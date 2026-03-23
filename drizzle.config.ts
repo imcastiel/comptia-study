@@ -5,6 +5,6 @@ export default {
   out: './src/db/migrations',
   dialect: 'sqlite',
   dbCredentials: {
-    url: process.env.DATABASE_URL ?? './comptia.db',
+    url: process.env.DATABASE_URL ?? 'file:./comptia.db',
   },
 } satisfies Config
