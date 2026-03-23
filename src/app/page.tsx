@@ -1,65 +1,193 @@
-import Image from "next/image";
+import Link from 'next/link'
+import { BookOpen, Layers, Trophy, ChevronRight } from 'lucide-react'
 
-export default function Home() {
+const CORE1_DOMAINS = [
+  { name: 'Mobile Devices', weight: 13, color: 'var(--apple-teal)' },
+  { name: 'Networking', weight: 23, color: 'var(--apple-blue)' },
+  { name: 'Hardware', weight: 25, color: 'var(--apple-indigo)' },
+  { name: 'Virtualization & Cloud', weight: 11, color: 'var(--apple-purple)' },
+  { name: 'HW & Network Troubleshooting', weight: 28, color: 'var(--apple-orange)' },
+]
+
+const CORE2_DOMAINS = [
+  { name: 'Operating Systems', weight: 28, color: 'var(--apple-blue)' },
+  { name: 'Security', weight: 28, color: 'var(--apple-red)' },
+  { name: 'Software Troubleshooting', weight: 23, color: 'var(--apple-orange)' },
+  { name: 'Operational Procedures', weight: 21, color: 'var(--apple-green)' },
+]
+
+interface ExamCardProps {
+  code: string
+  name: string
+  domains: typeof CORE1_DOMAINS
+  passingScore: number
+  href: string
+  delay: number
+}
+
+function ExamCard({ code, name, domains, passingScore, href, delay }: ExamCardProps) {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <Link
+      href={href}
+      className="block bg-card rounded-[20px] p-6 card-lift shadow-sm border border-[var(--apple-separator)] animate-fade-up group"
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <div className="flex items-start justify-between mb-5">
+        <div>
+          <p className="text-[12px] font-semibold text-[var(--apple-blue)] tracking-wide uppercase mb-1">
+            {code}
           </p>
+          <h2 className="text-[22px] font-bold tracking-tight text-foreground">{name}</h2>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="flex items-center gap-1 bg-[var(--apple-fill)] rounded-full px-3 py-1.5">
+          <Trophy className="w-3.5 h-3.5 text-[var(--apple-orange)]" />
+          <span className="text-[12px] font-semibold text-[var(--apple-label-secondary)]">
+            Pass: {passingScore}
+          </span>
         </div>
-      </main>
+      </div>
+
+      {/* Domain weight bars */}
+      <div className="space-y-2.5 mb-5">
+        {domains.map((d) => (
+          <div key={d.name} className="flex items-center gap-3">
+            <div className="w-full bg-[var(--apple-fill)] rounded-full h-[5px] overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-700"
+                style={{
+                  width: `${d.weight}%`,
+                  backgroundColor: d.color,
+                }}
+              />
+            </div>
+            <div className="flex items-center justify-between min-w-0 gap-2" style={{ width: '200px' }}>
+              <span className="text-[11px] text-[var(--apple-label-secondary)] truncate">{d.name}</span>
+              <span className="text-[11px] font-semibold shrink-0" style={{ color: d.color }}>{d.weight}%</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--apple-blue)] group-hover:gap-3 transition-all duration-200">
+        <BookOpen className="w-4 h-4" />
+        Start Studying
+        <ChevronRight className="w-4 h-4" />
+      </div>
+    </Link>
+  )
+}
+
+function QuickActionCard({
+  icon: Icon,
+  title,
+  description,
+  href,
+  color,
+  delay,
+}: {
+  icon: React.ElementType
+  title: string
+  description: string
+  href: string
+  color: string
+  delay: number
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center gap-4 bg-card rounded-[16px] p-4 card-lift shadow-sm border border-[var(--apple-separator)] animate-fade-up"
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <div
+        className="w-11 h-11 rounded-[12px] flex items-center justify-center shrink-0"
+        style={{ backgroundColor: `${color}18` }}
+      >
+        <Icon className="w-5 h-5" style={{ color }} />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[14px] font-semibold text-foreground">{title}</p>
+        <p className="text-[12px] text-[var(--apple-label-secondary)] truncate">{description}</p>
+      </div>
+      <ChevronRight className="w-4 h-4 text-[var(--apple-label-tertiary)] shrink-0 ml-auto" />
+    </Link>
+  )
+}
+
+export default function HomePage() {
+  return (
+    <div className="max-w-4xl mx-auto px-6 py-8">
+      {/* Header */}
+      <div className="mb-8 animate-fade-up">
+        <h1 className="text-[32px] font-bold tracking-tight text-foreground mb-1">
+          Good morning 👋
+        </h1>
+        <p className="text-[16px] text-[var(--apple-label-secondary)]">
+          Ready to study for your CompTIA A+ certification?
+        </p>
+      </div>
+
+      {/* Quick Actions */}
+      <section className="mb-8">
+        <h2 className="text-[13px] font-semibold text-[var(--apple-label-secondary)] uppercase tracking-wide mb-3 animate-fade-up" style={{ animationDelay: '50ms' }}>
+          Quick Start
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <QuickActionCard
+            icon={BookOpen}
+            title="Study Content"
+            description="Read and learn concepts"
+            href="/study"
+            color="var(--apple-blue)"
+            delay={100}
+          />
+          <QuickActionCard
+            icon={Layers}
+            title="Flashcards"
+            description="0 cards due today"
+            href="/flashcards"
+            color="var(--apple-green)"
+            delay={150}
+          />
+          <QuickActionCard
+            icon={Trophy}
+            title="Practice Exam"
+            description="Timed simulation"
+            href="/practice"
+            color="var(--apple-orange)"
+            delay={200}
+          />
+        </div>
+      </section>
+
+      {/* Exam Cards */}
+      <section>
+        <h2 className="text-[13px] font-semibold text-[var(--apple-label-secondary)] uppercase tracking-wide mb-3 animate-fade-up" style={{ animationDelay: '250ms' }}>
+          Exams
+        </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <ExamCard
+            code="220-1201"
+            name="Core 1"
+            domains={CORE1_DOMAINS}
+            passingScore={675}
+            href="/study/core1"
+            delay={300}
+          />
+          <ExamCard
+            code="220-1202"
+            name="Core 2"
+            domains={CORE2_DOMAINS}
+            passingScore={700}
+            href="/study/core2"
+            delay={350}
+          />
+        </div>
+      </section>
+
+      {/* Exam details footer */}
+      <p className="mt-8 text-center text-[12px] text-[var(--apple-label-tertiary)] animate-fade-in" style={{ animationDelay: '500ms' }}>
+        90 questions · 90 minutes · Passing: 675/700 (scale of 900)
+      </p>
     </div>
-  );
+  )
 }

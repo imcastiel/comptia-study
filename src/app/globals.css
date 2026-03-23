@@ -5,10 +5,13 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Apple system font stack */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SF Mono", ui-monospace, "Cascadia Code", "Fira Mono", monospace;
+
+  /* Map to shadcn tokens */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -46,85 +49,230 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Apple semantic colors */
+  --color-apple-blue: var(--apple-blue);
+  --color-apple-green: var(--apple-green);
+  --color-apple-orange: var(--apple-orange);
+  --color-apple-red: var(--apple-red);
+  --color-apple-purple: var(--apple-purple);
+  --color-apple-teal: var(--apple-teal);
+  --color-apple-indigo: var(--apple-indigo);
+  --color-apple-label: var(--apple-label);
+  --color-apple-label-secondary: var(--apple-label-secondary);
+  --color-apple-label-tertiary: var(--apple-label-tertiary);
+  --color-apple-fill: var(--apple-fill);
+  --color-apple-bg-primary: var(--apple-bg-primary);
+  --color-apple-bg-secondary: var(--apple-bg-secondary);
+  --color-apple-bg-tertiary: var(--apple-bg-tertiary);
+  --color-apple-separator: var(--apple-separator);
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  /* Apple Light Mode Colors */
+  --apple-blue: #007AFF;
+  --apple-green: #34C759;
+  --apple-orange: #FF9F0A;
+  --apple-red: #FF3B30;
+  --apple-purple: #AF52DE;
+  --apple-teal: #5AC8FA;
+  --apple-indigo: #5856D6;
+  --apple-label: #000000;
+  --apple-label-secondary: rgba(60, 60, 67, 0.6);
+  --apple-label-tertiary: rgba(60, 60, 67, 0.3);
+  --apple-fill: rgba(120, 120, 128, 0.12);
+  --apple-bg-primary: #F2F2F7;
+  --apple-bg-secondary: #FFFFFF;
+  --apple-bg-tertiary: #E5E5EA;
+  --apple-separator: rgba(60, 60, 67, 0.12);
+
+  /* shadcn/ui — Apple Light Theme */
+  --background: oklch(0.972 0 0);      /* #F2F2F7 */
+  --foreground: oklch(0 0 0);           /* #000000 */
+  --card: oklch(1 0 0);                 /* #FFFFFF */
+  --card-foreground: oklch(0 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --popover-foreground: oklch(0 0 0);
+  --primary: oklch(0.487 0.24 255.0);  /* #007AFF apple blue */
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.9 0 0);         /* #E5E5EA */
+  --secondary-foreground: oklch(0 0 0);
+  --muted: oklch(0.93 0 0);
+  --muted-foreground: oklch(0.43 0 0); /* #6C6C70 */
+  --accent: oklch(0.95 0 0);
+  --accent-foreground: oklch(0 0 0);
+  --destructive: oklch(0.56 0.23 24.0); /* #FF3B30 */
+  --border: oklch(0.88 0 0 / 60%);
+  --input: oklch(0.93 0 0);
+  --ring: oklch(0.487 0.24 255.0);
+  --radius: 0.75rem;                    /* 12px base */
+
+  /* Chart colors using Apple palette */
+  --chart-1: oklch(0.487 0.24 255.0);  /* blue */
+  --chart-2: oklch(0.72 0.19 149.0);   /* green */
+  --chart-3: oklch(0.78 0.18 62.0);    /* orange */
+  --chart-4: oklch(0.64 0.21 280.0);   /* purple */
+  --chart-5: oklch(0.56 0.23 24.0);    /* red */
+
+  /* Sidebar */
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0 0 0);
+  --sidebar-primary: oklch(0.487 0.24 255.0);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.487 0.24 255.0 / 10%);
+  --sidebar-accent-foreground: oklch(0.487 0.24 255.0);
+  --sidebar-border: oklch(0.88 0 0 / 40%);
+  --sidebar-ring: oklch(0.487 0.24 255.0);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  /* Apple Dark Mode Colors */
+  --apple-blue: #0A84FF;
+  --apple-green: #30D158;
+  --apple-orange: #FF9F0A;
+  --apple-red: #FF453A;
+  --apple-purple: #BF5AF2;
+  --apple-teal: #5AC8FA;
+  --apple-indigo: #5E5CE6;
+  --apple-label: #FFFFFF;
+  --apple-label-secondary: rgba(235, 235, 245, 0.6);
+  --apple-label-tertiary: rgba(235, 235, 245, 0.3);
+  --apple-fill: rgba(120, 120, 128, 0.2);
+  --apple-bg-primary: #000000;
+  --apple-bg-secondary: #1C1C1E;
+  --apple-bg-tertiary: #2C2C2E;
+  --apple-separator: rgba(84, 84, 88, 0.36);
+
+  /* shadcn/ui — Apple Dark Theme */
+  --background: oklch(0 0 0);          /* #000000 */
+  --foreground: oklch(1 0 0);          /* #FFFFFF */
+  --card: oklch(0.13 0 0);             /* #1C1C1E */
+  --card-foreground: oklch(1 0 0);
+  --popover: oklch(0.13 0 0);
+  --popover-foreground: oklch(1 0 0);
+  --primary: oklch(0.52 0.24 255.0);   /* #0A84FF */
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.2 0 0);         /* #2C2C2E */
+  --secondary-foreground: oklch(1 0 0);
+  --muted: oklch(0.17 0 0);
+  --muted-foreground: oklch(0.62 0 0); /* #98989D */
+  --accent: oklch(0.2 0 0);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.60 0.24 24.0);/* #FF453A */
   --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.52 0.24 255.0);
+  --chart-1: oklch(0.52 0.24 255.0);
+  --chart-2: oklch(0.73 0.19 149.0);
+  --chart-3: oklch(0.78 0.18 62.0);
+  --chart-4: oklch(0.67 0.21 280.0);
+  --chart-5: oklch(0.60 0.24 24.0);
+  --sidebar: oklch(0.13 0 0);
+  --sidebar-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(0.52 0.24 255.0);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.52 0.24 255.0 / 15%);
+  --sidebar-accent-foreground: oklch(0.52 0.24 255.0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: oklch(0.52 0.24 255.0);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    box-sizing: border-box;
   }
+
+  html {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+      "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
     @apply bg-background text-foreground;
+    min-height: 100dvh;
   }
-  html {
-    @apply font-sans;
+
+  /* Apple-style scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
   }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(120, 120, 128, 0.25);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(120, 120, 128, 0.45);
+  }
+}
+
+/* Apple spring animation */
+@layer utilities {
+  .ease-spring {
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .ease-smooth {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Glassmorphism — Apple frosted glass */
+  .glass {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(20px) saturate(1.8);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  }
+  .dark .glass {
+    background: rgba(28, 28, 30, 0.72);
+  }
+
+  /* Apple card hover lift */
+  .card-lift {
+    transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 200ms ease;
+  }
+  .card-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+  .dark .card-lift:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Staggered entrance animations */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease both;
+}
+
+/* Progress bar pulse for "needs review" state */
+@keyframes pulse-orange {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
