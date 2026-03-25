@@ -1,7 +1,7 @@
 // src/app/api/ai/context/route.ts
 import { db } from '@/db'
 import { flashcardReviews, flashcards, topics, domains, exams, studyProgress, questionAttempts, examAttempts, questions } from '@/db/schema'
-import { eq, lte, and, count, sql } from 'drizzle-orm'
+import { eq, lte, and, count, sql, isNotNull, desc } from 'drizzle-orm'
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -69,8 +69,8 @@ export async function GET(req: Request) {
       .innerJoin(topics, eq(studyProgress.topicId, topics.id))
       .innerJoin(domains, eq(topics.domainId, domains.id))
       .innerJoin(exams, eq(domains.examId, exams.id))
-      .where(sql`${studyProgress.lastStudiedAt} IS NOT NULL`)
-      .orderBy(sql`${studyProgress.lastStudiedAt} DESC`)
+      .where(isNotNull(studyProgress.lastStudiedAt))
+      .orderBy(desc(studyProgress.lastStudiedAt))
       .limit(1)
     if (lastRows[0]) {
       lastTopicSlug = lastRows[0].slug
