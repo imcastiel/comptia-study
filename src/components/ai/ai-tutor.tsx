@@ -82,16 +82,22 @@ export function AiTutor() {
   })
 
   useEffect(() => {
+    const controller = new AbortController()
     const topicPage = parseTopicPage(pathname)
     const params = new URLSearchParams()
     if (topicPage) {
       params.set('topicSlug', topicPage.topicSlug)
       params.set('domainSlug', topicPage.domainSlug)
     }
-    fetch(`/api/ai/context?${params}`)
+    fetch(`/api/ai/context?${params}`, { signal: controller.signal })
       .then((r) => r.json())
       .then((data: TutorContext) => setContext(data))
-      .catch(() => {}) // silently fail — UI degrades to empty state
+      .catch((err: unknown) => {
+        if (err instanceof Error && err.name !== 'AbortError') {
+          // silently fail — UI degrades to empty state
+        }
+      })
+    return () => controller.abort()
   }, [pathname])
 
   const scrollToBottom = useCallback(() => {
