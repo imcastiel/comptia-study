@@ -178,7 +178,7 @@ function GeneralInitialState({ context, onSend, onNavigate }: GeneralStateProps)
     heroCta = 'Start now →'
   } else if (context.lastTopicTitle) {
     heroTitle = `Continue: ${context.lastTopicTitle}`
-    heroHref = context.lastTopicPath!
+    heroHref = context.lastTopicPath ?? '/study'
     heroCta = 'Continue →'
   } else {
     heroTitle = 'Start studying'
