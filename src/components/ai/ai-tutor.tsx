@@ -490,6 +490,19 @@ export function AiTutor() {
                             ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
                             li: ({ children }) => <li className="leading-snug">{children}</li>,
                             code: ({ children }) => <code className="bg-[var(--apple-separator)] text-[var(--apple-red)] px-1 py-0.5 rounded text-[12px] font-mono">{children}</code>,
+                            a: ({ href, children }) => (
+                              <a
+                                href={href}
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  setOpen(false)
+                                  window.location.href = href ?? '/practice'
+                                }}
+                                className="text-[var(--apple-blue)] underline underline-offset-2 cursor-pointer"
+                              >
+                                {children}
+                              </a>
+                            ),
                           }}
                         >
                           {msg.content}
