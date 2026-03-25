@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
-import { Sparkles, X, Send, RotateCcw, Minimize2 } from 'lucide-react'
+import { Sparkles, X, Send, RotateCcw, Minimize2, Layers, Terminal, Zap } from 'lucide-react'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -65,6 +66,97 @@ function parseTopicPage(pathname: string | null): TopicPageParams | null {
   const match = pathname.match(/^\/study\/([^/]+)\/([^/]+)\/([^/]+)/)
   if (!match) return null
   return { examId: match[1], domainSlug: match[2], topicSlug: match[3] }
+}
+
+interface InitialStateProps {
+  topicPage: TopicPageParams
+  context: TutorContext
+  onSend: (text: string) => void
+  onNavigate: () => void
+}
+
+function TopicPageInitialState({ topicPage, context, onSend, onNavigate }: InitialStateProps) {
+  const prompts = getTopicPrompts(topicPage.topicSlug)
+  const flashcardsHref = context.domainId
+    ? `/flashcards/session?domainId=${context.domainId}`
+    : '/flashcards'
+  // Use DB-resolved title for Quiz me message; fall back to slug-derived label
+  const quizLabel = context.topicTitle
+    ?? topicPage.topicSlug.replace(/-/g, ' ').replace(/^\d+-\d+\s/, '')
+
+  return (
+    <div className="flex flex-col gap-3 px-1 py-2">
+      {/* Topic badge — hidden if context not resolved */}
+      {context.topicTitle && (
+        <div className="flex items-center gap-1.5 px-3 py-2 rounded-[10px] bg-[var(--apple-purple)]/10 border border-[var(--apple-purple)]/20">
+          <span className="text-[10px] text-[var(--apple-label-tertiary)] uppercase tracking-wide">Currently studying</span>
+          <span className="text-[11px] font-semibold text-[var(--apple-purple)] truncate">
+            {context.topicTitle}
+            {context.examCode && <span className="font-normal text-[var(--apple-label-tertiary)]"> · {context.examCode}</span>}
+            {context.domainName && <span className="font-normal text-[var(--apple-label-tertiary)]"> · {context.domainName}</span>}
+          </span>
+        </div>
+      )}
+
+      {/* Action row */}
+      <div className="flex gap-2">
+        <Link
+          href={flashcardsHref}
+          onClick={onNavigate}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[12px] font-semibold bg-[var(--apple-blue)]/15 text-[var(--apple-blue)] border border-[var(--apple-blue)]/25 hover:bg-[var(--apple-blue)]/25 transition-colors"
+        >
+          <Layers className="w-3.5 h-3.5" />
+          Flashcards
+        </Link>
+        <Link
+          href="/labs"
+          onClick={onNavigate}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[12px] font-semibold bg-[var(--apple-purple)]/15 text-[var(--apple-purple)] border border-[var(--apple-purple)]/25 hover:bg-[var(--apple-purple)]/25 transition-colors"
+        >
+          <Terminal className="w-3.5 h-3.5" />
+          Lab
+        </Link>
+        <button
+          onClick={() => onSend(`Quiz me on ${quizLabel}`)}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[12px] font-semibold bg-[var(--apple-green)]/15 text-[var(--apple-green)] border border-[var(--apple-green)]/30 hover:bg-[var(--apple-green)]/25 transition-colors"
+        >
+          <Zap className="w-3.5 h-3.5" />
+          Quiz me
+        </button>
+      </div>
+
+      {/* Due cards pill */}
+      {context.dueCount > 0 && (
+        <Link
+          href="/flashcards/session?mode=due"
+          onClick={onNavigate}
+          className="flex items-center gap-2 px-3 py-2 rounded-[10px] bg-[var(--apple-orange)]/10 border border-[var(--apple-orange)]/25 hover:bg-[var(--apple-orange)]/15 transition-colors"
+        >
+          <span className="w-2 h-2 rounded-full bg-[var(--apple-orange)] shrink-0" />
+          <span className="text-[12px] font-medium text-[var(--apple-orange)]">
+            {context.dueCount} card{context.dueCount !== 1 ? 's' : ''} due
+          </span>
+          <span className="ml-auto text-[11px] text-[var(--apple-orange)]/60">Review now →</span>
+        </Link>
+      )}
+
+      {/* Chat prompts */}
+      <div>
+        <p className="text-[10px] text-[var(--apple-label-tertiary)] uppercase tracking-wide mb-1.5 px-1">Or ask me anything</p>
+        <div className="flex flex-col gap-1">
+          {prompts.map((p) => (
+            <button
+              key={p}
+              onClick={() => onSend(p)}
+              className="w-full text-left text-[11px] px-3 py-2 rounded-[10px] bg-[var(--apple-fill)] hover:bg-[var(--apple-blue)]/10 hover:text-[var(--apple-blue)] transition-colors text-[var(--apple-label-secondary)]"
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export function AiTutor() {
@@ -251,28 +343,18 @@ export function AiTutor() {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
             {messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full gap-4 px-2">
-                <div className="w-12 h-12 rounded-full bg-[var(--apple-purple)]/15 flex items-center justify-center">
-                  <Sparkles className="w-6 h-6 text-[var(--apple-purple)]" />
-                </div>
-                <div className="text-center">
-                  <p className="text-[13px] font-semibold mb-1">Ask me anything</p>
-                  <p className="text-[11px] text-[var(--apple-label-secondary)]">
-                    CompTIA A+ concepts, practice questions, or study tips.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-1.5 w-full">
-                  {FALLBACK_PROMPTS.map((prompt) => (
-                    <button
-                      key={prompt}
-                      onClick={() => sendMessage(prompt)}
-                      className="w-full text-left text-[11px] px-3 py-2 rounded-[10px] bg-[var(--apple-fill)] hover:bg-[var(--apple-blue)]/10 hover:text-[var(--apple-blue)] transition-colors text-[var(--apple-label-secondary)]"
-                    >
-                      {prompt}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              (() => {
+                const topicPage = parseTopicPage(pathname)
+                if (topicPage) {
+                  return <TopicPageInitialState
+                    topicPage={topicPage}
+                    context={context}
+                    onSend={sendMessage}
+                    onNavigate={() => setOpen(false)}
+                  />
+                }
+                return <div className="px-3 py-6 text-center text-[11px] text-[var(--apple-label-tertiary)]">Loading…</div>
+              })()
             ) : (
               messages.map((msg, i) => (
                 <div
