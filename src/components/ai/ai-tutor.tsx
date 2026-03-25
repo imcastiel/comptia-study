@@ -89,7 +89,7 @@ function TopicPageInitialState({ topicPage, context, onSend, onNavigate }: Initi
       {/* Topic badge — hidden if context not resolved */}
       {context.topicTitle && (
         <div className="flex items-center gap-1.5 px-3 py-2 rounded-[10px] bg-[var(--apple-purple)]/10 border border-[var(--apple-purple)]/20">
-          <span className="text-[10px] text-[var(--apple-label-tertiary)] uppercase tracking-wide">Currently studying</span>
+          <span className="text-[10px] text-[var(--apple-label-secondary)] uppercase tracking-wide">Currently studying</span>
           <span className="text-[11px] font-semibold text-[var(--apple-purple)] truncate">
             {context.topicTitle}
             {context.examCode && <span className="font-normal text-[var(--apple-label-tertiary)]"> · {context.examCode}</span>}
@@ -277,6 +277,8 @@ export function AiTutor() {
     setInput('')
   }
 
+  const topicPage = parseTopicPage(pathname)
+
   return (
     <>
       {/* Floating button */}
@@ -343,18 +345,14 @@ export function AiTutor() {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
             {messages.length === 0 ? (
-              (() => {
-                const topicPage = parseTopicPage(pathname)
-                if (topicPage) {
-                  return <TopicPageInitialState
+              topicPage
+                ? <TopicPageInitialState
                     topicPage={topicPage}
                     context={context}
                     onSend={sendMessage}
                     onNavigate={() => setOpen(false)}
                   />
-                }
-                return <div className="px-3 py-6 text-center text-[11px] text-[var(--apple-label-tertiary)]">Loading…</div>
-              })()
+                : <div className="px-3 py-6 text-center text-[11px] text-[var(--apple-label-tertiary)]">Loading…</div>
             ) : (
               messages.map((msg, i) => (
                 <div
