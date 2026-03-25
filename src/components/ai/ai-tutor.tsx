@@ -159,6 +159,109 @@ function TopicPageInitialState({ topicPage, context, onSend, onNavigate }: Initi
   )
 }
 
+interface GeneralStateProps {
+  context: TutorContext
+  onSend: (text: string) => void
+  onNavigate: () => void
+}
+
+function GeneralInitialState({ context, onSend, onNavigate }: GeneralStateProps) {
+  // Determine hero card content
+  let heroTitle: string
+  let heroSub: string | null = null
+  let heroHref: string
+  let heroCta: string
+
+  if (context.dueCount > 0) {
+    heroTitle = `Review ${context.dueCount} due card${context.dueCount !== 1 ? 's' : ''}`
+    heroHref = '/flashcards/session?mode=due'
+    heroCta = 'Start now →'
+  } else if (context.lastTopicTitle) {
+    heroTitle = `Continue: ${context.lastTopicTitle}`
+    heroHref = context.lastTopicPath!
+    heroCta = 'Continue →'
+  } else {
+    heroTitle = 'Start studying'
+    heroSub = 'Core 1 Hardware is 25% of the exam'
+    heroHref = '/study'
+    heroCta = 'Browse topics →'
+  }
+
+  const weakPrompt = context.weakDomain
+    ? (DOMAIN_PROMPTS[context.weakDomain] ?? FALLBACK_WEAK_PROMPT)
+    : null
+
+  const chatPrompts = weakPrompt
+    ? [weakPrompt, 'What should I focus on this week?']
+    : ["What's the hardest part of CompTIA A+?", 'Which exam should I take first?']
+
+  return (
+    <div className="flex flex-col gap-3 px-1 py-2">
+      {/* Hero card */}
+      <Link
+        href={heroHref}
+        onClick={onNavigate}
+        className="flex flex-col gap-1 px-4 py-3.5 rounded-[14px] bg-[var(--apple-blue)]/10 border border-[var(--apple-blue)]/20 hover:bg-[var(--apple-blue)]/15 transition-colors"
+      >
+        <p className="text-[11px] text-[var(--apple-label-tertiary)] uppercase tracking-wide">Best next step</p>
+        <p className="text-[14px] font-bold text-foreground leading-snug">{heroTitle}</p>
+        {heroSub && <p className="text-[11px] text-[var(--apple-label-secondary)]">{heroSub}</p>}
+        <p className="text-[12px] font-semibold text-[var(--apple-blue)] mt-1">{heroCta}</p>
+      </Link>
+
+      {/* Weak area nudge */}
+      {context.weakDomain && (
+        <Link
+          href="/practice"
+          onClick={onNavigate}
+          className="flex items-center gap-2 px-3 py-2.5 rounded-[10px] bg-[var(--apple-orange)]/10 border border-[var(--apple-orange)]/20 hover:bg-[var(--apple-orange)]/15 transition-colors"
+        >
+          <span className="text-[13px]">⚠️</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-semibold text-[var(--apple-orange)]">{context.weakDomain} needs practice</p>
+            <p className="text-[10px] text-[var(--apple-label-tertiary)]">Based on your practice history</p>
+          </div>
+          <span className="text-[10px] text-[var(--apple-orange)]/60 shrink-0">Take a quiz →</span>
+        </Link>
+      )}
+
+      {/* Secondary nav */}
+      <div className="flex gap-2">
+        {[
+          { href: '/labs', label: '🧪 Labs' },
+          { href: '/practice', label: '📝 Practice' },
+          { href: '/study', label: '📖 Study' },
+        ].map(({ href, label }) => (
+          <Link
+            key={href}
+            href={href}
+            onClick={onNavigate}
+            className="flex-1 text-center py-2 rounded-[9px] text-[11px] font-medium bg-[var(--apple-fill)] text-[var(--apple-label-secondary)] hover:text-foreground transition-colors"
+          >
+            {label}
+          </Link>
+        ))}
+      </div>
+
+      {/* Chat prompts */}
+      <div>
+        <p className="text-[10px] text-[var(--apple-label-tertiary)] uppercase tracking-wide mb-1.5 px-1">Or ask me anything</p>
+        <div className="flex flex-col gap-1">
+          {chatPrompts.map((p) => (
+            <button
+              key={p}
+              onClick={() => onSend(p)}
+              className="w-full text-left text-[11px] px-3 py-2 rounded-[10px] bg-[var(--apple-fill)] hover:bg-[var(--apple-blue)]/10 hover:text-[var(--apple-blue)] transition-colors text-[var(--apple-label-secondary)]"
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function AiTutor() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
@@ -352,7 +455,11 @@ export function AiTutor() {
                     onSend={sendMessage}
                     onNavigate={() => setOpen(false)}
                   />
-                : <div className="px-3 py-6 text-center text-[11px] text-[var(--apple-label-tertiary)]">Loading…</div>
+                : <GeneralInitialState
+                    context={context}
+                    onSend={sendMessage}
+                    onNavigate={() => setOpen(false)}
+                  />
             ) : (
               messages.map((msg, i) => (
                 <div
