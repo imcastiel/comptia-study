@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Sparkles, X, Send, RotateCcw, Minimize2, Layers, Terminal, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
@@ -264,6 +264,7 @@ function GeneralInitialState({ context, onSend, onNavigate }: GeneralStateProps)
 
 export function AiTutor() {
   const pathname = usePathname()
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -494,9 +495,10 @@ export function AiTutor() {
                               <a
                                 href={href}
                                 onClick={(e) => {
+                                  if (!href) return
                                   e.preventDefault()
                                   setOpen(false)
-                                  window.location.href = href ?? '/practice'
+                                  router.push(href)
                                 }}
                                 className="text-[var(--apple-blue)] underline underline-offset-2 cursor-pointer"
                               >
