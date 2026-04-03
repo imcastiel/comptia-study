@@ -69,6 +69,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const paletteRef = useRef<HTMLDivElement>(null)
+  const selectedIndexRef = useRef(0)
 
   // Fetch index on first open
   useEffect(() => {
@@ -114,6 +115,11 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     if (isOpen) inputRef.current?.focus()
   }, [isOpen])
 
+  // Keep ref in sync with selectedIndex state to avoid stale closures in keyboard handler
+  useEffect(() => {
+    selectedIndexRef.current = selectedIndex
+  }, [selectedIndex])
+
   // Keyboard handlers: Esc, arrows, Enter, Tab trap
   useEffect(() => {
     if (!isOpen) return
@@ -134,8 +140,8 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
         setSelectedIndex(i => Math.max(i - 1, 0))
         return
       }
-      if (e.key === 'Enter' && allResults[selectedIndex]) {
-        router.push(allResults[selectedIndex].path)
+      if (e.key === 'Enter' && allResults[selectedIndexRef.current]) {
+        router.push(allResults[selectedIndexRef.current].path)
         onClose()
         return
       }
@@ -160,7 +166,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, results, selectedIndex, router, onClose])
+  }, [isOpen, results, router, onClose])
 
   if (!isOpen) return null
 
@@ -237,12 +243,13 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
         {/* Results panel — only shown when query >= 2 chars */}
         {showResults && !loading && (
           <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '6px 0' }}>
+            {allResults.length === 0 && (
+              <div style={{ padding: '12px 16px', color: '#666', fontSize: '13px' }}>
+                No results for &ldquo;{query}&rdquo;
+              </div>
+            )}
+            {allResults.length > 0 && (
             <div role="listbox" aria-label="Search results">
-              {allResults.length === 0 && (
-                <div style={{ padding: '12px 16px', color: '#666', fontSize: '13px' }}>
-                  No results for &ldquo;{query}&rdquo;
-                </div>
-              )}
 
               {/* Topic title matches */}
               {results.titleMatches.length > 0 && (
@@ -333,6 +340,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                 </>
               )}
             </div>
+            )}
           </div>
         )}
       </div>
