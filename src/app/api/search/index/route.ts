@@ -52,6 +52,10 @@ export async function GET() {
       console.warn(`[search] Invalid examDir: ${examDir}`)
       continue
     }
+    if (!/^[a-z0-9-]+$/i.test(row.slug)) {
+      console.warn(`[search] Invalid slug: ${row.slug}`)
+      continue
+    }
     const filePath = join(process.cwd(), 'src', 'content', examDir, `${row.slug}.mdx`)
 
     let text = ''
