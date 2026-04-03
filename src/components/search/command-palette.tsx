@@ -75,7 +75,10 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     if (!isOpen || cachedIndex) return
     setLoading(true)
     fetch('/api/search/index')
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`Search index fetch failed: ${r.status}`)
+        return r.json()
+      })
       .then((data: SearchEntry[]) => {
         cachedIndex = data
         setLoading(false)
@@ -108,9 +111,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
   // Auto-focus input when opened
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 0)
-    }
+    if (isOpen) inputRef.current?.focus()
   }, [isOpen])
 
   // Keyboard handlers: Esc, arrows, Enter, Tab trap
@@ -236,96 +237,102 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
         {/* Results panel — only shown when query >= 2 chars */}
         {showResults && !loading && (
           <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '6px 0' }}>
-            {!loading && allResults.length === 0 && (
-              <div style={{ padding: '12px 16px', color: '#666', fontSize: '13px' }}>
-                No results for &ldquo;{query}&rdquo;
-              </div>
-            )}
-
-            {/* Topic title matches */}
-            {!loading && results.titleMatches.length > 0 && (
-              <>
-                <div style={{
-                  padding: '6px 16px 4px',
-                  fontSize: '10px',
-                  color: '#555',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                }}>
-                  Topics
+            <div role="listbox" aria-label="Search results">
+              {allResults.length === 0 && (
+                <div style={{ padding: '12px 16px', color: '#666', fontSize: '13px' }}>
+                  No results for &ldquo;{query}&rdquo;
                 </div>
-                {results.titleMatches.map((entry, i) => (
-                  <button
-                    key={entry.slug}
-                    aria-selected={selectedIndex === i}
-                    onClick={() => { router.push(entry.path); onClose() }}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '8px 16px',
-                      background: selectedIndex === i ? 'rgba(99,102,241,0.15)' : 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      color: 'inherit',
-                    }}
-                  >
-                    <span style={{ fontSize: '13px', color: 'var(--apple-label, #fff)' }}>
-                      {highlightMatch(entry.title, query)}
-                    </span>
-                    <span style={{ fontSize: '11px', color: '#555', whiteSpace: 'nowrap', marginLeft: '12px' }}>
-                      {entry.examCode} · {entry.domainName}
-                    </span>
-                  </button>
-                ))}
-              </>
-            )}
+              )}
 
-            {/* Content matches */}
-            {!loading && results.contentMatches.length > 0 && (
-              <>
-                <div style={{
-                  padding: '6px 16px 4px',
-                  marginTop: results.titleMatches.length > 0 ? '4px' : 0,
-                  fontSize: '10px',
-                  color: '#555',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  borderTop: results.titleMatches.length > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                }}>
-                  In content
-                </div>
-                {results.contentMatches.map((entry, i) => {
-                  const globalIdx = results.titleMatches.length + i
-                  const snippet = extractSnippet(entry.text, query)
-                  return (
-                    <button
+              {/* Topic title matches */}
+              {results.titleMatches.length > 0 && (
+                <>
+                  <div style={{
+                    padding: '6px 16px 4px',
+                    fontSize: '10px',
+                    color: '#555',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}>
+                    Topics
+                  </div>
+                  {results.titleMatches.map((entry, i) => (
+                    <div
                       key={entry.slug}
-                      aria-selected={selectedIndex === globalIdx}
+                      role="option"
+                      aria-selected={selectedIndex === i}
+                      tabIndex={-1}
                       onClick={() => { router.push(entry.path); onClose() }}
                       style={{
                         width: '100%',
                         textAlign: 'left',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
                         padding: '8px 16px',
-                        background: selectedIndex === globalIdx ? 'rgba(99,102,241,0.15)' : 'transparent',
+                        background: selectedIndex === i ? 'rgba(99,102,241,0.15)' : 'transparent',
                         border: 'none',
                         cursor: 'pointer',
                         color: 'inherit',
                       }}
                     >
-                      <div style={{ fontSize: '13px', color: 'var(--apple-label, #fff)' }}>
-                        {entry.title}
+                      <span style={{ fontSize: '13px', color: 'var(--apple-label, #fff)' }}>
+                        {highlightMatch(entry.title, query)}
+                      </span>
+                      <span style={{ fontSize: '11px', color: '#555', whiteSpace: 'nowrap', marginLeft: '12px' }}>
+                        {entry.examCode} · {entry.domainName}
+                      </span>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {/* Content matches */}
+              {results.contentMatches.length > 0 && (
+                <>
+                  <div style={{
+                    padding: '6px 16px 4px',
+                    marginTop: results.titleMatches.length > 0 ? '4px' : 0,
+                    fontSize: '10px',
+                    color: '#555',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    borderTop: results.titleMatches.length > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                  }}>
+                    In content
+                  </div>
+                  {results.contentMatches.map((entry, i) => {
+                    const globalIdx = results.titleMatches.length + i
+                    const snippet = extractSnippet(entry.text, query)
+                    return (
+                      <div
+                        key={entry.slug}
+                        role="option"
+                        aria-selected={selectedIndex === globalIdx}
+                        tabIndex={-1}
+                        onClick={() => { router.push(entry.path); onClose() }}
+                        style={{
+                          width: '100%',
+                          textAlign: 'left',
+                          padding: '8px 16px',
+                          background: selectedIndex === globalIdx ? 'rgba(99,102,241,0.15)' : 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: 'inherit',
+                        }}
+                      >
+                        <div style={{ fontSize: '13px', color: 'var(--apple-label, #fff)' }}>
+                          {entry.title}
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>
+                          {highlightMatch(snippet, query)}
+                        </div>
                       </div>
-                      <div style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>
-                        {highlightMatch(snippet, query)}
-                      </div>
-                    </button>
-                  )
-                })}
-              </>
-            )}
+                    )
+                  })}
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>
