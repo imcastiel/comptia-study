@@ -19,7 +19,7 @@ interface SearchEntry {
 
 function stripMdx(raw: string): string {
   return raw
-    .replace(/^---[\s\S]*?---\n/, '')              // frontmatter
+    .replace(/^---[\s\S]*?---\n?/, '')              // frontmatter
     .replace(/```[\s\S]*?```/g, '')                 // code fences
     .replace(/<[^>]+>/g, ' ')                       // JSX/HTML tags
     .replace(/^#{1,6}\s+/gm, '')                    // headings
@@ -48,6 +48,10 @@ export async function GET() {
 
   for (const row of rows) {
     const examDir = row.rawExamId.replace('exam-', '')
+    if (!/^[a-z0-9-]+$/i.test(examDir)) {
+      console.warn(`[search] Invalid examDir: ${examDir}`)
+      continue
+    }
     const filePath = join(process.cwd(), 'src', 'content', examDir, `${row.slug}.mdx`)
 
     let text = ''
@@ -71,5 +75,7 @@ export async function GET() {
     })
   }
 
-  return NextResponse.json(entries)
+  return NextResponse.json(entries, {
+    headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' },
+  })
 }
