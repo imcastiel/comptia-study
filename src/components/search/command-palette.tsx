@@ -226,15 +226,16 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           }}>ESC</span>
         </div>
 
-        {/* Results panel */}
-        {showResults && (
-          <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '6px 0' }}>
-            {loading && (
-              <div style={{ padding: '12px 16px', color: '#666', fontSize: '13px' }}>
-                Loading…
-              </div>
-            )}
+        {/* Loading state — shown unconditionally when fetching */}
+        {loading && (
+          <div style={{ padding: '12px 16px', color: '#666', fontSize: '13px' }}>
+            Loading…
+          </div>
+        )}
 
+        {/* Results panel — only shown when query >= 2 chars */}
+        {showResults && !loading && (
+          <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '6px 0' }}>
             {!loading && allResults.length === 0 && (
               <div style={{ padding: '12px 16px', color: '#666', fontSize: '13px' }}>
                 No results for &ldquo;{query}&rdquo;
