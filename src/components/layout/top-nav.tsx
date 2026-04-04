@@ -9,12 +9,14 @@ import { usePomodoroContext } from '@/contexts/pomodoro-context'
 function PomodoroTimerPill() {
   const { phase, secondsLeft, pomodoroActive, start, pause, reset, skipBreak } = usePomodoroContext()
   const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const didLongPressRef = useRef(false)
 
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, '0')
   const ss = String(secondsLeft % 60).padStart(2, '0')
   const time = `${mm}:${ss}`
 
   function handleClick() {
+    if (didLongPressRef.current) return
     if (phase === 'idle') { start(); return }
     if (phase === 'work' && pomodoroActive) { pause(); return }
     if (phase === 'work' && !pomodoroActive) { start(); return }
@@ -22,7 +24,11 @@ function PomodoroTimerPill() {
   }
 
   function handleMouseDown() {
-    longPressRef.current = setTimeout(() => { reset() }, 500)
+    didLongPressRef.current = false
+    longPressRef.current = setTimeout(() => {
+      didLongPressRef.current = true
+      reset()
+    }, 500)
   }
 
   function handleMouseUp() {
@@ -91,7 +97,7 @@ function PomodoroTimerPill() {
       aria-label="Skip break"
     >
       <span className="text-[12px] font-medium tracking-[0.5px] text-[#6ee7b7]" style={{ fontVariantNumeric: 'tabular-nums' }}>{time}</span>
-      <span className="text-[10px] text-[#34d399]">break</span>
+      <span className="text-[10px] text-[#6ee7b7]">break</span>
     </button>
   )
 }
