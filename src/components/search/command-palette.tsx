@@ -70,6 +70,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const paletteRef = useRef<HTMLDivElement>(null)
   const selectedIndexRef = useRef(0)
+  const allResultsRef = useRef<SearchEntry[]>([])
 
   // Fetch index on first open
   useEffect(() => {
@@ -115,15 +116,18 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     if (isOpen) inputRef.current?.focus()
   }, [isOpen])
 
-  // Keep ref in sync with selectedIndex state to avoid stale closures in keyboard handler
+  // Keep refs in sync to avoid stale closures in keyboard handler
   useEffect(() => {
     selectedIndexRef.current = selectedIndex
   }, [selectedIndex])
 
+  useEffect(() => {
+    allResultsRef.current = [...results.titleMatches, ...results.contentMatches]
+  }, [results])
+
   // Keyboard handlers: Esc, arrows, Enter, Tab trap
   useEffect(() => {
     if (!isOpen) return
-    const allResults = [...results.titleMatches, ...results.contentMatches]
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
@@ -132,7 +136,8 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
       }
       if (e.key === 'ArrowDown') {
         e.preventDefault()
-        setSelectedIndex(i => Math.min(i + 1, allResults.length - 1))
+        const len = allResultsRef.current.length
+        setSelectedIndex(i => len > 0 ? Math.min(i + 1, len - 1) : 0)
         return
       }
       if (e.key === 'ArrowUp') {
@@ -140,8 +145,8 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
         setSelectedIndex(i => Math.max(i - 1, 0))
         return
       }
-      if (e.key === 'Enter' && allResults[selectedIndexRef.current]) {
-        router.push(allResults[selectedIndexRef.current].path)
+      if (e.key === 'Enter' && allResultsRef.current[selectedIndexRef.current]) {
+        router.push(allResultsRef.current[selectedIndexRef.current].path)
         onClose()
         return
       }
@@ -166,7 +171,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, results, router, onClose])
+  }, [isOpen, router, onClose])
 
   if (!isOpen) return null
 
@@ -215,7 +220,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
             role="combobox"
             aria-expanded={showResults && !loading && allResults.length > 0}
             aria-controls="search-listbox"
-            aria-activedescendant={allResults[selectedIndex] ? `search-opt-${allResults[selectedIndex].slug}` : undefined}
+            aria-activedescendant={allResults[selectedIndex] ? `search-opt-${allResults[selectedIndex].examId}-${allResults[selectedIndex].slug}` : undefined}
             aria-autocomplete="list"
             value={query}
             onChange={e => setQuery(e.target.value)}
@@ -270,8 +275,8 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                   </div>
                   {results.titleMatches.map((entry, i) => (
                     <div
-                      key={entry.slug}
-                      id={`search-opt-${entry.slug}`}
+                      key={`${entry.examId}-${entry.slug}`}
+                      id={`search-opt-${entry.examId}-${entry.slug}`}
                       role="option"
                       aria-selected={selectedIndex === i}
                       tabIndex={-1}
@@ -319,8 +324,8 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                     const snippet = extractSnippet(entry.text, query)
                     return (
                       <div
-                        key={entry.slug}
-                        id={`search-opt-${entry.slug}`}
+                        key={`${entry.examId}-${entry.slug}`}
+                        id={`search-opt-${entry.examId}-${entry.slug}`}
                         role="option"
                         aria-selected={selectedIndex === globalIdx}
                         tabIndex={-1}

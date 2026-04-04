@@ -19,7 +19,7 @@ export function TopNav() {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
-        setSearchOpen(true)
+        setSearchOpen(prev => !prev)
       }
     }
     document.addEventListener('keydown', handleKeyDown)

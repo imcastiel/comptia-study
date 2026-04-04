@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import { db } from '@/db'
 import { topics, domains, exams } from '@/db/schema'
 import { eq } from 'drizzle-orm'
-import { readFileSync } from 'fs'
+import { readFile } from 'fs/promises'
 import { join } from 'path'
 
 interface SearchEntry {
@@ -44,40 +44,43 @@ export async function GET() {
     .innerJoin(domains, eq(topics.domainId, domains.id))
     .innerJoin(exams, eq(domains.examId, exams.id))
 
-  const entries: SearchEntry[] = []
-
-  for (const row of rows) {
+  const validRows = rows.filter(row => {
     const examDir = row.rawExamId.replace('exam-', '')
     if (!/^[a-z0-9-]+$/i.test(examDir)) {
       console.warn(`[search] Invalid examDir: ${examDir}`)
-      continue
+      return false
     }
     if (!/^[a-z0-9-]+$/i.test(row.slug)) {
       console.warn(`[search] Invalid slug: ${row.slug}`)
-      continue
+      return false
     }
-    const filePath = join(process.cwd(), 'src', 'content', examDir, `${row.slug}.mdx`)
+    return true
+  })
 
-    let text = ''
-    try {
-      const raw = readFileSync(filePath, 'utf-8')
-      text = stripMdx(raw)
-    } catch {
-      console.warn(`[search] Missing MDX file: ${filePath}`)
-      continue
-    }
-
-    entries.push({
-      slug: row.slug,
-      title: row.title,
-      domainName: row.domainName,
-      examCode: row.examCode,
-      examId: examDir,
-      domainSlug: row.domainSlug,
-      path: `/study/${examDir}/${row.domainSlug}/${row.slug}`,
-      text,
+  const settled = await Promise.all(
+    validRows.map(async row => {
+      const examDir = row.rawExamId.replace('exam-', '')
+      const filePath = join(process.cwd(), 'src', 'content', examDir, `${row.slug}.mdx`)
+      try {
+        const raw = await readFile(filePath, 'utf-8')
+        return {
+          slug: row.slug,
+          title: row.title,
+          domainName: row.domainName,
+          examCode: row.examCode,
+          examId: examDir,
+          domainSlug: row.domainSlug,
+          path: `/study/${examDir}/${row.domainSlug}/${row.slug}`,
+          text: stripMdx(raw),
+        } satisfies SearchEntry
+      } catch {
+        console.warn(`[search] Missing MDX file: ${filePath}`)
+        return null
+      }
     })
-  }
+  )
+
+  const entries = settled.filter((e): e is SearchEntry => e !== null)
 
   return NextResponse.json(entries, {
     headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' },
