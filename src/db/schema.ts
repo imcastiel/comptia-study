@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer, real, index, unique } from 'drizzle-orm/sqlite-core'
 
 // 1. exams
 export const exams = sqliteTable('exams', {
@@ -127,6 +127,20 @@ export const studyProgress = sqliteTable('study_progress', {
   index('idx_study_progress_topic_id').on(t.topicId),
 ])
 
+// 10. study_activity_log — one row per calendar day, tracks total active minutes
+export const studyActivityLog = sqliteTable('study_activity_log', {
+  date: text('date').primaryKey(),          // "2026-04-03"
+  minutesActive: integer('minutes_active').notNull().default(0),
+})
+
+// 11. study_topic_visits — dedup log; each topic counted once per day for tooltip
+export const studyTopicVisits = sqliteTable('study_topic_visits', {
+  date: text('date').notNull(),
+  topicId: text('topic_id').notNull(),
+}, (t) => [
+  unique().on(t.date, t.topicId),
+])
+
 // Inferred TypeScript types
 export type Exam = typeof exams.$inferSelect
 export type Domain = typeof domains.$inferSelect
@@ -145,3 +159,5 @@ export type NewQuestion = typeof questions.$inferInsert
 export type NewFlashcard = typeof flashcards.$inferInsert
 export type NewFlashcardReview = typeof flashcardReviews.$inferInsert
 export type NewStudyProgress = typeof studyProgress.$inferInsert
+export type StudyActivityLog = typeof studyActivityLog.$inferSelect
+export type StudyTopicVisit = typeof studyTopicVisits.$inferSelect
