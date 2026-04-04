@@ -29,7 +29,7 @@ export function ActivityHeatmap() {
   useEffect(() => {
     fetch('/api/activity/history')
       .then((r) => r.json())
-      .then((rows: ActivityDay[]) => { setData(rows); setLoading(false) })
+      .then((rows: unknown) => { setData(Array.isArray(rows) ? rows : []); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])
 
