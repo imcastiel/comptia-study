@@ -212,6 +212,11 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           <Search size={16} color="var(--apple-label-secondary, #888)" />
           <input
             ref={inputRef}
+            role="combobox"
+            aria-expanded={showResults && !loading && allResults.length > 0}
+            aria-controls="search-listbox"
+            aria-activedescendant={allResults[selectedIndex] ? `search-opt-${allResults[selectedIndex].slug}` : undefined}
+            aria-autocomplete="list"
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search topics, terms…"
@@ -249,7 +254,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
               </div>
             )}
             {allResults.length > 0 && (
-            <div role="listbox" aria-label="Search results">
+            <div id="search-listbox" role="listbox" aria-label="Search results">
 
               {/* Topic title matches */}
               {results.titleMatches.length > 0 && (
@@ -266,6 +271,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                   {results.titleMatches.map((entry, i) => (
                     <div
                       key={entry.slug}
+                      id={`search-opt-${entry.slug}`}
                       role="option"
                       aria-selected={selectedIndex === i}
                       tabIndex={-1}
@@ -314,6 +320,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                     return (
                       <div
                         key={entry.slug}
+                        id={`search-opt-${entry.slug}`}
                         role="option"
                         aria-selected={selectedIndex === globalIdx}
                         tabIndex={-1}
