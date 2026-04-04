@@ -18,7 +18,8 @@ export async function GET() {
       .orderBy(studyActivityLog.date)
 
     return NextResponse.json(rows)
-  } catch {
+  } catch (err) {
+    console.error('[GET /api/activity/history]', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
