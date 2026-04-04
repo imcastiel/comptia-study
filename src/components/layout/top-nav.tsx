@@ -2,8 +2,99 @@
 
 import Link from 'next/link'
 import { Shield, Search, Sun, Moon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CommandPalette } from '@/components/search/command-palette'
+import { usePomodoroContext } from '@/contexts/pomodoro-context'
+
+function PomodoroTimerPill() {
+  const { phase, secondsLeft, pomodoroActive, start, pause, reset, skipBreak } = usePomodoroContext()
+  const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const mm = String(Math.floor(secondsLeft / 60)).padStart(2, '0')
+  const ss = String(secondsLeft % 60).padStart(2, '0')
+  const time = `${mm}:${ss}`
+
+  function handleClick() {
+    if (phase === 'idle') { start(); return }
+    if (phase === 'work' && pomodoroActive) { pause(); return }
+    if (phase === 'work' && !pomodoroActive) { start(); return }
+    if (phase === 'break') { skipBreak() }
+  }
+
+  function handleMouseDown() {
+    longPressRef.current = setTimeout(() => { reset() }, 500)
+  }
+
+  function handleMouseUp() {
+    if (longPressRef.current) { clearTimeout(longPressRef.current); longPressRef.current = null }
+  }
+
+  if (phase === 'idle') {
+    return (
+      <button
+        onClick={handleClick}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        className="flex items-center gap-[5px] bg-transparent border-none cursor-pointer px-2 py-1 rounded-[6px] hover:bg-[var(--apple-fill)] transition-colors"
+        aria-label="Start pomodoro timer"
+      >
+        <span className="text-[11px] text-[var(--apple-label-tertiary)]">▶</span>
+        <span className="text-[12px] text-[var(--apple-label-tertiary)] tracking-[0.5px]" style={{ fontVariantNumeric: 'tabular-nums' }}>{time}</span>
+      </button>
+    )
+  }
+
+  if (phase === 'work' && pomodoroActive) {
+    return (
+      <button
+        onClick={handleClick}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        className="flex items-center gap-[5px] cursor-pointer px-[10px] py-1 rounded-[6px]"
+        style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)' }}
+        aria-label="Pause pomodoro timer"
+      >
+        <span className="w-[6px] h-[6px] bg-[#6366f1] rounded-full inline-block animate-pulse" />
+        <span className="text-[12px] font-medium tracking-[0.5px] text-[#c7d2fe]" style={{ fontVariantNumeric: 'tabular-nums' }}>{time}</span>
+      </button>
+    )
+  }
+
+  if (phase === 'work' && !pomodoroActive) {
+    return (
+      <button
+        onClick={handleClick}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        className="flex items-center gap-[5px] cursor-pointer px-[10px] py-1 rounded-[6px]"
+        style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)' }}
+        aria-label="Resume pomodoro timer"
+      >
+        <span className="text-[10px] text-[#6366f1]">⏸</span>
+        <span className="text-[12px] font-medium tracking-[0.5px] text-[#c7d2fe]" style={{ fontVariantNumeric: 'tabular-nums' }}>{time}</span>
+      </button>
+    )
+  }
+
+  // Break phase
+  return (
+    <button
+      onClick={handleClick}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      className="flex items-center gap-[5px] cursor-pointer px-[10px] py-1 rounded-[6px]"
+      style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)' }}
+      aria-label="Skip break"
+    >
+      <span className="text-[12px] font-medium tracking-[0.5px] text-[#6ee7b7]" style={{ fontVariantNumeric: 'tabular-nums' }}>{time}</span>
+      <span className="text-[10px] text-[#34d399]">break</span>
+    </button>
+  )
+}
 
 export function TopNav() {
   const [isDark, setIsDark] = useState(false)
@@ -52,6 +143,7 @@ export function TopNav() {
 
           {/* Actions */}
           <div className="flex items-center gap-1">
+            <PomodoroTimerPill />
             <button
               onClick={() => setSearchOpen(true)}
               className="w-9 h-9 rounded-[10px] flex items-center justify-center text-[var(--apple-label-secondary)] hover:bg-[var(--apple-fill)] transition-colors duration-150"
