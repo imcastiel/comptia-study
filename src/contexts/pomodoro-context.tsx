@@ -18,9 +18,13 @@ type TimerAction =
   | { type: 'SKIP_BREAK' }
   | { type: 'TICK' }
 
+const WORK_SECONDS = 25 * 60
+const SHORT_BREAK_SECONDS = 5 * 60
+const LONG_BREAK_SECONDS = 15 * 60
+
 const initialState: PomodoroState = {
   phase: 'idle',
-  secondsLeft: 25 * 60,
+  secondsLeft: WORK_SECONDS,
   pomodoroCount: 0,
   pomodoroActive: false,
 }
@@ -29,7 +33,7 @@ function timerReducer(state: PomodoroState, action: TimerAction): PomodoroState 
   switch (action.type) {
     case 'START':
       if (state.phase === 'idle') {
-        return { ...state, phase: 'work', secondsLeft: 25 * 60, pomodoroActive: true }
+        return { ...state, phase: 'work', secondsLeft: WORK_SECONDS, pomodoroActive: true }
       }
       if (state.phase === 'work') {
         return { ...state, pomodoroActive: true }
@@ -42,14 +46,22 @@ function timerReducer(state: PomodoroState, action: TimerAction): PomodoroState 
     case 'RESET':
       return initialState
 
-    case 'SKIP_BREAK':
+    case 'SKIP_BREAK': {
       if (state.phase === 'break') {
-        return { ...state, phase: 'idle', secondsLeft: 25 * 60, pomodoroActive: false }
+        const wasLong = state.pomodoroCount % 4 === 0
+        return {
+          ...state,
+          phase: 'idle',
+          secondsLeft: WORK_SECONDS,
+          pomodoroActive: false,
+          pomodoroCount: wasLong ? 0 : state.pomodoroCount,
+        }
       }
       return state
+    }
 
     case 'TICK': {
-      if (state.secondsLeft > 1) {
+      if (state.secondsLeft > 0) {
         return { ...state, secondsLeft: state.secondsLeft - 1 }
       }
       // Timer reaches 0
@@ -58,7 +70,7 @@ function timerReducer(state: PomodoroState, action: TimerAction): PomodoroState 
         const isLong = newCount % 4 === 0
         return {
           phase: 'break',
-          secondsLeft: isLong ? 15 * 60 : 5 * 60,
+          secondsLeft: isLong ? LONG_BREAK_SECONDS : SHORT_BREAK_SECONDS,
           pomodoroCount: newCount,
           pomodoroActive: false,
         }
@@ -67,7 +79,7 @@ function timerReducer(state: PomodoroState, action: TimerAction): PomodoroState 
       const wasLong = state.pomodoroCount % 4 === 0
       return {
         phase: 'idle',
-        secondsLeft: 25 * 60,
+        secondsLeft: WORK_SECONDS,
         pomodoroCount: wasLong ? 0 : state.pomodoroCount,
         pomodoroActive: false,
       }
