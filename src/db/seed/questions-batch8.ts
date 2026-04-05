@@ -719,14 +719,14 @@ export const BATCH8_QUESTIONS = [
     type: 'multiple_choice' as const,
     stem: 'Which TWO characteristics are TRUE of M.2 NVMe SSDs compared to M.2 SATA SSDs? (Select TWO)',
     choices: chMulti(
-      'They use the M key (or B+M) and PCIe lanes',
+      'They use the M key and PCIe lanes',
       'They are limited to 550 MB/s by the SATA III protocol',
       'They can reach several thousand MB/s in sequential reads',
       'They use the USB 3.2 protocol internally',
       ['a', 'c']
     ),
     correctAnswer: cam('a', 'c'),
-    explanation: 'M.2 NVMe drives use the M key (or B+M) notch and communicate over PCIe lanes, achieving speeds of 3,500 MB/s on PCIe 3.0 x4 and about 7,000 MB/s on PCIe 4.0 x4. The SATA III 550 MB/s cap applies to M.2 SATA drives, not NVMe. M.2 drives never use USB 3.2 internally.',
+    explanation: 'M.2 NVMe drives use the M key notch and communicate over PCIe x4 lanes, achieving speeds of 3,500 MB/s on PCIe 3.0 x4 and about 7,000 MB/s on PCIe 4.0 x4. M.2 SATA drives use the B+M key and are limited to SATA bandwidth (~550 MB/s). The SATA III 550 MB/s cap applies to M.2 SATA drives, not NVMe. M.2 drives never use USB 3.2 internally.',
     difficulty: 3,
     tags: null,
     createdAt: NOW,
