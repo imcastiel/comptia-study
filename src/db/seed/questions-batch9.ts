@@ -1,6 +1,5 @@
 // CompTIA A+ 220-1201 — Core 1 Domain 2: Networking (Part 1)
-// 168 questions across 4 topics (42 per topic): 2-1, 2-2, 2-3, 2-4
-// Topics 2-5 through 2-8 will be added by a second pass.
+// 336 questions across 8 topics (42 per topic)
 
 const NOW = new Date().toISOString()
 
