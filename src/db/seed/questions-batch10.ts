@@ -590,17 +590,17 @@ export const BATCH10_QUESTIONS = [
   {
     id: 'q-c1-3-1-44',
     topicId: 'topic-c1-3-1',
-    type: 'single_choice' as const,
-    stem: 'Which connector type on a DVI port has the flat "+" shaped pins on one side that indicate it can output both analog and digital signals?',
-    choices: ch(
+    type: 'multiple_choice' as const,
+    stem: 'Which TWO DVI variants include analog signal capability? (Select TWO)',
+    choices: chMulti(
       'DVI-A',
       'DVI-D',
       'DVI-I',
       'Mini-DVI',
-      'c'
+      ['a', 'c']
     ),
-    correctAnswer: ca('c'),
-    explanation: 'DVI-I (Integrated) has both digital and analog pins, including the four pins surrounding the flat blade on one side that carry the analog signal. DVI-D (Digital) has only digital pins and a missing flat blade. DVI-A (Analog) carries only analog signals. The physical pin layout is how you identify which DVI variant a port or cable is.',
+    correctAnswer: cam('a', 'c'),
+    explanation: 'DVI-A (Analog) carries only analog signals and includes the four analog pins. DVI-I (Integrated) carries both digital and analog signals, including the four analog pins surrounding the flat blade. DVI-D (Digital) carries only digital signals and lacks the analog pins entirely. Mini-DVI is a compact connector used on some Apple laptops that carries digital video only.',
     difficulty: 2,
     tags: null,
     createdAt: NOW,
@@ -844,17 +844,17 @@ export const BATCH10_QUESTIONS = [
   {
     id: 'q-c1-3-2-22',
     topicId: 'topic-c1-3-2',
-    type: 'single_choice' as const,
-    stem: 'What is the main disadvantage of eSATA compared to USB 3.x for external storage?',
-    choices: ch(
+    type: 'multiple_choice' as const,
+    stem: 'Which TWO are disadvantages of eSATA compared to USB 3.x for external storage? (Select TWO)',
+    choices: chMulti(
+      'eSATA does not supply power through its cable',
       'eSATA is slower than USB 3.0',
-      'eSATA does not supply power to the connected drive',
-      'eSATA cables are limited to 30 cm in length',
+      'eSATA cables are limited to a maximum of 2 meters',
       'eSATA is incompatible with SSDs',
-      'b'
+      ['a', 'c']
     ),
-    correctAnswer: ca('b'),
-    explanation: 'eSATA does not supply power through its cable — external drives need a separate power adapter or secondary USB connection for power. USB 3.x provides both data and power through a single cable, making it much more convenient. eSATA provides native SATA speeds, so performance is not the issue. This power limitation is a major reason eSATA has been largely replaced by USB 3.x.',
+    correctAnswer: cam('a', 'c'),
+    explanation: 'eSATA does not supply power through its cable — external drives need a separate power adapter or secondary USB connection for power. eSATA is also limited to a maximum cable length of 2 meters, making it less flexible than USB which supports up to 5 meters. USB 3.x provides both data and power through a single cable with longer reach, which is why it has largely replaced eSATA.',
     difficulty: 2,
     tags: null,
     createdAt: NOW,
@@ -1348,17 +1348,17 @@ export const BATCH10_QUESTIONS = [
   {
     id: 'q-c1-3-2-50',
     topicId: 'topic-c1-3-2',
-    type: 'single_choice' as const,
-    stem: 'What is the primary advantage of single-mode fiber over multimode fiber?',
-    choices: ch(
-      'Lower cost per meter',
-      'Supports much longer distances (up to 100 km)',
+    type: 'multiple_choice' as const,
+    stem: 'Which TWO characteristics are advantages of single-mode fiber over multimode fiber? (Select TWO)',
+    choices: chMulti(
+      'Lower cost per meter than multimode fiber',
+      'Supports much longer distances up to 100 km',
       'Uses cheaper LED light sources',
-      'Easier to terminate and splice',
-      'b'
+      'Small 8-10 μm core that eliminates modal dispersion',
+      ['b', 'd']
     ),
-    correctAnswer: ca('b'),
-    explanation: 'Single-mode fiber supports much longer distances — up to 100 km for WAN and campus backbone links. Its small core (8-10 μm) allows only one light path, eliminating modal dispersion that limits multimode distance. However, single-mode requires more expensive laser light sources and is harder to terminate. Multimode is cheaper and easier to work with for shorter in-building runs.',
+    correctAnswer: cam('b', 'd'),
+    explanation: 'Single-mode fiber supports much longer distances — up to 100 km for WAN and campus backbone links. Its small core (8-10 μm) allows only one light path (mode), eliminating modal dispersion that limits multimode fiber to shorter runs. However, single-mode requires more expensive laser light sources (not cheaper LEDs) and costs more per meter. These two technical advantages — distance and the elimination of modal dispersion — are the key exam points.',
     difficulty: 2,
     tags: null,
     createdAt: NOW,
@@ -1440,17 +1440,17 @@ export const BATCH10_QUESTIONS = [
   {
     id: 'q-c1-3-3-17',
     topicId: 'topic-c1-3-3',
-    type: 'single_choice' as const,
-    stem: 'Which RAM technology adds extra bits per word to detect and automatically correct single-bit memory errors?',
-    choices: ch(
-      'Registered (buffered) RAM',
-      'ECC (Error-Correcting Code) RAM',
-      'XMP-enabled RAM',
-      'LPDDR RAM',
-      'b'
+    type: 'multiple_choice' as const,
+    stem: 'Which TWO statements about ECC (Error-Correcting Code) RAM are correct? (Select TWO)',
+    choices: chMulti(
+      'It adds 8 extra bits per 64-bit word, making the memory bus 72 bits wide',
+      'It requires a dedicated parity drive installed alongside the RAM to function',
+      'It can detect and automatically correct single-bit memory errors',
+      'It is standard in all consumer desktop and laptop systems',
+      ['a', 'c']
     ),
-    correctAnswer: ca('b'),
-    explanation: 'ECC (Error-Correcting Code) RAM adds 8 extra bits per 64-bit word (making the bus 72 bits wide) to detect and automatically correct single-bit errors. This prevents silent data corruption in servers and workstations. Registered/buffered RAM reduces electrical load for more DIMMs per channel but does not correct errors. XMP is an overclocking profile. LPDDR is low-power mobile memory.',
+    correctAnswer: cam('a', 'c'),
+    explanation: 'ECC RAM adds 8 extra check bits per 64-bit data word (widening the bus to 72 bits) using Hamming code algorithms. This allows the memory controller to detect and automatically correct single-bit errors in real time, preventing silent data corruption. ECC does not require any external parity drive — the correction logic is built into the RAM chips and memory controller. ECC is used in servers and workstations, not standard in consumer systems.',
     difficulty: 1,
     tags: null,
     createdAt: NOW,
@@ -2234,17 +2234,17 @@ export const BATCH10_QUESTIONS = [
   {
     id: 'q-c1-3-4-25',
     topicId: 'topic-c1-3-4',
-    type: 'single_choice' as const,
-    stem: 'SAS (Serial Attached SCSI) controllers can connect which types of drives?',
-    choices: ch(
-      'SAS drives only',
-      'SATA drives only',
-      'Both SAS and SATA drives',
-      'Only NVMe drives',
-      'c'
+    type: 'multiple_choice' as const,
+    stem: 'Which TWO drive types can connect to a SAS (Serial Attached SCSI) controller? (Select TWO)',
+    choices: chMulti(
+      'SAS drives',
+      'SATA drives',
+      'NVMe PCIe drives',
+      'IDE/PATA drives',
+      ['a', 'b']
     ),
-    correctAnswer: ca('c'),
-    explanation: 'SAS controllers are backward compatible with SATA drives — a SAS backplane or controller can accept both SAS and SATA drives. However, the reverse is NOT true: SATA controllers cannot connect SAS drives. This flexibility makes SAS infrastructure popular in enterprise environments where a mix of drive types is common.',
+    correctAnswer: cam('a', 'b'),
+    explanation: 'SAS controllers are backward compatible with SATA drives — a SAS backplane or controller can accept both SAS drives and SATA drives in the same enclosure. However, the reverse is NOT true: SATA controllers cannot connect SAS drives. NVMe PCIe drives and IDE/PATA drives require their own dedicated interfaces. This SAS/SATA compatibility makes SAS infrastructure popular in enterprise environments where a mix of drive types is common.',
     difficulty: 2,
     tags: null,
     createdAt: NOW,
@@ -2270,17 +2270,17 @@ export const BATCH10_QUESTIONS = [
   {
     id: 'q-c1-3-4-27',
     topicId: 'topic-c1-3-4',
-    type: 'single_choice' as const,
-    stem: 'Which NAND flash type has the highest endurance (P/E cycles) but the lowest storage density?',
-    choices: ch(
-      'SLC (Single-Level Cell)',
-      'MLC (Multi-Level Cell)',
-      'TLC (Triple-Level Cell)',
-      'QLC (Quad-Level Cell)',
-      'a'
+    type: 'multiple_choice' as const,
+    stem: 'Which TWO characteristics describe SLC (Single-Level Cell) NAND flash compared to MLC, TLC, and QLC? (Select TWO)',
+    choices: chMulti(
+      'Stores only 1 bit per cell, providing approximately 100,000 P/E cycles',
+      'Stores 4 bits per cell for maximum density at the lowest cost',
+      'Has the lowest storage density and highest cost per GB',
+      'Is the most common NAND type used in consumer SSDs',
+      ['a', 'c']
     ),
-    correctAnswer: ca('a'),
-    explanation: 'SLC (Single-Level Cell) stores only 1 bit per cell, giving it approximately 100,000 P/E cycles — far more than MLC (~10,000), TLC (~3,000), or QLC (~1,000). However, storing only 1 bit per cell means SLC has the lowest storage density and highest cost per GB. SLC is primarily used in enterprise caching and high-endurance applications.',
+    correctAnswer: cam('a', 'c'),
+    explanation: 'SLC (Single-Level Cell) stores only 1 bit per cell, giving it approximately 100,000 P/E (Program/Erase) cycles — far more than MLC (~10,000), TLC (~3,000), or QLC (~1,000). However, storing only 1 bit per cell means SLC has the lowest storage density and the highest cost per GB of all NAND types. QLC stores 4 bits per cell for maximum density. TLC (3 bits per cell) is the most common type in consumer SSDs. SLC is used in enterprise caching and high-endurance applications.',
     difficulty: 2,
     tags: null,
     createdAt: NOW,
