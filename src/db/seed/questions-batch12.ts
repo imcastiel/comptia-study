@@ -2580,17 +2580,17 @@ export const BATCH12_QUESTIONS = [
   {
     id: 'q-c1-5-4-23',
     topicId: 'topic-c1-5-4',
-    type: 'single_choice' as const,
-    stem: 'A smartphone user reports that their device overheats while charging and playing a video game simultaneously. What is the BEST advice for the user?',
-    choices: ch(
+    type: 'multiple_choice' as const,
+    stem: 'A smartphone user reports that their device overheats while charging and playing a video game simultaneously. Which TWO actions should the technician recommend to reduce overheating? (Select TWO)',
+    choices: chMulti(
       'Replace the battery because it must be defective',
-      'Avoid charging while performing resource-intensive tasks, and remove the case to improve heat dissipation',
-      'Use the phone only while it is connected to Wi-Fi',
+      'Avoid charging while performing resource-intensive tasks such as gaming',
+      'Remove the phone case during charging and heavy use to improve heat dissipation',
       'Disable all background apps permanently in the settings',
-      'b'
+      ['b', 'c']
     ),
-    correctAnswer: ca('b'),
-    explanation: 'Charging generates heat from the battery, and gaming generates heat from the CPU/GPU. Combined, they produce significant heat that can trigger thermal throttling or shutdown. Avoiding simultaneous charging and heavy use, and removing the case, are the best preventive measures.',
+    correctAnswer: cam('b', 'c'),
+    explanation: 'Charging generates heat from the battery, and gaming generates heat from the CPU/GPU. Combined, they produce significant heat that can trigger thermal throttling or shutdown. Avoiding simultaneous charging and heavy use reduces heat load, and removing the case allows heat to escape more efficiently. Replacing the battery is unnecessary unless it has failed.',
     difficulty: 2,
     tags: null,
     createdAt: NOW,
@@ -2706,17 +2706,17 @@ export const BATCH12_QUESTIONS = [
   {
     id: 'q-c1-5-4-30',
     topicId: 'topic-c1-5-4',
-    type: 'single_choice' as const,
-    stem: 'A smartphone user reports that their phone is warm even when idle and the battery usage screen shows a social media app consuming 60% of battery. What should the technician recommend?',
-    choices: ch(
+    type: 'multiple_choice' as const,
+    stem: 'A smartphone user reports that their phone is warm even when idle and the battery usage screen shows a social media app consuming 60% of battery. Which TWO actions should the technician take to address the rogue app? (Select TWO)',
+    choices: chMulti(
       'Replace the phone battery immediately',
-      'Force stop the app, disable its background refresh, and check for an app update',
+      'Force stop the app and disable its background refresh permission',
+      'Check for and install an updated version of the app that may contain a bug fix',
       'Disable Wi-Fi to reduce battery usage',
-      'Lower the screen resolution in display settings',
-      'b'
+      ['b', 'c']
     ),
-    correctAnswer: ca('b'),
-    explanation: 'A single app consuming 60% of battery indicates a rogue app running excessively in the background. Force stopping it, disabling background refresh, and updating to the latest version (which may contain a bug fix) is the appropriate targeted response.',
+    correctAnswer: cam('b', 'c'),
+    explanation: 'A single app consuming 60% of battery indicates a rogue app running excessively in the background. Force stopping it and disabling background refresh immediately halts the excessive activity. Checking for an app update addresses the root cause, as the excessive background usage is often a bug fixed in a newer version. Replacing the battery is unnecessary when hardware is not the issue.',
     difficulty: 2,
     tags: null,
     createdAt: NOW,
@@ -3326,17 +3326,17 @@ export const BATCH12_QUESTIONS = [
   {
     id: 'q-c1-5-5-22',
     topicId: 'topic-c1-5-5',
-    type: 'single_choice' as const,
-    stem: 'A technician discovers that a workstation has an APIPA address of 169.254.50.10. The Ethernet cable is plugged in and the link LED is lit. What should the technician check NEXT?',
-    choices: ch(
-      'Whether the DNS server is configured correctly',
-      'Whether the DHCP server is running and has available addresses in its scope',
-      'Whether the NIC driver is up to date',
-      'Whether the web browser proxy settings are correct',
-      'b'
+    type: 'multiple_choice' as const,
+    stem: 'A technician discovers that a workstation has an APIPA address of 169.254.50.10. The Ethernet cable is plugged in and the link LED is lit. Which TWO conditions could explain why the workstation received an APIPA address? (Select TWO)',
+    choices: chMulti(
+      'The DNS server is not responding to queries',
+      'The DHCP server is down and cannot respond to the workstation lease request',
+      'The DHCP address pool is exhausted and no addresses are available to assign',
+      'The web browser proxy settings are configured incorrectly',
+      ['b', 'c']
     ),
-    correctAnswer: ca('b'),
-    explanation: 'An APIPA address with an active physical link means the computer can communicate at Layer 1 but cannot reach the DHCP server. The technician should verify the DHCP server is running and has available addresses. The pool may be exhausted, or the server may be down.',
+    correctAnswer: cam('b', 'c'),
+    explanation: 'An APIPA address with an active physical link means the computer can communicate at Layer 1 but the DHCP server did not respond. The two most common causes are: the DHCP server is offline or unreachable, or the DHCP address pool is exhausted and has no free leases to issue. DNS configuration and proxy settings do not affect DHCP address assignment.',
     difficulty: 2,
     tags: null,
     createdAt: NOW,
@@ -3470,17 +3470,17 @@ export const BATCH12_QUESTIONS = [
   {
     id: 'q-c1-5-5-30',
     topicId: 'topic-c1-5-5',
-    type: 'single_choice' as const,
-    stem: 'A Wi-Fi analyzer shows that the office access point is on channel 6 (2.4 GHz) and the two neighboring offices are also on channel 6. Users report slow Wi-Fi. What should the technician do?',
-    choices: ch(
-      'Increase the transmit power on the access point to overpower the neighbors',
-      'Change the office AP to channel 1 or channel 11 to avoid co-channel interference',
-      'Disable the 2.4 GHz radio entirely',
-      'Replace the access point with a newer model',
-      'b'
+    type: 'multiple_choice' as const,
+    stem: 'A Wi-Fi analyzer shows that the office access point is on channel 6 (2.4 GHz) and the two neighboring offices are also on channel 6. Users report slow Wi-Fi. Which TWO channels could the technician switch the office AP to in order to avoid co-channel interference? (Select TWO)',
+    choices: chMulti(
+      'Channel 1',
+      'Channel 4',
+      'Channel 11',
+      'Channel 9',
+      ['a', 'c']
     ),
-    correctAnswer: ca('b'),
-    explanation: 'In the 2.4 GHz band, only channels 1, 6, and 11 are non-overlapping. When multiple nearby APs use the same channel, they create co-channel interference that degrades performance. Switching to channel 1 or 11 eliminates the overlap with the neighboring APs.',
+    correctAnswer: cam('a', 'c'),
+    explanation: 'In the 2.4 GHz band, only channels 1, 6, and 11 are non-overlapping. When multiple nearby APs share channel 6, they create co-channel interference that degrades performance. Switching to channel 1 or channel 11 places the office AP on a non-overlapping channel and eliminates the co-channel interference. Channels 4 and 9 overlap with other channels and would still cause adjacent-channel interference.',
     difficulty: 2,
     tags: null,
     createdAt: NOW,
@@ -4091,16 +4091,16 @@ export const BATCH12_QUESTIONS = [
     id: 'q-c1-5-6-22',
     topicId: 'topic-c1-5-6',
     type: 'single_choice' as const,
-    stem: 'A laser printer produces a faint repeated image of the previous page offset further down on the current page. This occurs on every print. Which component is MOST likely responsible?',
+    stem: 'A laser printer produces a faint repeated image of the previous page offset further down on the current page. This occurs on every print. Which component is the PRIMARY suspect on CompTIA A+?',
     choices: ch(
       'The pickup roller',
-      'The transfer roller',
-      'The drum (not being properly cleaned between print cycles)',
+      'The fuser assembly (fuser roller retaining residual toner from the previous print cycle)',
+      'The drum unit',
       'The paper tray sensor',
-      'c'
+      'b'
     ),
-    correctAnswer: ca('c'),
-    explanation: 'Ghosting (a faint repeated image offset on the page) indicates the drum is not being fully cleaned between print cycles. Residual toner from the previous image remains on the drum and transfers to the next page. The drum unit or the cleaning blade needs replacement.',
+    correctAnswer: ca('b'),
+    explanation: 'Laser printer ghosting occurs when the fuser roller retains residual toner from a previous print cycle and re-deposits it on subsequent pages. The fuser assembly or fuser roller is the primary replacement for this symptom on CompTIA A+. A worn drum can also cause ghosting, but the fuser is the canonical first suspect.',
     difficulty: 2,
     tags: null,
     createdAt: NOW,
@@ -4216,17 +4216,17 @@ export const BATCH12_QUESTIONS = [
   {
     id: 'q-c1-5-6-29',
     topicId: 'topic-c1-5-6',
-    type: 'single_choice' as const,
-    stem: 'A laser printer frequently jams at the same location near the fuser. The technician inspects and finds small paper fragments lodged near the fuser rollers from a previous jam clearing. What was done incorrectly?',
-    choices: ch(
-      'The technician did not replace the toner after the first jam',
-      'The technician pulled the jammed paper against the direction of travel, tearing it and leaving fragments',
-      'The technician did not restart the print spooler',
-      'The technician used the wrong paper size',
-      'b'
+    type: 'multiple_choice' as const,
+    stem: 'A laser printer frequently jams at the same location near the fuser. The technician inspects and finds small paper fragments lodged near the fuser rollers from a previous jam clearing. Which TWO mistakes led to the recurring jam? (Select TWO)',
+    choices: chMulti(
+      'The technician pulled the jammed paper against the direction of travel, tearing it near the fuser rollers',
+      'The technician did not replace the toner cartridge after clearing the jam',
+      'The technician failed to perform a full visual inspection to confirm all paper fragments were removed',
+      'The technician did not restart the print spooler after clearing the jam',
+      ['a', 'c']
     ),
-    correctAnswer: ca('b'),
-    explanation: 'Pulling paper against the direction of travel tears it near the fuser rollers, which grip the paper tightly. Small fragments left behind cause repeated jams at the same location. Paper should always be pulled in the direction of travel, and all fragments must be removed with a visual inspection.',
+    correctAnswer: cam('a', 'c'),
+    explanation: 'Pulling paper against the direction of travel tears it near the fuser rollers, which grip the paper tightly, leaving fragments inside. Failing to perform a thorough visual inspection after clearing the jam allows those fragments to remain, causing recurring jams at the same spot. Paper should always be pulled in the direction of travel, and all internal areas must be inspected for residual pieces.',
     difficulty: 2,
     tags: null,
     createdAt: NOW,
@@ -4360,17 +4360,17 @@ export const BATCH12_QUESTIONS = [
   {
     id: 'q-c1-5-6-37',
     topicId: 'topic-c1-5-6',
-    type: 'single_choice' as const,
-    stem: 'A laser printer produces background speckling (light dots scattered across the page) on every print. The prints are otherwise readable. What is the MOST likely cause?',
-    choices: ch(
-      'A failing fuser assembly',
-      'High humidity causing moisture in the paper, combined with static buildup and a worn drum',
-      'An incorrect print driver',
-      'The network connection is intermittent',
-      'b'
+    type: 'multiple_choice' as const,
+    stem: 'A laser printer produces background speckling (light dots scattered across the page) on every print. The prints are otherwise readable. Which TWO factors are MOST likely contributing to this symptom? (Select TWO)',
+    choices: chMulti(
+      'High humidity causing moisture in the paper, which increases static and causes stray toner attraction',
+      'A worn drum that is no longer uniformly holding its charge, allowing toner to cling to unintended areas',
+      'A failing fuser assembly overheating the paper',
+      'An outdated printer driver sending incorrect page data',
+      ['a', 'b']
     ),
-    correctAnswer: ca('b'),
-    explanation: 'Background speckling on laser prints is caused by toner attracted to unintended areas of the paper. This is exacerbated by humid paper (which increases static), a worn drum, or incorrect density settings. Using fresh dry paper, cleaning the drum, and adjusting density settings reduce speckling.',
+    correctAnswer: cam('a', 'b'),
+    explanation: 'Background speckling on laser prints is caused by toner attracted to unintended areas of the paper. Humid paper increases static charge, making it easier for stray toner particles to adhere. A worn drum that can no longer maintain a uniform charge leaves low-charge spots that attract toner. Using fresh dry paper and replacing the drum unit are the appropriate corrective actions.',
     difficulty: 2,
     tags: null,
     createdAt: NOW,
