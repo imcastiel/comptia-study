@@ -677,7 +677,7 @@ export const BATCH13A_QUESTIONS = [
     id: 'q-c2-1-1-51',
     topicId: 'topic-c2-1-1',
     type: 'multiple_choice' as const,
-    stem: 'A technician is evaluating operating systems for different roles. Which THREE statements are correct? (Select THREE)',
+    stem: 'A technician is evaluating operating systems for different roles. Which TWO statements are correct? (Select TWO)',
     choices: chMulti(
       'Linux can function as both a desktop and server operating system',
       'macOS can be legally installed on non-Apple hardware without restriction',
@@ -915,7 +915,7 @@ export const BATCH13A_QUESTIONS = [
   },
   {
     id: 'q-c2-1-2-19',
-    topicId: 'topic-c2-1-1',
+    topicId: 'topic-c2-1-2',
     type: 'single_choice' as const,
     stem: 'What does the acronym UEFI stand for?',
     choices: ch(
@@ -2326,7 +2326,7 @@ export const BATCH13A_QUESTIONS = [
   {
     id: 'q-c2-1-1-56',
     topicId: 'topic-c2-1-1',
-    type: 'multiple_choice',
+    type: 'multiple_choice' as const,
     stem: 'Which TWO of the following are advantages of Linux over Windows for server use? (Select TWO)',
     choices: chMulti('Open-source with no licensing cost', 'Supports DirectX gaming APIs natively', 'Highly configurable via command line', 'Has a mandatory GUI', ['a', 'c']),
     correctAnswer: cam('a', 'c'),
@@ -2338,7 +2338,7 @@ export const BATCH13A_QUESTIONS = [
   {
     id: 'q-c2-1-2-56',
     topicId: 'topic-c2-1-2',
-    type: 'multiple_choice',
+    type: 'multiple_choice' as const,
     stem: 'Which TWO of the following are required before performing an in-place upgrade of Windows? (Select TWO)',
     choices: chMulti('Back up user data', 'Reformat the system drive', 'Verify hardware compatibility', 'Uninstall all applications', ['a', 'c']),
     correctAnswer: cam('a', 'c'),
@@ -2350,7 +2350,7 @@ export const BATCH13A_QUESTIONS = [
   {
     id: 'q-c2-1-3-58',
     topicId: 'topic-c2-1-3',
-    type: 'multiple_choice',
+    type: 'multiple_choice' as const,
     stem: 'Which TWO Windows features are available in Windows 10/11 Pro but NOT in Windows 10/11 Home? (Select TWO)',
     choices: chMulti('BitLocker drive encryption', 'Windows Defender Antivirus', 'Remote Desktop host (incoming connections)', 'Microsoft Edge browser', ['a', 'c']),
     correctAnswer: cam('a', 'c'),
