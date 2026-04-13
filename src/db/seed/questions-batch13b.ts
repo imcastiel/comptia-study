@@ -1,7 +1,8 @@
 // questions-batch13b.ts
 // Core 2 Domain 1 — Operating Systems Part 2
-// Topics: c2-1-7 (Windows Networking), c2-1-8 (macOS Features), c2-1-9 (Linux Features)
-// 126 questions across 3 topics (Part 1 of 2)
+// Topics: c2-1-7 (Windows Networking), c2-1-8 (macOS Features), c2-1-9 (Linux Features),
+//         c2-1-10 (Application Installation), c2-1-11 (Cloud and Productivity Tools)
+// 210 questions across 5 topics
 
 const NOW = new Date().toISOString()
 
@@ -1986,7 +1987,7 @@ export const BATCH13B_QUESTIONS = [
     stem: 'When running an MSI repair using msiexec, which switch triggers a repair of all files regardless of checksum or version?',
     choices: ch('/fa', '/fu', '/fm', '/fo', 'a'),
     correctAnswer: ca('a'),
-    explanation: 'msiexec /fa forces a repair of all files regardless of whether they appear to be up-to-date. /fu repairs only if the file is missing or an older version is installed, /fm repairs only if the file is missing, and /fo repairs if the file is missing or an older version exists (similar to /fu but based on date).',
+    explanation: 'msiexec /fa forces a repair of all files regardless of whether they appear to be up-to-date. /fu repairs only if the file is missing or an older version is installed, /fm repairs only if the file is missing, and /fo repairs if the file is missing or an older version (by version number) is installed.',
     difficulty: 3,
     tags: null,
     createdAt: NOW,
