@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Lock } from 'lucide-react'
 
-export default function LoginPage() {
+function LoginForm() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -33,6 +33,31 @@ export default function LoginPage() {
   }
 
   return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Password"
+        autoFocus
+        className="w-full px-4 py-3 rounded-[12px] bg-[var(--apple-fill)] border border-[var(--apple-separator)] text-[15px] outline-none focus:border-[var(--apple-blue)] transition-colors"
+      />
+      {error && (
+        <p className="text-[13px] text-red-500 text-center">Incorrect password</p>
+      )}
+      <button
+        type="submit"
+        disabled={loading || !password}
+        className="w-full py-3 rounded-[12px] bg-[var(--apple-blue)] text-white text-[15px] font-semibold disabled:opacity-50 transition-opacity"
+      >
+        {loading ? 'Checking...' : 'Continue'}
+      </button>
+    </form>
+  )
+}
+
+export default function LoginPage() {
+  return (
     <div className="min-h-screen flex items-center justify-center px-6 bg-background">
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
@@ -42,29 +67,9 @@ export default function LoginPage() {
           <h1 className="text-[22px] font-bold tracking-tight">CompTIA Study</h1>
           <p className="text-[14px] text-[var(--apple-label-secondary)] mt-1">Enter your password to continue</p>
         </div>
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            autoFocus
-            className="w-full px-4 py-3 rounded-[12px] bg-[var(--apple-fill)] border border-[var(--apple-separator)] text-[15px] outline-none focus:border-[var(--apple-blue)] transition-colors"
-          />
-
-          {error && (
-            <p className="text-[13px] text-red-500 text-center">Incorrect password</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading || !password}
-            className="w-full py-3 rounded-[12px] bg-[var(--apple-blue)] text-white text-[15px] font-semibold disabled:opacity-50 transition-opacity"
-          >
-            {loading ? 'Checking...' : 'Continue'}
-          </button>
-        </form>
+        <Suspense>
+          <LoginForm />
+        </Suspense>
       </div>
     </div>
   )
