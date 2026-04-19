@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState, useCallback } from 'react'
 import { Terminal, Wifi, Shield, Monitor, Cpu, Smartphone, Clock, ChevronRight, FlaskConical, Sparkles, Loader2, Play } from 'lucide-react'
-import { PBQ_SCENARIOS, type PBQCategory, type PBQScenario } from '@/data/pbq-scenarios'
+import { PBQ_SCENARIOS, type PBQCategory, type PBQScenario, getStepType } from '@/data/pbq-scenarios'
 import { ScenarioPlayer } from '@/components/labs/scenario-player'
 import { cn } from '@/lib/utils'
 
@@ -308,6 +308,31 @@ export default function LabsPage() {
                   <div className="text-[11px] text-[var(--apple-label-tertiary)]">
                     {scenario.steps.length} steps
                   </div>
+                  {/* Step type badges */}
+                  {(() => {
+                    const types = [...new Set(scenario.steps.map((s) => getStepType(s)))]
+                    const TYPE_COLORS: Record<string, string> = {
+                      drag_match: 'var(--apple-purple)',
+                      drag_order: 'var(--apple-indigo)',
+                      terminal:   'var(--apple-green)',
+                    }
+                    const TYPE_LABELS: Record<string, string> = {
+                      drag_match: 'Drag',
+                      drag_order: 'Order',
+                      terminal:   'Terminal',
+                    }
+                    return types
+                      .filter((t) => t !== 'multiple_choice')
+                      .map((t) => (
+                        <span
+                          key={t}
+                          className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                          style={{ backgroundColor: `${TYPE_COLORS[t]}18`, color: TYPE_COLORS[t] }}
+                        >
+                          {TYPE_LABELS[t]}
+                        </span>
+                      ))
+                  })()}
                   {scenario.objectives.length > 0 && (
                     <div className="text-[10px] text-[var(--apple-label-tertiary)] font-mono">
                       Obj {scenario.objectives.join(', ')}

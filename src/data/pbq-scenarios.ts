@@ -1,5 +1,7 @@
 export type PBQCategory = 'networking' | 'security' | 'os' | 'hardware' | 'mobile'
 
+// ── Shared types ────────────────────────────────────────────────────────────
+
 export interface PBQChoice {
   id: string
   text: string
@@ -7,16 +9,97 @@ export interface PBQChoice {
   feedback: string
 }
 
-export interface PBQStep {
+interface ToolOutput {
+  label: string
+  content: string
+}
+
+// ── Step type: multiple_choice (default / legacy) ───────────────────────────
+
+export interface PBQStepMultipleChoice {
+  type?: 'multiple_choice'
   id: string
   prompt: string
-  /** Optional simulated tool output shown before choices */
-  toolOutput?: {
-    label: string   // e.g. "ipconfig /all output"
-    content: string // pre-formatted text
-  }
+  toolOutput?: ToolOutput
   choices: PBQChoice[]
   hint?: string
+}
+
+// ── Step type: drag_match ───────────────────────────────────────────────────
+// Drag items on the left to matching targets on the right.
+
+export interface DragMatchItem {
+  id: string
+  label: string
+}
+
+export interface DragMatchTarget {
+  id: string
+  label: string
+  correctItemId: string
+}
+
+export interface PBQStepDragMatch {
+  type: 'drag_match'
+  id: string
+  prompt: string
+  toolOutput?: ToolOutput
+  items: DragMatchItem[]
+  targets: DragMatchTarget[]
+  feedback: { correct: string; incorrect: string }
+  hint?: string
+}
+
+// ── Step type: drag_order ───────────────────────────────────────────────────
+// Sort items into the correct sequence.
+
+export interface DragOrderItem {
+  id: string
+  label: string
+}
+
+export interface PBQStepDragOrder {
+  type: 'drag_order'
+  id: string
+  prompt: string
+  toolOutput?: ToolOutput
+  items: DragOrderItem[]
+  correctOrder: string[]   // item IDs in correct sequence
+  feedback: { correct: string; incorrect: string }
+  hint?: string
+}
+
+// ── Step type: terminal ─────────────────────────────────────────────────────
+// Type commands and see realistic output; submit the right command to proceed.
+
+export interface TerminalCommand {
+  command: string
+  aliases?: string[]
+  output: string
+  isCorrect: boolean
+  feedback: string
+}
+
+export interface PBQStepTerminal {
+  type: 'terminal'
+  id: string
+  prompt: string
+  toolOutput?: ToolOutput    // initial context shown above the terminal
+  commands: TerminalCommand[]
+  defaultOutput: string      // shown for unrecognized commands
+  hint?: string
+}
+
+// ── Union ───────────────────────────────────────────────────────────────────
+
+export type PBQStep =
+  | PBQStepMultipleChoice
+  | PBQStepDragMatch
+  | PBQStepDragOrder
+  | PBQStepTerminal
+
+export function getStepType(step: PBQStep): 'multiple_choice' | 'drag_match' | 'drag_order' | 'terminal' {
+  return step.type ?? 'multiple_choice'
 }
 
 export interface PBQScenario {
@@ -674,6 +757,333 @@ Network:  <1%  (normal)`,
           { id: 'd', text: 'Change the WPS PIN to something complex', isCorrect: false, feedback: 'The vulnerability is in the WPS protocol itself (the 8-digit PIN is checked in two halves of 4 digits each, reducing combinations from 100M to ~11,000). Changing the PIN does not fix the protocol flaw.' },
         ],
       },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // INTERACTIVE: DRAG & DROP MATCH — Ports to Protocols
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    id: 'net-ports-drag',
+    title: 'Match Protocols to Port Numbers',
+    category: 'networking',
+    difficulty: 1,
+    estimatedMinutes: 5,
+    objectives: ['2.1'],
+    examCode: '220-1201',
+    summary: 'Drag each protocol name to its correct well-known port number — a classic CompTIA exam PBQ.',
+    context: `Port numbers are fundamental to networking. The CompTIA A+ exam tests your ability to match protocols to their well-known ports without looking them up. Drag each protocol to its correct port.`,
+    steps: [
+      {
+        type: 'drag_match',
+        id: 's1',
+        prompt: 'Match each protocol to its well-known port number.',
+        items: [
+          { id: 'http',   label: 'HTTP' },
+          { id: 'https',  label: 'HTTPS' },
+          { id: 'ssh',    label: 'SSH' },
+          { id: 'dns',    label: 'DNS' },
+          { id: 'smtp',   label: 'SMTP' },
+          { id: 'rdp',    label: 'RDP' },
+        ],
+        targets: [
+          { id: 'p80',   label: 'Port 80',   correctItemId: 'http' },
+          { id: 'p443',  label: 'Port 443',  correctItemId: 'https' },
+          { id: 'p22',   label: 'Port 22',   correctItemId: 'ssh' },
+          { id: 'p53',   label: 'Port 53',   correctItemId: 'dns' },
+          { id: 'p25',   label: 'Port 25',   correctItemId: 'smtp' },
+          { id: 'p3389', label: 'Port 3389', correctItemId: 'rdp' },
+        ],
+        feedback: {
+          correct: 'Perfect! Knowing these ports cold is essential for the A+ exam and real-world troubleshooting. HTTP=80, HTTPS=443, SSH=22, DNS=53, SMTP=25, RDP=3389.',
+          incorrect: 'Some ports are wrong. Remember: HTTP=80, HTTPS=443 (HTTP + Security), SSH=22, DNS=53, SMTP=25, RDP=3389 (Remote Desktop Protocol).',
+        },
+        hint: 'HTTPS is just HTTP with SSL/TLS added — it uses the next "round" port above 80. SSH replaced Telnet on port 22 as the secure alternative.',
+      } as PBQStepDragMatch,
+      {
+        type: 'drag_match',
+        id: 's2',
+        prompt: 'Now match these additional protocols to their ports.',
+        items: [
+          { id: 'ftp',    label: 'FTP' },
+          { id: 'ftps',   label: 'FTPS' },
+          { id: 'sftp',   label: 'SFTP' },
+          { id: 'telnet', label: 'Telnet' },
+          { id: 'pop3',   label: 'POP3' },
+          { id: 'imap',   label: 'IMAP' },
+        ],
+        targets: [
+          { id: 'p21',  label: 'Port 21',  correctItemId: 'ftp' },
+          { id: 'p990', label: 'Port 990', correctItemId: 'ftps' },
+          { id: 'p22b', label: 'Port 22',  correctItemId: 'sftp' },
+          { id: 'p23',  label: 'Port 23',  correctItemId: 'telnet' },
+          { id: 'p110', label: 'Port 110', correctItemId: 'pop3' },
+          { id: 'p143', label: 'Port 143', correctItemId: 'imap' },
+        ],
+        feedback: {
+          correct: 'Excellent! FTP=21 (data on 20), FTPS=990, SFTP=22 (runs over SSH), Telnet=23, POP3=110, IMAP=143. SFTP is not the same as FTPS — SFTP is FTP over SSH.',
+          incorrect: 'Key trick: SFTP runs over SSH so it shares port 22. FTPS is FTP with SSL and uses port 990. FTP itself uses port 21 (control) and 20 (data).',
+        },
+        hint: 'SFTP ≠ FTPS. SFTP = FTP over SSH (port 22). FTPS = FTP + SSL/TLS (port 990).',
+      } as PBQStepDragMatch,
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // INTERACTIVE: DRAG & DROP ORDER — Troubleshooting Methodology
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    id: 'os-troubleshooting-order',
+    title: 'Order the Troubleshooting Steps',
+    category: 'os',
+    difficulty: 1,
+    estimatedMinutes: 4,
+    objectives: ['5.1'],
+    examCode: 'both',
+    summary: 'Drag CompTIA\'s 6-step troubleshooting methodology into the correct order — tested on both A+ exams.',
+    context: `CompTIA defines a specific 6-step troubleshooting methodology that appears on both the Core 1 and Core 2 exams. You must know the exact order. Rearrange the steps into the correct sequence.`,
+    steps: [
+      {
+        type: 'drag_order',
+        id: 's1',
+        prompt: 'Place CompTIA\'s 6-step troubleshooting methodology in the correct order (1 = first, 6 = last).',
+        items: [
+          { id: 'establish',   label: 'Establish a theory of probable cause' },
+          { id: 'identify',    label: 'Identify the problem' },
+          { id: 'verify',      label: 'Verify full system functionality and implement preventive measures' },
+          { id: 'test',        label: 'Test the theory to determine the cause' },
+          { id: 'plan',        label: 'Establish a plan of action to resolve the problem and implement the solution' },
+          { id: 'document',    label: 'Document findings, actions, and outcomes' },
+        ],
+        correctOrder: ['identify', 'establish', 'test', 'plan', 'verify', 'document'],
+        feedback: {
+          correct: 'Correct order! 1) Identify the problem → 2) Establish a theory → 3) Test the theory → 4) Plan & implement solution → 5) Verify full functionality → 6) Document everything. This is memorized exactly as-is for the exam.',
+          incorrect: 'Not quite. The correct order: 1) Identify → 2) Theory → 3) Test → 4) Plan & Implement → 5) Verify → 6) Document. Note that "Document" is always last, and "Identify" is always first.',
+        },
+        hint: 'Remember: you must IDENTIFY before you THEORIZE, TEST before you IMPLEMENT, and DOCUMENT last.',
+      } as PBQStepDragOrder,
+      {
+        type: 'drag_order',
+        id: 's2',
+        prompt: 'A user reports their laptop won\'t connect to Wi-Fi. Order these specific actions in the correct troubleshooting sequence.',
+        items: [
+          { id: 'reboot',   label: 'Reboot the laptop to rule out a temporary glitch' },
+          { id: 'ask',      label: 'Ask the user: "When did it stop working? What changed?"' },
+          { id: 'doc2',     label: 'Document: DHCP lease failure resolved by router restart' },
+          { id: 'ipconfig', label: 'Run ipconfig to check IP assignment' },
+          { id: 'router',   label: 'Restart the router after confirming DHCP server is unresponsive' },
+          { id: 'confirm',  label: 'Confirm with user that Wi-Fi and internet are now working' },
+        ],
+        correctOrder: ['ask', 'ipconfig', 'reboot', 'router', 'confirm', 'doc2'],
+        feedback: {
+          correct: 'Correct! Gather info first (ask), diagnose (ipconfig), test theory (reboot), implement fix (restart router), verify (confirm with user), then document. This is the 6-step methodology applied to a real scenario.',
+          incorrect: 'Remember the methodology: gather information FIRST (ask the user), then diagnose, then try fixes, verify with the user, and document LAST.',
+        },
+        hint: 'Documentation is ALWAYS last. Gathering information (asking the user) is ALWAYS first.',
+      } as PBQStepDragOrder,
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // INTERACTIVE: TERMINAL — Network Diagnostic Commands
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    id: 'net-terminal-commands',
+    title: 'Network Diagnostic Terminal',
+    category: 'networking',
+    difficulty: 2,
+    estimatedMinutes: 10,
+    objectives: ['5.5', '2.1'],
+    examCode: '220-1201',
+    summary: 'Type the actual commands to diagnose a network problem — tests command recall, not just recognition.',
+    context: `A user calls: "I can ping my router (192.168.1.1) but can't reach any websites. DNS might be the issue." You have remote terminal access. Work through the diagnosis by typing the appropriate commands.`,
+    steps: [
+      {
+        type: 'terminal',
+        id: 's1',
+        prompt: 'First, verify the current IP configuration. Type the command to display full IP configuration details.',
+        toolOutput: {
+          label: 'Terminal — Windows 10',
+          content: `Microsoft Windows [Version 10.0.19045]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\\Users\\user>`,
+        },
+        commands: [
+          {
+            command: 'ipconfig /all',
+            aliases: ['ipconfig/all', 'IPCONFIG /ALL', 'IPCONFIG/ALL'],
+            isCorrect: true,
+            feedback: 'Correct! `ipconfig /all` shows full details including DNS server addresses, DHCP server, MAC address, and lease information — everything you need to diagnose IP and DNS issues.',
+            output: `Windows IP Configuration
+
+   Host Name . . . . . . . . . . . . : WORKSTATION-01
+   DNS Suffix Search List. . . . . . : home
+
+Wireless LAN adapter Wi-Fi:
+
+   Connection-specific DNS Suffix  . : home
+   Description . . . . . . . . . . . : Intel Wireless-AC 9560
+   Physical Address. . . . . . . . . : A4-C3-F0-85-22-11
+   DHCP Enabled. . . . . . . . . . . : Yes
+   Autoconfiguration Enabled . . . . : Yes
+   IPv4 Address. . . . . . . . . . . : 192.168.1.47
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : 192.168.1.1
+   DHCP Server . . . . . . . . . . . : 192.168.1.1
+   DNS Servers . . . . . . . . . . . : 192.168.1.1
+   Lease Obtained. . . . . . . . . . : Saturday, April 19, 2026 9:00 AM
+   Lease Expires . . . . . . . . . . : Sunday, April 20, 2026 9:00 AM`,
+          },
+          {
+            command: 'ipconfig',
+            aliases: ['IPCONFIG'],
+            isCorrect: false,
+            feedback: '`ipconfig` (without /all) shows basic IP info but omits DNS server addresses — which is exactly what you need to diagnose a DNS problem. Use `ipconfig /all` for full details.',
+            output: `Windows IP Configuration
+
+Wireless LAN adapter Wi-Fi:
+
+   Connection-specific DNS Suffix  . : home
+   IPv4 Address. . . . . . . . . . . : 192.168.1.47
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : 192.168.1.1`,
+          },
+        ],
+        defaultOutput: `'{{cmd}}' is not recognized as an internal or external command,
+operable program or batch file.`,
+        hint: 'The /all flag shows DNS server addresses and DHCP details — essential for diagnosing DNS problems.',
+      } as PBQStepTerminal,
+      {
+        type: 'terminal',
+        id: 's2',
+        prompt: 'The DNS server is 192.168.1.1 (the router). Test whether DNS resolution is actually working by looking up a domain name.',
+        commands: [
+          {
+            command: 'nslookup google.com',
+            aliases: ['nslookup google.com 192.168.1.1', 'NSLOOKUP GOOGLE.COM', 'nslookup www.google.com'],
+            isCorrect: true,
+            feedback: 'Correct! `nslookup` queries DNS directly. If it times out or returns a server failure, DNS is the problem. If it resolves successfully but the browser fails, the issue is elsewhere.',
+            output: `Server:  router.home
+Address:  192.168.1.1
+
+*** router.home can't find google.com: Server failed`,
+          },
+          {
+            command: 'ping google.com',
+            aliases: ['ping www.google.com', 'PING GOOGLE.COM'],
+            isCorrect: false,
+            feedback: '`ping google.com` would also reveal DNS failure (can\'t resolve hostname), but `nslookup` is the purpose-built DNS diagnostic tool. It gives more detail — which DNS server responded, the exact error type, and lets you query alternate DNS servers. Use `nslookup` when diagnosing DNS specifically.',
+            output: `Ping request could not find host google.com.
+Please check the name and try again.`,
+          },
+          {
+            command: 'ping 8.8.8.8',
+            aliases: ['ping 1.1.1.1', 'ping 8.8.4.4'],
+            isCorrect: false,
+            feedback: 'Pinging a public IP confirms internet connectivity but doesn\'t test DNS resolution. Since you already know the user can ping the router, the question is whether DNS is working — `nslookup` answers that directly.',
+            output: `Pinging 8.8.8.8 with 32 bytes of data:
+Reply from 8.8.8.8: bytes=32 time=14ms TTL=116
+Reply from 8.8.8.8: bytes=32 time=13ms TTL=116
+Reply from 8.8.8.8: bytes=32 time=15ms TTL=116
+Reply from 8.8.8.8: bytes=32 time=14ms TTL=116
+
+Ping statistics for 8.8.8.8:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)`,
+          },
+        ],
+        defaultOutput: `'{{cmd}}' is not recognized as an internal or external command,
+operable program or batch file.`,
+        hint: 'nslookup is the DNS-specific diagnostic tool. It queries a DNS server directly and shows whether resolution succeeds or fails.',
+      } as PBQStepTerminal,
+      {
+        type: 'terminal',
+        id: 's3',
+        prompt: 'DNS lookup is failing via the router. The router\'s DNS may be down. Test whether DNS works using Google\'s public DNS server (8.8.8.8) directly.',
+        commands: [
+          {
+            command: 'nslookup google.com 8.8.8.8',
+            aliases: ['nslookup google.com 8.8.8.8', 'NSLOOKUP GOOGLE.COM 8.8.8.8'],
+            isCorrect: true,
+            feedback: 'Correct! By appending the DNS server IP, you bypass the router\'s DNS and query Google\'s DNS directly. If this succeeds, the router\'s DNS forwarding is broken — fix: configure the network adapter to use 8.8.8.8 as its DNS server.',
+            output: `Server:  dns.google
+Address:  8.8.8.8
+
+Non-authoritative answer:
+Name:    google.com
+Addresses:  142.250.80.46
+          2607:f8b0:4004:c1b::71`,
+          },
+          {
+            command: 'nslookup google.com 1.1.1.1',
+            aliases: ['NSLOOKUP GOOGLE.COM 1.1.1.1'],
+            isCorrect: true,
+            feedback: 'Also correct! Cloudflare\'s DNS (1.1.1.1) is another reliable public DNS server. Querying it directly with nslookup confirms whether the router\'s DNS forwarding is the problem.',
+            output: `Server:  one.one.one.one
+Address:  1.1.1.1
+
+Non-authoritative answer:
+Name:    google.com
+Address:  142.250.80.46`,
+          },
+          {
+            command: 'nslookup google.com',
+            aliases: ['NSLOOKUP GOOGLE.COM'],
+            isCorrect: false,
+            feedback: 'Without specifying a DNS server, nslookup defaults to 192.168.1.1 (the router) — which you already know is failing. You need to test an alternate DNS server (like 8.8.8.8) to determine if the problem is the router\'s DNS specifically.',
+            output: `Server:  router.home
+Address:  192.168.1.1
+
+*** router.home can't find google.com: Server failed`,
+          },
+        ],
+        defaultOutput: `'{{cmd}}' is not recognized as an internal or external command,
+operable program or batch file.`,
+        hint: 'nslookup accepts an optional second argument: the DNS server to query. `nslookup google.com 8.8.8.8` bypasses the router.',
+      } as PBQStepTerminal,
+      {
+        type: 'terminal',
+        id: 's4',
+        prompt: 'Google DNS resolves correctly. The router\'s DNS forwarding is broken. Set the DNS server on the network adapter to use 8.8.8.8 as a workaround. Type the netsh command to set the DNS server.',
+        commands: [
+          {
+            command: 'netsh interface ip set dns "Wi-Fi" static 8.8.8.8',
+            aliases: [
+              'netsh interface ip set dns "wi-fi" static 8.8.8.8',
+              'netsh interface ip set dns Wi-Fi static 8.8.8.8',
+              'netsh interface ip set dnsservers "Wi-Fi" static 8.8.8.8',
+            ],
+            isCorrect: true,
+            feedback: 'Correct! `netsh interface ip set dns` sets a static DNS server on a specific adapter. This is the command-line equivalent of going to Network Adapter → IPv4 Properties → DNS. The user can now browse the internet.',
+            output: `C:\\Users\\user>netsh interface ip set dns "Wi-Fi" static 8.8.8.8
+
+C:\\Users\\user>`,
+          },
+          {
+            command: 'ipconfig /flushdns',
+            aliases: ['IPCONFIG /FLUSHDNS', 'ipconfig/flushdns'],
+            isCorrect: false,
+            feedback: '`ipconfig /flushdns` clears the local DNS cache — useful for stale records, but it doesn\'t change which DNS server is used. The problem is the DNS server itself (router) is failing, so you need to switch to a working server like 8.8.8.8.',
+            output: `Windows IP Configuration
+
+Successfully flushed the DNS Resolver Cache.`,
+          },
+          {
+            command: 'ipconfig /registerdns',
+            aliases: ['IPCONFIG /REGISTERDNS'],
+            isCorrect: false,
+            feedback: '`ipconfig /registerdns` re-registers the computer\'s DNS records with a domain DNS server — used in Active Directory environments, not relevant here. You need to change the DNS server to 8.8.8.8.',
+            output: `Windows IP Configuration
+
+Registration of the DNS resource records for all adapters of this computer
+has been initiated. Any errors will be reported in the Event Viewer in
+15 minutes.`,
+          },
+        ],
+        defaultOutput: `'{{cmd}}' is not recognized as an internal or external command,
+operable program or batch file.`,
+        hint: 'The netsh command for setting DNS: `netsh interface ip set dns "[adapter name]" static [DNS IP]`',
+      } as PBQStepTerminal,
     ],
   },
 ]
