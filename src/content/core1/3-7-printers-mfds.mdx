@@ -1,0 +1,136 @@
+# Deploying and Configuring Multifunction Devices and Printers
+
+Printers are a constant part of workplace IT support. The A+ exam tests your knowledge of printer types, how each technology works, and how to configure them for network use. MFDs (Multifunction Devices) combine printing, scanning, copying, and faxing in one unit.
+
+## Printer Types
+
+### Laser Printers
+
+Laser printers use electrostatic charges and heat to transfer toner (powdered plastic) onto paper. They're fast, economical for high-volume printing, and produce crisp text. Color laser printers use four toner cartridges (CMYK).
+
+#### The 7-Step Laser Printing Process
+
+Understanding each step and what component performs it is essential exam knowledge:
+
+*Mnemonic: "Please Come Eat Delicious Tasty Fried Chicken" — Processing, Charging, Exposing, Developing, Transferring, Fusing, Cleaning*
+
+| Step | What Happens | Component Responsible |
+| --- | --- | --- |
+| 1. Processing | Print job is converted to a bitmap page image (rasterization) stored in printer memory | Formatter board / RIP |
+| 2. Charging | A uniform negative charge (~−600V) is applied to the photosensitive drum surface | Primary Charge Roller (PCR) or corona wire |
+| 3. Exposing | Laser selectively discharges drum areas to ~−100V, creating the invisible latent image | Laser diode + rotating polygon mirror |
+| 4. Developing | Negatively charged toner adheres to the less-negative (laser-exposed) drum areas | Developer roller + toner cartridge |
+| 5. Transferring | Positively charged paper attracts toner from drum surface | Transfer roller or transfer corona wire |
+| 6. Fusing | Heat (~180°C) + pressure permanently melts and bonds toner into paper fibers | Fuser assembly (heat roller + pressure roller) |
+| 7. Cleaning | Rubber blade wipes residual toner from drum; waste toner collected | Cleaning blade + waste toner reservoir |
+
+<ConceptCallout type="tip">
+  The exam often asks which step causes specific problems. **Smearing** = fuser failure (step 6). **Ghosting** = drum not fully cleaned (step 7) or insufficient charging (step 2). **No image at all** = laser/exposing failure (step 3). **Toner won't stick** = transfer failure (step 5) or fuser failure (step 6).
+</ConceptCallout>
+
+**Toner vs ink:** Toner is dry powder (thermoplastic polymer + pigment). Unlike ink, it doesn't dry out in the cartridge and doesn't smear when wet once fused. Laser prints are generally more water-resistant than inkjet.
+
+**Corona wires vs PCR:** Older laser printers used fine corona wires to apply charges (high voltage, ozone-producing). Modern printers use PCRs (conductive rubber rollers) — more efficient, less ozone.
+
+### Inkjet Printers
+
+Inkjet printers spray microscopic liquid ink droplets through precision nozzles directly onto paper. They excel at photo-quality color output.
+
+**Two nozzle technologies:**
+
+**Thermal inkjet** (HP, Canon): a tiny heating element vaporizes a small amount of ink, creating a bubble that pushes a droplet out. Simple, low-cost, but the heating element degrades over time.
+
+**Piezoelectric inkjet** (Epson): an electric charge deforms a piezoelectric crystal, physically squeezing ink out. More precise droplet control, wider ink compatibility, longer printhead lifespan.
+
+**Ink types:**
+- **Dye-based ink:** Vivid, saturated colors. Less water-resistant — prints can smear when wet. Less UV-resistant, fades over time. Used in budget photo printers.
+- **Pigment-based ink:** More durable, water-resistant, UV-resistant. Archival quality. Slightly less vibrant but better for documents and professional photos.
+
+### Thermal Printers
+
+Thermal printers use heat rather than ink or toner. No ink cartridges means lower operating costs, but output quality has limitations.
+
+**Direct thermal:** Print head applies heat directly to special heat-sensitive paper coated with a leuco dye (a color-forming chemical). **No ribbon needed.** Prints fade with heat, UV light, or time. Used for: receipts (POS terminals), shipping labels, event tickets.
+
+**Thermal transfer:** A thermal print head heats a wax or resin-based ink ribbon, transferring ink onto paper or label stock. More durable output. Used for: shipping labels (FedEx/UPS), product labels, medical wristbands, barcode labels.
+
+### Impact Printers (Dot Matrix)
+
+Impact printers use a print head with small pins that strike an ink ribbon against paper, creating dots that form characters and graphics.
+
+**Why they still exist:** Impact printers can print on multi-part forms (NCR paper, carbon copies) because the physical impact presses through multiple layers simultaneously. This is critical for invoices, work orders, and receipts requiring simultaneous copies.
+
+**Characteristics:** Very noisy, slow, limited resolution, but extremely durable in harsh environments. Still found in manufacturing, retail POS (for receipts requiring duplicates), and automotive/healthcare billing.
+
+**Daisy wheel printers** are an older impact type using a wheel of letter-shaped spokes. Letter-quality text output but no graphics capability. Obsolete.
+
+### 3D Printers
+
+3D printers create physical three-dimensional objects by depositing or curing material layer by layer.
+
+**FDM (Fused Deposition Modeling):** The most common consumer type. A heated extruder nozzle melts thermoplastic filament (PLA, ABS, PETG, TPU) and deposits it layer by layer on a build plate. Slow but inexpensive. Used for prototypes, custom parts, hobbyist projects.
+
+**SLA (Stereolithography):** A UV laser or projected light source cures liquid photopolymer resin layer by layer. Very high resolution (down to 0.025mm layer height), smooth surface finish. Used for dental models, jewelry masters, detailed figurines.
+
+**SLS (Selective Laser Sintering):** A laser fuses powder (nylon, metal, ceramics) into solid layers. Used in industrial manufacturing.
+
+<ConceptCallout type="info">
+  For the A+ exam, you need to know **FDM** (melts filament, layer by layer) as the primary consumer 3D printing technology. Know that 3D printers require a design file (STL format from CAD software) and slicing software to generate print instructions (G-code).
+</ConceptCallout>
+
+## Printer Setup and Configuration
+
+### Driver Installation
+
+Every printer requires a **printer driver** — software that translates documents into the printer's native format (PCL, PostScript, or vendor proprietary). Obtain drivers from:
+1. Windows Update (basic class drivers)
+2. Manufacturer's website (recommended — full featured)
+3. Driver CD/USB included with printer (may be outdated)
+
+**PCL (Printer Control Language):** HP standard. Printer-dependent rendering. Fast for office documents, widely supported.
+
+**PostScript (PS):** Adobe standard. Device-independent rendering. Consistent output on any PS printer. Better for complex graphics, accurate fonts. Required for professional printing workflows.
+
+### Wireless Printer Setup
+
+1. Connect printer to Wi-Fi (WPS button press or navigate printer's touchscreen)
+2. Confirm printer and computer are on the same network
+3. Install driver on computer
+4. Add printer via Windows Settings → Bluetooth & devices → Printers & scanners
+
+### IP-Based Printing (Wired Network)
+
+1. Assign a static IP to the printer (via printer config menu or DHCP reservation)
+2. Install driver, add printer using TCP/IP port
+3. Enter printer IP address as port hostname
+
+### Sharing via Print Server
+
+**Dedicated hardware print server:** A network-attached device with USB/parallel ports for the printer. Legacy but still found in small offices.
+
+**Software-based sharing:** A PC shares its locally-connected printer via Windows → Printer Properties → Sharing. Other computers add it as a "network printer." The host PC must be powered on for other users to print.
+
+**Network printer:** Modern printers have integrated NIC and print server — connect directly to the switch and configure IP. Preferred method.
+
+## Duplexing
+
+**Duplex printing** = printing on both sides of a page. Reduces paper consumption by 50%.
+
+**Automatic duplex:** The printer mechanically flips the page after printing one side. Requires a duplex unit (built-in or optional accessory). Most business laser printers include automatic duplexing.
+
+**Manual duplex:** The printer prompts you to remove and reinsert the paper after printing side one. Slower, requires user attention, available on nearly all printers.
+
+## Common Print Settings
+
+| Setting | Purpose | Common Options |
+| --- | --- | --- |
+| Paper size | Match paper in tray | Letter, A4, Legal, Custom |
+| Print quality | Resolution / speed trade-off | Draft (fast), Normal, Best |
+| Color / B&W | Saves color ink/toner | Color, Grayscale, Black only |
+| Duplex | Double-sided printing | None, Long-edge, Short-edge flip |
+| Tray selection | Paper source | Auto, Tray 1, Manual Feed (bypass) |
+| Media type | Optimizes fusing/ink for paper type | Plain, Cardstock, Envelope, Labels, Photo |
+
+<ConceptCallout type="warning">
+  Printing labels on paper-optimized trays, or printing envelopes at full heat can cause jams, adhesive melting inside the printer (for labels), or crushing (for envelopes in straight-path printers). Always use the correct tray and media type setting.
+</ConceptCallout>

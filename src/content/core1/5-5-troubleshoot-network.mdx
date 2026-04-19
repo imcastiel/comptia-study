@@ -1,0 +1,370 @@
+# Troubleshooting Network Issues
+
+## Systematic Network Troubleshooting: OSI Model Approach
+
+The most effective network troubleshooting strategy uses the **OSI model bottom-up**: start at the physical layer and work upward. A problem at a lower layer always affects all layers above it.
+
+| OSI Layer | What to Check | Common Tools |
+|---|---|---|
+| 1 — Physical | Cable, NIC, port, link LEDs | Visual inspection, cable tester |
+| 2 — Data Link | MAC address, switch port, VLAN | `arp -a`, switch logs |
+| 3 — Network | IP address, subnet, gateway, routing | `ipconfig`, `ping`, `tracert` |
+| 4 — Transport | Port availability, firewall rules | `netstat`, `telnet`, `Test-NetConnection` |
+| 5–7 — Application | DNS, application config, authentication | `nslookup`, browser, application logs |
+
+<ConceptCallout type="tip">
+Always start at Layer 1 (Physical). No amount of DNS configuration fixes a bad cable. The most common cause of "no network" is a disconnected or failed cable, a disabled network adapter, or a switch port in the wrong VLAN.
+</ConceptCallout>
+
+---
+
+## No Network Connectivity — Full Checklist
+
+Work through this checklist in order:
+
+### Step 1: Physical Layer Check
+
+- **Wired:** Is the cable plugged in at both ends? Is the link LED lit on the NIC and the switch port?
+- **Wireless:** Is Wi-Fi enabled? (Check for hardware toggle, Fn key, or software setting)
+- **Link LED colors:** Green typically means link; blinking means traffic; amber on some switches means 100 Mbps (vs gigabit green)
+
+### Step 2: IP Address Check
+
+Run `ipconfig` (Windows) or `ip addr` / `ifconfig` (Linux/macOS):
+
+```
+ipconfig
+```
+
+What to look for:
+- **Valid IP address** (e.g., 192.168.1.100): DHCP worked
+- **APIPA address (169.254.x.x):** DHCP failed — see APIPA section below
+- **No IP address at all:** Adapter may be disabled or driver issue
+
+### Step 3: Ping Loopback
+
+```
+ping 127.0.0.1
+```
+
+Tests the TCP/IP stack on the local machine. If this fails, TCP/IP is corrupted or disabled. Fix: `netsh int ip reset` or `netsh winsock reset` in administrator command prompt.
+
+### Step 4: Ping Your Own IP Address
+
+```
+ping 192.168.1.100
+```
+
+Confirms the NIC and adapter driver are functioning and the IP is assigned.
+
+### Step 5: Ping the Default Gateway
+
+```
+ping 192.168.1.1
+```
+
+Confirms Layer 3 connectivity to the router. If this fails:
+- Cable problem or switch problem (if wired)
+- Wrong subnet mask (device thinks gateway is on a different network)
+- Router down or misconfigured
+
+### Step 6: Ping a Known Internet IP Address
+
+```
+ping 8.8.8.8
+```
+
+(Google's public DNS server — bypasses DNS to test raw internet connectivity)
+
+- If this succeeds but websites don't load → DNS failure (see DNS section)
+- If this fails but the gateway responds → routing problem at the router/ISP level; check internet modem/router
+
+### Step 7: Ping by Hostname
+
+```
+ping google.com
+```
+
+If this fails but `ping 8.8.8.8` succeeds → DNS is not resolving hostnames (see DNS section)
+
+### Step 8: nslookup
+
+```
+nslookup google.com
+```
+
+Tests DNS resolution directly. Shows which DNS server is responding and whether the name resolves.
+
+---
+
+## APIPA — Automatic Private IP Addressing
+
+When a Windows device cannot obtain an IP address from a DHCP server, it automatically assigns itself an **APIPA address** in the range **169.254.0.0/16** (169.254.0.1 – 169.254.255.254).
+
+<ConceptCallout type="warning">
+An APIPA address (169.254.x.x) means the device FAILED to get an IP from DHCP. The device has no gateway, no DNS server, and cannot communicate with the internet or other subnets. It can only communicate with other devices that also have APIPA addresses on the same physical segment.
+</ConceptCallout>
+
+### APIPA Troubleshooting
+
+When a device has a 169.254.x.x address:
+
+1. **Check physical connection** — most common cause on wired networks
+2. **Check DHCP server** — is the DHCP server running? (On Windows Server: verify DHCP service running; on home network: restart the router)
+3. **Check DHCP scope** — has the DHCP pool been exhausted? (All addresses leased out) — increase pool size or shorten lease time
+4. **Check VLAN configuration** — is the switch port in the correct VLAN? Wrong VLAN = DHCP requests never reach the server
+5. **Test with static IP** — manually configure an IP, subnet mask, and gateway. If network works with a static IP but not DHCP, the DHCP server is the problem.
+6. **Release/renew DHCP lease:**
+
+```
+ipconfig /release
+ipconfig /renew
+```
+
+---
+
+## Limited Connectivity
+
+"Limited connectivity" means the device obtained an IP address (DHCP worked) but internet access is not available.
+
+### Diagnosing Limited Connectivity
+
+| Symptom | Likely Layer | Check |
+|---|---|---|
+| IP obtained, can ping gateway, can't ping 8.8.8.8 | Router/ISP | Check router WAN connection; call ISP |
+| IP obtained, can ping 8.8.8.8, can't load websites | DNS | Check DNS settings; flush DNS cache |
+| IP obtained, can't ping anything | Firewall blocking ICMP | Test with different protocols; check Windows Firewall |
+
+### Checking NAT
+
+On home networks, the router performs NAT (Network Address Translation) — translating private IPs to the router's public IP for internet communication. If NAT fails:
+- Internal devices can communicate with each other
+- No internet access from any device
+- Check router WAN connection and confirm it has a public IP from the ISP
+
+---
+
+## DNS Issues
+
+### DNS Troubleshooting
+
+**Test DNS resolution:**
+
+```
+nslookup google.com
+```
+
+Successful response shows the resolved IP address and which DNS server answered. Failed response shows "DNS request timed out" or "Non-existent domain."
+
+**Flush DNS cache:**
+
+```
+ipconfig /flushdns
+```
+
+Clears the local DNS resolver cache. Useful when a site's IP has changed but the old IP is cached.
+
+**Test with alternate DNS:**
+
+```
+nslookup google.com 8.8.8.8
+```
+
+Queries Google's DNS directly, bypassing the configured DNS server. If this works but the configured DNS doesn't, the configured DNS server is the problem.
+
+### Common DNS Problems
+
+| Problem | Symptom | Fix |
+|---|---|---|
+| DNS server down | All name resolution fails; ping by IP works | Change DNS to 8.8.8.8 or 1.1.1.1 temporarily |
+| Stale DNS cache | Old IP cached; site unreachable | `ipconfig /flushdns` |
+| Wrong DNS server configured | Internal hostnames don't resolve | Set DNS to internal DNS server IP |
+| Split-horizon DNS failure | VPN connected but internal names fail | Check VPN DNS push; set split DNS |
+| ISP DNS hijacking | Wrong IP returned for queries | Use 8.8.8.8 or 1.1.1.1; check for malware |
+
+### Configure DNS Server Addresses
+
+**Windows:**
+- Network adapter → Properties → IPv4 Properties → Use the following DNS server addresses
+- Preferred: 8.8.8.8 (Google) or 1.1.1.1 (Cloudflare)
+- Alternate: 8.8.4.4 (Google) or 1.0.0.1 (Cloudflare)
+
+**Command line (temporary):**
+
+```
+netsh interface ip set dns "Ethernet" static 8.8.8.8
+```
+
+---
+
+## Slow Network Performance
+
+### Duplex Mismatch
+
+A **duplex mismatch** occurs when one side of a network connection operates at **full duplex** and the other at **half duplex**.
+
+| Side A | Side B | Result |
+|---|---|---|
+| Full duplex | Full duplex | Normal operation |
+| Half duplex | Half duplex | Normal operation (slower) |
+| Full duplex | Half duplex | **MISMATCH — severe performance degradation** |
+
+**How duplex mismatch causes problems:**
+- Full duplex device sends and receives simultaneously
+- Half duplex device expects to send and receive in turns (CSMA/CD)
+- The half-duplex side sees transmissions while it's transmitting as **collisions**
+- High collision rate → frequent retransmissions → extremely slow throughput
+- Symptom: connection works but very slow; **late collisions** visible on switch port statistics
+
+**Diagnosing duplex mismatch:**
+- Check switch port statistics for late collisions (collisions after 512 bit-times = late collision)
+- `ethtool eth0` on Linux shows current duplex setting
+- Switch management interface shows port duplex setting
+
+**Fix:** Hardcode both sides to the same speed and duplex, or ensure auto-negotiation works correctly on both sides.
+
+<ConceptCallout type="warning">
+Never hardcode one side to a specific speed/duplex and leave the other on auto-negotiate. Auto-negotiation on one side will fail to detect the hardcoded settings and default to half duplex, creating a mismatch. Either hardcode **both** sides or leave **both** on auto-negotiate.
+</ConceptCallout>
+
+---
+
+## Wi-Fi Troubleshooting
+
+### Weak Signal
+
+| Cause | Fix |
+|---|---|
+| Distance from AP | Move closer or add a Wi-Fi extender/mesh node |
+| Physical obstructions (walls, floors) | Reposition AP; use 2.4 GHz (better penetration) |
+| Wrong frequency band | 2.4 GHz: longer range, slower; 5 GHz: shorter range, faster |
+| Too many devices on AP | Add another AP; upgrade to Wi-Fi 6 (better multi-client handling) |
+
+### Channel Interference
+
+Wi-Fi channels in the same frequency range overlap. Non-overlapping channels:
+- **2.4 GHz:** Channels 1, 6, and 11 are the only non-overlapping channels
+- **5 GHz:** Many non-overlapping channels (36, 40, 44, 48, 52, 56, etc.)
+
+Use a Wi-Fi analyzer app (WiFi Analyzer on Android, Wireless Diagnostics on macOS) to see which channels nearby APs are using and choose the least congested channel.
+
+### Authentication Failures
+
+| Error | Cause | Fix |
+|---|---|---|
+| Wrong password | Incorrect PSK | Verify password; case-sensitive |
+| "Unable to join the network" | Security type mismatch | Verify WPA2/WPA3; check AP config |
+| 802.1X authentication failure | Certificate expired, RADIUS server unreachable | Check cert validity; check RADIUS connectivity |
+| DHCP failure after connection | AP doesn't forward DHCP to correct VLAN | Check AP VLAN and DHCP server config |
+
+### 2.4 GHz vs 5 GHz Selection
+
+Most modern routers broadcast both bands with the same or different SSID names. The device should automatically select the best band, but sometimes manual selection is needed:
+- If device connects to 2.4 GHz but is close to the router: forget the 2.4 GHz network or rename SSIDs differently to control which band devices use
+- 5 GHz offers significantly less interference in dense Wi-Fi environments
+
+---
+
+## VLAN Mismatch
+
+A **VLAN (Virtual LAN)** mismatch occurs when a switch port is configured for the wrong VLAN. The device's traffic goes to the wrong logical network segment.
+
+**Symptoms:**
+- Device gets an IP address from the wrong subnet
+- Device can't reach expected resources even with a valid IP
+- Device gets an APIPA address (if the wrong VLAN has no DHCP server)
+
+**Example:**
+- Device should be on VLAN 10 (192.168.10.x)
+- Switch port accidentally configured for VLAN 20 (192.168.20.x)
+- Device receives a 192.168.20.x IP and can't reach the 192.168.10.x resources
+
+**Fix:** Check the switch port configuration; set the correct access VLAN.
+
+<ConceptCallout type="info">
+VLAN mismatches often happen after network changes or when a device is moved to a different switch port that happens to be in a different VLAN. A device suddenly getting an unexpected IP subnet after being moved is almost always a VLAN issue.
+</ConceptCallout>
+
+---
+
+## Firewall Blocking
+
+### Testing Firewall Rules
+
+**Test if a specific TCP port is open:**
+
+```
+telnet 192.168.1.10 80
+```
+
+If the connection succeeds (blank screen or application banner appears), the port is open and the service is reachable.
+
+```
+Test-NetConnection -ComputerName 192.168.1.10 -Port 80
+```
+
+PowerShell equivalent (more reliable than telnet in modern Windows).
+
+### Windows Firewall
+
+Windows Defender Firewall can block specific ports and applications:
+- **Allow an app:** Windows Defender Firewall → Allow an app or feature through → find app → enable
+- **Advanced rules:** Windows Defender Firewall with Advanced Security → Inbound/Outbound Rules
+- **Quick disable for testing:** `netsh advfirewall set allprofiles state off` (re-enable immediately after testing)
+
+### Network Firewall / ACL
+
+Network-level firewalls enforce Access Control Lists (ACLs) that block traffic by IP, port, or protocol:
+- Check firewall logs for drops on the relevant IP/port
+- Work with network administrator to create a permit rule for legitimate traffic
+- Confirm the test packet is actually reaching the firewall (tracert to see where it stops)
+
+---
+
+## Port Flapping and Intermittent Connectivity
+
+**Port flapping** occurs when a switch port repeatedly transitions between up and down states.
+
+### Symptoms
+
+- Intermittent connectivity that comes and goes
+- Device loses network connection briefly and reconnects
+- Switch logs show repeated "link up" and "link down" messages on the same port
+- Loss of in-progress connections (file transfers, video calls)
+
+### Causes and Fixes
+
+| Cause | Fix |
+|---|---|
+| Bad or damaged network cable | Replace cable; test with cable tester |
+| Loose cable connector | Reseat cable at both ends; check RJ-45 crimp quality |
+| Failing NIC | Test with a different NIC or USB Ethernet adapter |
+| Failing switch port | Move cable to a different switch port |
+| Duplex/speed negotiation issue | Hardcode speed and duplex on both ends |
+| PoE power budget exceeded | Too many PoE devices; upgrade PoE switch or reduce PoE load |
+
+<ConceptCallout type="tip">
+A cable tester can identify a bad cable, but even a cable that passes a basic tester can cause intermittent issues if one conductor is borderline. For critical connections, replace the cable even if the tester shows green. A flap that occurs when the cable is physically moved confirms a cable problem.
+</ConceptCallout>
+
+---
+
+## Key Network Troubleshooting Commands Reference
+
+| Command | Platform | Purpose |
+|---|---|---|
+| `ipconfig` | Windows | Show IP, subnet, gateway, DNS |
+| `ipconfig /all` | Windows | Show all adapter details including MAC |
+| `ipconfig /release` | Windows | Release DHCP lease |
+| `ipconfig /renew` | Windows | Request new DHCP lease |
+| `ipconfig /flushdns` | Windows | Clear DNS resolver cache |
+| `ping [IP/hostname]` | All | Test Layer 3 connectivity and name resolution |
+| `ping -t [IP]` | Windows | Continuous ping (Ctrl+C to stop) |
+| `tracert [IP/hostname]` | Windows | Trace route, show each hop |
+| `traceroute [IP]` | Linux/macOS | Same as tracert |
+| `nslookup [hostname]` | All | DNS query |
+| `netstat -an` | All | Show active connections and listening ports |
+| `arp -a` | All | Show ARP cache (IP-to-MAC mappings) |
+| `route print` | Windows | Show routing table |
+| `netsh winsock reset` | Windows | Reset TCP/IP stack |
+| `Test-NetConnection` | Windows PowerShell | Test TCP connectivity to specific port |

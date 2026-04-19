@@ -1,0 +1,202 @@
+# Storage Devices
+
+Storage holds data persistently — it survives power cycles. As a technician, you need to understand the full spectrum: from spinning hard drives to NVMe SSDs, RAID arrays, optical discs, and the technologies that make modern storage reliable and fast.
+
+## HDD vs SSD: The Fundamental Comparison
+
+<CompareCards
+  left={{
+    title: "HDD — Hard Disk Drive",
+    icon: "HardDrive",
+    color: "orange",
+    points: [
+      "Spinning magnetic platters with read/write heads",
+      "100–200 MB/s sequential — mechanical speed limit",
+      "5–15 ms random access (seek time for head movement)",
+      "Fragile when spinning — vulnerable to drops and vibration",
+      "Low cost: ~$0.02–0.03 per GB — ideal for bulk storage",
+      "Audible: clicking, spinning sounds"
+    ]
+  }}
+  right={{
+    title: "SSD — Solid State Drive",
+    icon: "Zap",
+    color: "blue",
+    points: [
+      "NAND flash memory chips — no moving parts whatsoever",
+      "SATA: 550 MB/s | NVMe: up to 7000+ MB/s",
+      "~0.05 ms random access — instant, no seek delay",
+      "Excellent shock resistance — survives drops",
+      "Higher cost: ~$0.07–0.15 per GB for NVMe",
+      "Silent — no mechanical components"
+    ]
+  }}
+  title="Storage Technology Comparison"
+/>
+
+<ConceptCallout type="why">
+  HDDs still dominate for bulk cold storage (surveillance footage, backup, NAS) because of their low cost per GB. SSDs dominate for OS drives and applications because their random access speed transforms the user experience — a system with an SSD boots in seconds where an HDD takes minutes.
+</ConceptCallout>
+
+<StorageSpeedChart />
+
+## The Speed Gap
+
+<StatCallout
+  value="100×"
+  label="Faster Random Access on SSD vs HDD"
+  sublabel="0.05 ms (SSD) vs 5–15 ms (HDD) — the biggest real-world performance difference"
+  color="blue"
+/>
+
+<StatCallout
+  value="7,000+"
+  unit="MB/s"
+  label="NVMe PCIe 4.0 Peak Speed"
+  sublabel="vs 550 MB/s SATA III limit — 12× faster peak throughput"
+  color="purple"
+/>
+
+## Hard Drive Specifications
+
+**RPM (Rotations Per Minute):** The speed at which platters spin.
+- **5400 RPM** — laptop drives. Quieter, lower heat, slower (~120 MB/s sequential)
+- **7200 RPM** — standard desktop drives. Faster (~160–200 MB/s)
+- **10,000 RPM** — high-performance (WD Raptor series). Rarely used now
+- **15,000 RPM** — enterprise SAS drives for servers. Fastest HDDs
+
+**Form factors:**
+- **3.5"** — desktop HDDs. Uses 4-pin Molex or SATA power + SATA data
+- **2.5"** — laptop HDDs and SSDs. Uses SATA data + SATA power (7+15 combined connector common in laptops)
+
+## SSD Technologies
+
+### NAND Flash Cell Types
+
+All SSDs store data in NAND flash cells. The type of cell determines the density, speed, and endurance trade-offs:
+
+*More bits per cell = denser storage, lower cost, but fewer write cycles before cell failure.*
+
+| Type | Bits/Cell | P/E Cycles | Speed | Cost | Best For |
+| --- | --- | --- | --- | --- | --- |
+| SLC (Single-Level) | 1 | ~100,000 | Fastest | Highest | Enterprise caching |
+| MLC (Multi-Level) | 2 | ~10,000 | Fast | High | Enterprise SSDs |
+| TLC (Triple-Level) | 3 | ~3,000 | Good | Moderate | Consumer SSDs (most common) |
+| QLC (Quad-Level) | 4 | ~1,000 | Slower | Lowest | High-capacity consumer drives |
+
+### NVMe vs SATA SSD
+
+Both are solid-state, but they use completely different interfaces:
+
+**SATA SSD:** Uses the AHCI protocol designed for spinning disks. Bottlenecked by SATA III at ~550 MB/s. Available in 2.5" form factor or M.2 (SATA variant).
+
+**NVMe SSD:** Uses the NVMe protocol designed for flash over PCIe. Much higher parallelism (up to 64,000 I/O queues vs AHCI's 1) and dramatically lower latency.
+
+| Interface | Protocol | Max Sequential Read | Random IOPS | Notes |
+| --- | --- | --- | --- | --- |
+| SATA III | AHCI | ~550 MB/s | ~100K IOPS | Bottlenecked by SATA spec |
+| NVMe PCIe 3.0 ×4 | NVMe | ~3500 MB/s | ~700K IOPS | Common in 2018–2022 systems |
+| NVMe PCIe 4.0 ×4 | NVMe | ~7000 MB/s | ~1M IOPS | Current mainstream high-end |
+| NVMe PCIe 5.0 ×4 | NVMe | ~14000 MB/s | ~2M IOPS | Latest, mostly enterprise/enthusiast |
+
+## M.2 Form Factor and Key Types
+
+M.2 is a compact module slot on the motherboard that can host SSDs (and Wi-Fi cards). It's 22mm wide and comes in different lengths: **2242, 2260, 2280** (width × length in mm). 2280 (22mm × 80mm) is the most common.
+
+The **key notch** determines what the slot/module supports:
+
+- **M-key** (single notch on right): supports NVMe/PCIe ×4 or SATA
+- **B-key** (single notch on left): supports PCIe ×2 NVMe or SATA
+- **B+M key** (two notches): SATA only, or PCIe ×2 (fits both M-key and B-key slots)
+
+<ConceptCallout type="warning">
+  An M.2 slot that physically accepts a drive might still not work if the slot only supports SATA and you install an NVMe drive (or vice versa). Always check the motherboard manual to confirm whether the M.2 slot supports NVMe, SATA, or both.
+</ConceptCallout>
+
+## SSD Health: TRIM and Wear Leveling
+
+### How TRIM Works
+
+NAND flash must **erase a block before writing to it**. Without TRIM, when you delete a file, the SSD doesn't immediately erase those cells — they contain stale data. When the drive needs to write to them later, it must read the old data, modify it, erase the entire block, then write the new data (*read-modify-write*). This slows write speeds.
+
+<ProcessSteps
+  steps={[
+    { title: "File Deleted by OS", description: "OS marks the file's disk space as free, but the NAND cells still contain the old data." },
+    { title: "TRIM Command Sent", description: "OS sends TRIM commands telling the SSD which blocks are now free and can be erased." },
+    { title: "Background Erase", description: "SSD erases the identified blocks during idle time, so they're ready for fresh writes." },
+    { title: "Fast Future Writes", description: "Next write goes directly to pre-erased blank cells — no read-modify-write penalty, maintaining peak performance." }
+  ]}
+  color="green"
+  title="The TRIM Process"
+/>
+
+### Wear Leveling
+
+Each NAND cell can only handle a finite number of Program/Erase (P/E) cycles before it fails. Without intervention, heavily-written cells (like the OS page file location) would fail while other cells remain pristine.
+
+**Wear leveling** spreads write operations evenly across all cells, extending overall SSD lifespan. Dynamic wear leveling redistributes actively written data. Static wear leveling also moves rarely-changed data to distribute wear more thoroughly.
+
+## S.M.A.R.T.
+
+**Self-Monitoring, Analysis and Reporting Technology** — built into all modern HDDs and SSDs. Tracks dozens of health indicators:
+- Reallocated sectors (HDD) / reallocated NAND blocks (SSD)
+- Temperature
+- Power-on hours
+- Read/write error rate
+- Pending sector count
+
+Tools like **CrystalDiskInfo** (Windows) or `smartctl` (Linux/macOS) read S.M.A.R.T. data. A drive showing warnings should be backed up immediately — S.M.A.R.T. warnings are a strong predictor of imminent failure. **S.M.A.R.T. doesn't prevent failure — it warns you before it happens.**
+
+## RAID Levels
+
+RAID (Redundant Array of Independent Disks) combines multiple drives for performance, redundancy, or both.
+
+<RAIDVisual level={0} />
+<RAIDVisual level={1} />
+<RAIDVisual level={5} />
+<RAIDVisual level={10} />
+
+*RAID is not a backup. A RAID 1 mirror doesn't protect against accidental deletion, ransomware, or file corruption.*
+
+| RAID Level | Min Drives | Redundancy | Usable Capacity | Performance | Use Case |
+| --- | --- | --- | --- | --- | --- |
+| RAID 0 | 2 | None — 1 failure = total loss | 100% (all drives) | Best read/write | Temp/scratch storage, max speed |
+| RAID 1 | 2 | Full mirror — 1 drive can fail | 50% | Read improved, write same | OS drive, small critical data |
+| RAID 5 | 3 | 1 drive failure tolerated | N-1 drives | Good read, slower write (parity calc) | File servers, workstations |
+| RAID 6 | 4 | 2 drives can fail | N-2 drives | Good read, slower write | Large arrays where rebuild time is long |
+| RAID 10 | 4 | Mirror sets — 1 per mirrored pair | 50% | Best read/write + redundancy | Databases, high-performance servers |
+
+<ConceptCallout type="tip">
+  The exam will test you on minimum drive counts: RAID 0 and 1 need **2**, RAID 5 needs **3**, RAID 6 needs **4**, RAID 10 needs **4**. Also know that RAID 5 distributes parity across all drives (not a dedicated parity drive like RAID 3).
+</ConceptCallout>
+
+## Optical Storage
+
+Optical drives use laser light to read (and write) data on reflective discs.
+
+| Format | Capacity | Common Use |
+| --- | --- | --- |
+| CD-ROM | 700 MB | Legacy software, audio CDs |
+| DVD-5 (SL) | 4.7 GB | Software distribution, movies |
+| DVD-9 (DL) | 8.5 GB | Dual-layer DVD movies |
+| BD-25 Blu-ray | 25 GB (SL) | HD video, software |
+| BD-50 Blu-ray | 50 GB (DL) | 4K movies, large backups |
+| BD-100 (BDXL) | 100 GB (TL) | Professional archiving |
+
+**R vs RW:** `-R` (DVD-R, BD-R) = write once, then read-only. `-RW` (DVD-RW, BD-RE) = rewritable, limited to ~1000 cycles.
+
+## Enterprise Storage: SAS
+
+**SAS (Serial Attached SCSI)** is the enterprise-grade evolution of SCSI, designed for servers:
+- Faster: SAS-3 = 12 Gbps per port
+- More reliable: dual-port capability for redundant I/O paths
+- Longer cable lengths
+- Drives often spin at 10,000–15,000 RPM
+
+SAS controllers can connect both SAS and SATA drives. SATA controllers **cannot** connect SAS drives. SAS HDDs and SSDs are more expensive but designed for 24/7 operation at high I/O loads.
+
+## Flash Storage (Thumb Drives, SD Cards)
+
+Flash-based portable storage appears in USB flash drives, SD cards, CompactFlash, and similar formats. All use NAND flash. Performance varies widely by quality — cheap flash drives use QLC NAND with minimal controller optimization, resulting in very slow write speeds on large transfers.
+
+**SD Card speed classes:** Class 10 (10 MB/s min), UHS-I (50–104 MB/s), UHS-II (156–312 MB/s), V30/V60/V90 (video recording speed ratings).

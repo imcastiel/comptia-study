@@ -1,0 +1,111 @@
+# RAM Characteristics
+
+RAM (Random Access Memory) is the working memory of the computer — every program and piece of data actively being used lives in RAM. Understanding its types, form factors, and specifications is essential for selecting, installing, and troubleshooting memory.
+
+## Why RAM Matters
+
+When you open an application, the OS loads it from storage (slow) into RAM (fast). The CPU fetches instructions and data from RAM, processes them, and writes results back. If RAM fills up, the OS begins *swapping* — moving inactive pages to disk, which is dramatically slower. The more RAM, the more the system can do without touching disk.
+
+<ConceptCallout type="why">
+  The speed difference between RAM and storage is enormous: DDR4-3200 RAM delivers ~51 GB/s bandwidth with ~14 ns latency. A fast NVMe SSD offers ~7 GB/s and ~100 μs latency — roughly 7× slower throughput and 7000× worse latency. This is why "more RAM = faster computer" is often true up to a point.
+</ConceptCallout>
+
+## DDR Generations
+
+DDR (Double Data Rate) transfers data on both the rising and falling edges of the clock signal, doubling effective bandwidth vs single data rate. Each generation is faster, lower voltage, and physically incompatible with previous generations due to different notch positions.
+
+*MT/s = megatransfers per second. Note DDR4 and DDR5 both have 288-pin DIMMs but different notch positions — physically incompatible.*
+
+| Generation | Voltage | DIMM Pins | SO-DIMM Pins | Base Speed | Notes |
+| --- | --- | --- | --- | --- | --- |
+| DDR3 | 1.5V (1.35V LP) | 240 | 204 | 800–2133 MT/s | Legacy, found in pre-2017 systems |
+| DDR4 | 1.2V (1.05V LP) | 288 | 260 | 2133–3200 MT/s | Current mainstream standard |
+| DDR5 | 1.1V (1.05V LP) | 288 | 262 | 4800–8400+ MT/s | Current high-end, dual 32-bit channels per DIMM |
+
+<ConceptCallout type="tip">
+  The exam tests PIN COUNTS. Memorize: DDR4 DIMM = **288 pins**, DDR4 SO-DIMM = **260 pins**, DDR5 DIMM = **288 pins** (different notch), DDR5 SO-DIMM = **262 pins**. Also: DDR4 voltage = **1.2V**, DDR3 = **1.5V**, DDR5 = **1.1V**.
+</ConceptCallout>
+
+## Form Factors: DIMM vs SO-DIMM
+
+**DIMM** (Dual Inline Memory Module) is the full-size form factor (~133mm long) used in desktop computers and servers.
+
+**SO-DIMM** (Small Outline DIMM) is the compact form factor (~67mm long) used in laptops, mini-PCs (like Intel NUC), and some all-in-one computers.
+
+The two are not interchangeable due to both physical size and different pin configurations per DDR generation.
+
+## ECC vs Non-ECC RAM
+
+**ECC (Error-Correcting Code) RAM** adds extra data bits (typically 8 bits per 64-bit word, making the bus 72 bits wide) to detect and automatically correct single-bit memory errors in real time. This prevents the kind of silent data corruption that could corrupt files, crash OS kernels, or produce incorrect calculations.
+
+**When to use ECC:** Servers, workstations, financial computing, medical systems, scientific calculations — anywhere data integrity failures have serious consequences.
+
+ECC RAM requires a compatible motherboard (Intel Xeon/server boards, AMD EPYC, certain AMD Ryzen Pro platforms). Standard consumer motherboards do **not** support ECC.
+
+<ConceptCallout type="info">
+  ECC RAM is NOT faster than non-ECC — the error correction adds a tiny amount of latency. Its value is reliability, not speed. When you see "registered" or "buffered" (RDIMM), that's a separate feature used in servers to reduce electrical load, allowing more DIMMs per channel.
+</ConceptCallout>
+
+## LPDDR (Low Power DDR)
+
+LPDDR (Low Power Double Data Rate) is a mobile-optimized variant with lower voltage and tighter integration. It's commonly **soldered directly to the motherboard** in thin laptops, tablets, Chromebooks, and ARM-based devices (like Apple Silicon Macs and Surface devices). This makes the RAM non-upgradeable. The benefit: lower power consumption extends battery life.
+
+## Dual-Channel Memory
+
+Most modern desktop and laptop platforms support **dual-channel memory**, which doubles the memory bus width from 64-bit to 128-bit when two matching sticks are installed in the correct paired slots.
+
+**To enable dual-channel:** install two identical modules (same capacity, speed, and ideally same manufacturer) in the paired slots as specified in the motherboard manual. Typically these are slots 1 and 3 (often color-coded) — NOT slots 1 and 2.
+
+**Performance impact:** ~20–40% bandwidth increase over single-channel. Particularly noticeable in memory-bandwidth-sensitive workloads and with CPUs that have integrated graphics sharing the RAM bus.
+
+## Speed, Latency, and XMP/EXPO
+
+### Speed Rating
+
+DDR4 speed is rated in MT/s (megatransfers per second) — sometimes listed as MHz (half the MT/s value, reflecting the underlying clock). "DDR4-3200" = 3200 MT/s = 1600 MHz clock.
+
+### CAS Latency (CL)
+
+CAS Latency is the number of clock cycles between the memory controller issuing a read command and data becoming available. A lower CL number looks better, but the actual time in nanoseconds depends on the clock speed:
+
+> **Actual latency (ns) = CL ÷ (MHz × 2) × 1000**
+
+DDR4-3200 CL16 = 16 ÷ (3200/2) × 1000 = **10 ns** — identical to DDR4-2400 CL12. Context always matters.
+
+### XMP and EXPO
+
+By default, RAM boots at a conservative JEDEC standard speed (DDR4: 2133 or 2400 MT/s regardless of the speed on the label). To run at the rated speed (e.g., DDR4-3600):
+
+- **Intel XMP** (Extreme Memory Profile) — enable in UEFI under AI Overclocking or XMP setting
+- **AMD EXPO** — AMD's equivalent for Ryzen DDR5 platforms
+
+These are pre-validated speed/timing profiles stored in the RAM module's SPD EEPROM. Enabling them is a simple one-click setting in UEFI.
+
+<ConceptCallout type="tip">
+  If you install new DDR4-3600 RAM and it runs at 2133 MT/s, you need to enable XMP in UEFI. This is one of the most common "why is my new RAM slow?" issues.
+</ConceptCallout>
+
+## Virtual Memory and Paging
+
+When physical RAM fills up, the OS uses **virtual memory** — reserving space on the storage drive as an overflow buffer.
+
+- **Windows:** `pagefile.sys` (paging file) — default 1.5–3× RAM
+- **Linux/macOS:** swap partition or swap file
+
+The OS pages out (writes) inactive memory blocks to disk and pages in (reads) needed blocks back to RAM on demand. This prevents "out of memory" crashes but causes severe performance degradation because disk access is 1000–10,000× slower than RAM.
+
+**Symptoms of excessive paging:** disk activity light constantly active, system feels sluggish, HDD thrashing. Solution: add more physical RAM.
+
+## 32-bit vs 64-bit Memory Addressing
+
+A 32-bit processor or OS can address at most 2³² = **4,294,967,296 bytes = 4 GB** of RAM. Even if you install 8 GB, a 32-bit OS can only use ~3.2–3.5 GB (some address space is reserved for devices).
+
+A 64-bit OS theoretically supports 2⁶⁴ bytes (16 exabytes). Practical limits per Windows edition:
+- Windows 11 Home: 128 GB
+- Windows 11 Pro/Enterprise: 2 TB
+
+**All modern systems run 64-bit.** 32-bit OS is only relevant when supporting legacy applications.
+
+## SPD — Serial Presence Detect
+
+Every RAM module contains a small **EEPROM chip** called SPD (Serial Presence Detect) that stores the module's specifications: manufacturer, capacity, voltage, speed, and recommended timings. The system BIOS/UEFI reads SPD at boot to automatically configure the memory controller correctly. XMP/EXPO profiles are stored in the extended SPD data.

@@ -1,0 +1,174 @@
+# Data Destruction and Disposal Methods
+
+When a drive or device leaves your organization — retirement, resale, donation, return to lessor — the data on it must be properly destroyed. This is not optional: regulations such as HIPAA, PCI DSS, and GDPR impose legal obligations and significant penalties for improper disposal.
+
+---
+
+## Why Data Destruction Matters
+
+Hard drives, SSDs, USB drives, and phones retain data long after files are "deleted." The operating system marks space as available but does not erase the underlying data. Standard file deletion and even OS reinstallation leave recoverable data. Improperly disposed drives are one of the most common — and avoidable — causes of data breaches.
+
+**Types of sensitive data at risk:**
+- Personally Identifiable Information (PII) — names, SSNs, addresses
+- Protected Health Information (PHI) — HIPAA scope
+- Payment card data — PCI DSS scope
+- Trade secrets and intellectual property
+- Authentication credentials
+
+---
+
+## Software-Based Destruction Methods
+
+Software methods destroy data without physically destroying the media. The drive can then be reused or disposed of safely.
+
+### Overwriting (Data Wiping)
+
+Overwrites every sector of the drive with patterns of 0s and 1s, making original data statistically unrecoverable.
+
+- **DoD 5220.22-M**: U.S. Department of Defense standard — 7 passes with alternating patterns, then a final pass with a random character and verification. Widely accepted for government and commercial use.
+- **Single pass**: one pass of zeros is sufficient for modern drives according to current research — multiple passes provide diminishing security returns on modern media.
+- **Tools**: DBAN (Darik's Boot and Nuke) — bootable ISO that wipes entire drives; Eraser (Windows app for files/drives); manufacturer secure erase utilities.
+
+<ConceptCallout type="warning">Overwriting is NOT reliable for SSDs. Wear leveling means the SSD controller distributes writes across flash cells — overwrite commands may not reach cells that hold original data. Use ATA Secure Erase or cryptographic wipe for SSDs instead.</ConceptCallout>
+
+### ATA Secure Erase
+
+A built-in command in the ATA standard that instructs the drive controller to reset all flash memory cells to factory state. Because the drive controller handles the erase — not the OS — it can reach all storage cells, including those hidden by wear leveling.
+
+- **HDDs**: supported, performs multi-pass internal overwrite
+- **SSDs**: the correct software method for SSDs — reaches all cells including spares
+- **NVMe drives**: use `nvme format` with secure erase option
+- **Access tools**: `hdparm --security-erase` on Linux; manufacturer tools (Samsung Magician, Crucial Storage Executive); BIOS-level secure erase on some platforms
+- **Requirement**: drive must not be in a "frozen" security state. May need to suspend/resume to unfreeze first.
+
+### Cryptographic Wipe (Crypto Erase)
+
+If the drive was encrypted, destroying the encryption key renders all data permanently unrecoverable — the ciphertext is meaningless without the key.
+
+- **Process**: delete or destroy the encryption key. The encrypted data remains on the drive but cannot be decrypted.
+- **Speed**: nearly instantaneous — no need to overwrite every sector.
+- **Requirements**: drive must have been encrypted before the data was written. You cannot retroactively encrypt old plaintext data and call it "erased."
+- **Use cases**:
+  - BitLocker: delete the BitLocker key protectors — data becomes unrecoverable
+  - Self-Encrypting Drives (SED): issue a crypto erase command to destroy the internal key
+  - iOS/Android: factory reset performs crypto erase (encryption key is destroyed)
+  - Cloud storage: delete the key management service (KMS) key
+
+<ConceptCallout type="tip">Cryptographic wipe is the fastest and most reliable software method for encrypted SSDs and mobile devices. It is why encrypting drives before retirement planning is a best practice — it makes future disposal trivial.</ConceptCallout>
+
+---
+
+## Physical Destruction Methods
+
+Physical destruction is used when the highest assurance is required, when media is damaged, or when the organization has no need to reuse the media.
+
+### Shredding
+
+An industrial shredder reduces the drive to small fragments — typically 2mm or smaller for NSA-approved optical media shredding, and similar standards for drives.
+
+- **Handles**: HDDs, SSDs, USB drives, mobile devices, optical discs, magnetic tape — anything
+- **Result**: fragments too small to reconstruct data from
+- **Certification**: shredding vendors issue a Certificate of Destruction with the device serial numbers
+- **Most thorough** physical method available
+
+### Degaussing
+
+A degausser generates an extremely powerful magnetic field that disrupts and randomizes magnetic domains, destroying the data on magnetic media.
+
+<ConceptCallout type="warning">Degaussing does NOT work on SSDs, USB flash drives, SD cards, or optical discs. These storage types have no magnetic domains to disrupt. Degaussing is ONLY effective on HDDs and magnetic tape. This is a frequently tested exam point.</ConceptCallout>
+
+- **Effective on**: HDDs, magnetic tape (LTO, DLT), floppy disks
+- **NOT effective on**: SSDs, NVMe drives, USB flash drives, SD cards, optical media (CD/DVD/Blu-ray)
+- **Side effect**: renders HDDs permanently unusable — the servo tracks are also destroyed, so the drive cannot be reformatted or reused
+- **Types**: hand-held degaussers (lower field strength) and bulk/industrial degaussers
+
+### Drilling and Crushing
+
+Physically damaging the drive platters or circuit boards to prevent data recovery.
+
+- **Drilling**: drill through the platters of an HDD or the chips of an SSD. Multiple holes through different areas of the platter.
+- **Crushing/bending**: crush or bend the drive so platters warp or chips crack.
+- **Limitation**: fragments and partial platters may still be recoverable by a well-funded forensic lab. Not suitable for top-secret data — use shredding or incineration for those cases.
+- **Practical use**: low-to-medium sensitivity end-of-life devices, supplemented by prior overwrite
+
+### Incineration
+
+High-temperature burning in a certified incinerator completely destroys all storage media.
+
+- **Absolute**: nothing survives sufficient heat
+- **Compliance**: requires a certified incinerator facility and chain of custody documentation
+- **Use case**: classified media destruction, drives damaged in a fire, drives that cannot be processed by other means
+
+### Pulverizing
+
+Reduces drive to powder — typically accomplished in a hammer mill or pulverizing machine.
+
+- **Result**: essentially the same as shredding at a finer grade
+- **Used for**: very sensitive media, supplemental to shredding for highest assurance
+
+---
+
+## Choosing the Right Method
+
+<CompareCards
+  title="Physical vs Logical Data Destruction"
+  left={{ title: "Physical Destruction", icon: "HardDrive", color: "blue", points: ["Shredding, degaussing, drilling, incineration", "Drive is permanently unusable after destruction", "Required for classified and top-secret data", "Degaussing only works on magnetic media (HDDs/tape)", "Shredding works on ALL media types", "Certificate of Destruction issued by vendor"] }}
+  right={{ title: "Logical Destruction", icon: "Shield", color: "green", points: ["Overwriting, ATA Secure Erase, cryptographic wipe", "Drive can be reused after logical destruction", "Software overwrite unreliable for SSDs", "ATA Secure Erase is correct method for SSDs", "Cryptographic wipe requires prior encryption", "Fastest for encrypted drives — destroy the key"] }}
+/>
+
+| Media Type | Overwriting | ATA Secure Erase | Cryptographic Wipe | Degaussing | Physical Destruction |
+|---|---|---|---|---|---|
+| HDD (magnetic) | Effective | Effective | Effective (if encrypted) | Effective | Effective |
+| SSD / NVMe | NOT reliable | Effective | Effective (if encrypted) | NOT effective | Effective |
+| USB flash drive | NOT reliable | Varies | Effective (if encrypted) | NOT effective | Effective |
+| SD card | NOT reliable | Varies | Effective (if encrypted) | NOT effective | Effective |
+| Magnetic tape | Effective | N/A | Effective (if encrypted) | Effective | Effective |
+| Optical (CD/DVD) | N/A | N/A | N/A | NOT effective | Shred/incinerate |
+
+**Sensitivity-based guidance:**
+
+| Data Sensitivity | Recommended Method |
+|---|---|
+| Personal/home use | Single-pass overwrite or physical crush |
+| Business/organizational | 7-pass overwrite OR ATA Secure Erase OR physical destruction |
+| Highly sensitive / regulated | Physical destruction (shredding preferred) |
+| Classified / top secret | NSA-approved shredding or incineration |
+| SSD with any business data | ATA Secure Erase, cryptographic wipe, OR physical destruction |
+
+---
+
+## Certificate of Destruction
+
+A Certificate of Destruction (CoD) is a formal document provided by a destruction vendor confirming that specific devices were destroyed by a specific method on a specific date.
+
+**Contents of a Certificate of Destruction:**
+- Organization name and address
+- Device make, model, and serial number for each destroyed item
+- Date of destruction
+- Method used (shredding, degaussing, etc.)
+- Name and signature of the person who performed or witnessed destruction
+- Vendor name, certification, and contact information
+
+**Why it matters:**
+- Required evidence for compliance audits (HIPAA, PCI DSS, GDPR, SOX)
+- Demonstrates due diligence if a data breach investigation occurs
+- Chain of custody documentation from pickup to destruction
+
+<ConceptCallout type="info">For the exam, remember that a Certificate of Destruction is the documentation that proves data was properly destroyed. It is required for regulatory compliance, not optional paperwork.</ConceptCallout>
+
+---
+
+## Regulatory Requirements
+
+| Regulation | Scope | Data Destruction Requirement |
+|---|---|---|
+| HIPAA | Healthcare — patient PHI | Covered entities must "purge" or physically destroy PHI before disposal; must document the process |
+| PCI DSS | Payment card data | Render cardholder data unrecoverable — cross-cut shred, pulverize, or incinerate paper; degauss or destroy electronic media |
+| GDPR | EU personal data | Must ensure personal data cannot be reconstructed; erasure ("right to be forgotten") on request |
+| NIST SP 800-88 | U.S. government guidance | Defines Clear, Purge, and Destroy categories; ATA Secure Erase = Purge; physical destruction = Destroy |
+| State laws | Varies by U.S. state | Many states have data destruction requirements for businesses handling consumer PII |
+
+**NIST SP 800-88 categories (exam reference):**
+- **Clear**: overwriting — appropriate for lower-security scenarios; readable with standard tools but not by casual observation
+- **Purge**: ATA Secure Erase, degaussing, cryptographic erase — resistant to laboratory analysis
+- **Destroy**: physical destruction — absolute, media cannot be reused

@@ -1,0 +1,299 @@
+# Troubleshooting Motherboards, RAM, CPUs, and Power
+
+## POST — Power-On Self Test
+
+When a computer powers on, the BIOS/UEFI firmware runs POST (Power-On Self Test) to verify that essential hardware is present and functioning before attempting to boot the OS.
+
+### POST Sequence
+
+1. CPU initializes and begins executing firmware code from ROM
+2. BIOS/UEFI checks itself (ROM integrity)
+3. Initializes the chipset and memory controller
+4. Tests RAM
+5. Discovers and initializes expansion cards and storage controllers
+6. Passes control to bootloader
+
+### Beep Codes
+
+Beep codes are audio signals produced by the system speaker to indicate POST errors before video output is available (or when video fails).
+
+**AMI BIOS Beep Codes (American Megatrends):**
+
+| Beep Pattern | Meaning |
+|---|---|
+| 1 short | System boot successful (some AMI versions) |
+| 1 long, 2 short | Video card error |
+| 1 long, 3 short | Video card or RAM error |
+| 2 short | POST error (check monitor) |
+| Continuous beep | Power supply or RAM error |
+| Repeating short beeps | Power supply issue |
+
+**Phoenix BIOS Beep Codes (groups of beeps):**
+
+| Beep Pattern | Meaning |
+|---|---|
+| 1-1-1-3 | Verify real mode |
+| 1-1-2-1 | CPU failure |
+| 1-1-2-3 | Motherboard failure |
+| 1-3-1-1 | Test DRAM refresh |
+| 1-3-3-1 | RAM not found / failed |
+| 3-3-4 | Video card error |
+
+**Award BIOS:**
+
+| Beep Pattern | Meaning |
+|---|---|
+| 1 long, 2 short | Video error |
+| 1 long, 3 short | Video error |
+| Continuous long beeps | RAM error |
+| High/low repeating | CPU overheating or failure |
+
+<ConceptCallout type="tip">
+Modern UEFI systems often replace audio beep codes with **POST LED indicators** — a series of LEDs on the motherboard labeled Q-LED or Debug LED that light up in sequence (CPU, DRAM, VGA, BOOT). The last LED that stays lit indicates where POST is failing. This is more reliable than beep codes on modern systems.
+</ConceptCallout>
+
+### No POST vs No Video
+
+| Symptom | Likely Cause | Diagnostic Step |
+|---|---|---|
+| No POST (no beeps, fans run, nothing) | CPU, motherboard, or RAM failure | Remove all RAM; listen for beeps. Remove GPU. Clear CMOS. |
+| POST beeps but no video | GPU failure, monitor issue | Test with different monitor/cable. Try integrated GPU. |
+| POST completes but no OS | Boot device issue | Check boot order in BIOS. Check storage connection. |
+| POST LED stuck on CPU | CPU not detected / seated wrong | Reseat CPU. Check for bent pins. |
+| POST LED stuck on DRAM | RAM failure | Try one stick at a time in the primary slot. |
+
+---
+
+## Motherboard Troubleshooting
+
+### Common Motherboard Symptoms
+
+| Symptom | Likely Cause |
+|---|---|
+| System won't power on at all | Dead PSU, bad power switch, blown fuse on motherboard |
+| System powers on but shuts down immediately | Short circuit (check standoffs), CPU not seated, PSU fault |
+| Random reboots | Overheating, unstable RAM, PSU ripple, BIOS bug |
+| BSOD (Stop errors) | RAM, driver incompatibility, overheating, corrupted OS |
+| Burning smell | Blown capacitor, short, failed VRM |
+| USB ports not working | Blown USB port (ESD damage), BIOS setting, bad header cable |
+| No audio | Audio codec failure, incorrect BIOS settings, driver issue |
+| PCIe slot not working | Physical damage, BIOS disabled, PCIe riser issue |
+
+### Swollen / Blown Capacitors
+
+Electrolytic capacitors on older motherboards (especially 2000s-era) are prone to capacitor failure. Symptoms:
+- Visible bulging at the top of cylindrical capacitors (should be flat)
+- Brown residue or crust around the capacitor base
+- System instability, random reboots, failure to POST
+
+This is a physical failure — the motherboard must be repaired (capacitor replacement requires soldering skill) or replaced.
+
+### BIOS/UEFI Troubleshooting
+
+- **Settings won't save:** CMOS battery is dead — replace the CR2032 coin cell battery
+- **POST stuck:** Clear CMOS by jumper or by removing CMOS battery for 30 seconds
+- **Wrong boot device order:** Enter BIOS setup (Del, F2, F10, or F12 depending on vendor) and adjust boot priority
+- **Secure Boot blocking OS:** Disable Secure Boot in UEFI for non-Secure Boot OSes; enable for Windows 11 requirement
+
+---
+
+## RAM Troubleshooting
+
+### Symptoms of RAM Failure
+
+| Symptom | Description |
+|---|---|
+| System won't POST | No beep, or beep code indicating RAM; try one stick at a time |
+| Random BSODs (0x0000001A, 0x000000C2) | Memory management errors in Windows |
+| System crashes during memory-intensive tasks | Defective cells fail under load |
+| Corrupted files / application errors | Defective RAM writes wrong data |
+| Random reboots | Unstable RAM causing faults |
+| Blue screen with MEMORY_MANAGEMENT | Windows RAM failure indicator |
+
+### RAM Troubleshooting Process
+
+1. **Reseat the RAM:** Power off, remove modules, clean contacts gently, reinstall firmly until clips click
+2. **Try each stick individually:** Insert one module at a time in the primary slot (usually A2/DIMM1 per motherboard manual) to isolate a bad stick
+3. **Test with MemTest86:** Boot from USB; run all tests (full pass takes 30–60 minutes); any errors = faulty RAM
+4. **Check XMP/EXPO settings:** High-speed DDR4/DDR5 kits require XMP (Intel) or EXPO (AMD) profiles enabled in BIOS to run at rated speed and voltage. Wrong settings can cause instability.
+5. **Check for dual-channel installation:** RAM must be in matching slots (A2+B2 or A1+B1 per motherboard manual) for dual-channel operation
+
+<ConceptCallout type="warning">
+**XMP (Extreme Memory Profile)** / **EXPO (Extended Profiles for Overclocking)** are Intel and AMD's respective RAM overclocking standards. When you buy a DDR4-3200 kit, the RAM default speed is actually DDR4-2133 or 2666 (JEDEC standard). You must enable XMP/EXPO in BIOS to run at the advertised 3200 MHz. Running RAM out of spec (wrong voltage or frequency) causes instability and errors.
+</ConceptCallout>
+
+### MemTest86
+
+MemTest86 is the gold standard for RAM testing. It runs from a bootable USB drive, completely independent of the OS.
+
+**How to use:**
+1. Download MemTest86 from memtest86.com
+2. Write the ISO to a USB drive
+3. Boot from the USB drive
+4. Allow all tests to run (at least one full pass; multiple passes recommended)
+5. Any errors reported = faulty RAM — replace the failing module(s)
+
+MemTest86 tests address lines, data lines, and various read/write patterns to catch both hard and intermittent failures.
+
+---
+
+## CPU Troubleshooting
+
+### Overheating Symptoms
+
+| Symptom | Description |
+|---|---|
+| Thermal throttling | CPU automatically reduces clock speed to reduce heat; performance becomes sluggish under load |
+| Sudden shutdown | CPU or motherboard thermal protection shuts off power to prevent damage |
+| High fan speed constantly | Cooling system working at maximum to compensate |
+| System restarts spontaneously | Thermal shutdown and automatic restart |
+| BSOD THERMAL_RUNAWAY | Windows detecting thermal event |
+
+**Normal vs abnormal CPU temperatures:**
+
+| Scenario | Typical Temperature | Concern Level |
+|---|---|---|
+| Idle (no load) | 30–50°C | Normal |
+| Under load (gaming, encoding) | 70–85°C | Normal |
+| Under load 85–95°C | High | Monitor, consider better cooling |
+| Over 95°C | Thermal limit | Immediate action needed |
+
+### CPU Cooling Fixes
+
+1. **Check heatsink seating:** Is it fully locked down? Intel push-pin coolers are notorious for partial seating — all four pins must be fully engaged
+2. **Reapply thermal paste:** Dried or improperly applied thermal compound is a common cause of overheating. Clean old paste with isopropyl alcohol (90%+), apply a pea-sized amount to CPU center
+3. **Clean dust:** Remove accumulated dust from heatsink fins and fan blades; use compressed air
+4. **Verify fan spinning:** CPU fan should spin when under load; check fan header connection on motherboard
+5. **Check case airflow:** Ensure intake and exhaust fans are correctly oriented; manage cables to not block airflow
+
+<ConceptCallout type="tip">
+When replacing a CPU cooler or reapplying thermal paste: Clean both the CPU IHS (Integrated Heat Spreader) and the cooler base thoroughly with isopropyl alcohol. Apply a small pea-sized dot of thermal paste in the center of the CPU. Do NOT spread it manually — the pressure from mounting the cooler will spread it correctly. Over-application causes paste to overflow and potentially short components.
+</ConceptCallout>
+
+### CPU Physical Issues
+
+- **Bent pins:** Intel LGA sockets have pins on the motherboard (not the CPU). AMD uses PGA (pins on CPU) for consumer CPUs or LGA for newer Ryzen 7000. A bent pin can prevent POST or cause instability. Very carefully unbend with a mechanical pencil body (pin goes in tube).
+- **Wrong CPU for socket:** CPU won't seat if it's for a different socket
+- **BIOS update required:** New CPUs sometimes require a BIOS update before the motherboard recognizes them. Many boards have a BIOS flashback feature to update without a CPU installed.
+
+---
+
+## Power Supply Troubleshooting
+
+### Symptoms of PSU Failure
+
+| Symptom | Likely Cause |
+|---|---|
+| Nothing happens when power button pressed | PSU not receiving power, dead PSU, failed power switch |
+| System powers on then immediately off | PSU overload protection triggered (short circuit) |
+| Random shutdowns under load | PSU insufficient wattage for load; aging PSU |
+| Random reboots not related to heat | PSU voltage ripple, aging capacitors |
+| Burning smell or visible scorch | PSU component failure — STOP IMMEDIATELY |
+| Coil whine | Electrical noise from inductor coils — harmless but annoying |
+| PC won't power on after surge | Blown internal fuse or MOV in PSU |
+
+### Paperclip Test
+
+The paperclip test verifies whether a PSU will turn on independently of the motherboard:
+
+1. Disconnect PSU from all components (motherboard, drives, GPU)
+2. Find the 24-pin ATX connector
+3. Insert a bent paperclip between the **green wire** (PS_ON, pin 16) and any **black wire** (COM/ground)
+4. Plug the PSU into the wall
+5. The PSU fan should spin — this confirms the PSU can power on
+6. Use a multimeter to check voltage rails: +12V, +5V, +3.3V, -12V, +5Vsb
+
+<ConceptCallout type="warning">
+The paperclip test only confirms the PSU turns on under no load. A PSU can pass the paperclip test but still fail under the actual power load of a system. For thorough testing, use a PSU tester tool or load tester. If a PSU has catastrophically failed (burned smell, visible damage), **do not test it** — replace it immediately.
+</ConceptCallout>
+
+### PSU Wattage Considerations
+
+Common minimum wattages:
+- Basic office PC (integrated graphics): 300–400W
+- Gaming PC with mid-range GPU: 550–650W
+- Gaming PC with high-end GPU: 750–850W
+- Workstation with dual CPUs or multiple GPUs: 1000W+
+
+Always leave 20% headroom above calculated system power draw for PSU efficiency and longevity.
+
+---
+
+## CMOS Battery
+
+The **CMOS battery** (typically a CR2032 3V lithium coin cell) maintains BIOS/UEFI settings, system time, and date when the computer is powered off and unplugged.
+
+### Symptoms of Dead CMOS Battery
+
+- Date and time reset to default (e.g., January 1, 2000) every time system powers on
+- BIOS settings reset to factory defaults after each power cycle
+- "CMOS checksum error" or "CMOS battery low" message at POST
+- System prompts to enter BIOS to configure date/time on every boot
+
+### CMOS Battery Replacement
+
+1. Power off, unplug power, discharge residual charge (hold power button 5 sec)
+2. Locate the flat CR2032 coin cell on the motherboard
+3. Press the small clip to release and lift out the battery
+4. Insert new CR2032 with + side facing up
+5. Power on and reset BIOS date/time and any custom settings
+
+---
+
+## Proprietary Crash Screens
+
+### Windows Blue Screen of Death (BSOD)
+
+A BSOD (Stop Error) indicates a critical, unrecoverable kernel-level error.
+
+**Modern Windows BSOD elements:**
+- A sad face emoji (Windows 8+)
+- Stop error code: e.g., `IRQL_NOT_LESS_OR_EQUAL`, `MEMORY_MANAGEMENT`, `KERNEL_SECURITY_CHECK_FAILURE`
+- Hex error code: e.g., `0x0000000A`
+- Possibly the name of the driver or file that caused the error
+
+**Common BSODs and causes:**
+
+| Stop Code | Likely Cause |
+|---|---|
+| IRQL_NOT_LESS_OR_EQUAL (0xA) | Driver bug, bad RAM |
+| MEMORY_MANAGEMENT (0x1A) | Faulty RAM |
+| SYSTEM_THREAD_EXCEPTION_NOT_HANDLED | Driver crash |
+| CRITICAL_PROCESS_DIED | Corrupted system file or driver |
+| KERNEL_SECURITY_CHECK_FAILURE | Driver or hardware malfunction |
+| PAGE_FAULT_IN_NONPAGED_AREA (0x50) | Faulty RAM or driver |
+| NTFS_FILE_SYSTEM | Failing hard drive, file system corruption |
+
+**Analyzing BSODs:**
+- Event Viewer → Windows Logs → System (look for critical events around the crash time)
+- Use **WinDbg** or **BlueScreenView** to analyze minidump files (stored in `C:\Windows\Minidump\`)
+
+### macOS Kernel Panic
+
+The macOS equivalent of a BSOD. The screen dims and displays a multilingual message: "Your computer restarted because of a problem."
+
+- Caused by a kernel extension (kext), hardware failure, or driver issue
+- Log saved to: `/Library/Logs/DiagnosticReports/` or via Console app
+- Repeated kernel panics with the same kext noted: remove or update that kext/driver
+- Kernel panics after RAM installation: test RAM
+
+---
+
+## Hardware Diagnostic Tools
+
+| Tool | Type | Purpose |
+|---|---|---|
+| MemTest86 | Bootable USB | Test RAM for errors |
+| CPU-Z | Windows software | CPU, RAM, motherboard identification and specs |
+| GPU-Z | Windows software | GPU identification and specs |
+| HWiNFO | Windows software | Comprehensive sensor monitoring (temps, voltages, fan speeds) |
+| HWMonitor | Windows software | Temperature and voltage monitoring |
+| Prime95 | Windows software | CPU stress test (detects thermal and stability issues under load) |
+| CrystalDiskInfo | Windows software | S.M.A.R.T. storage health status |
+| AIDA64 | Windows software | System info + stress test (paid) |
+| GSmartControl | Cross-platform | S.M.A.R.T. disk testing |
+| Furmark | Windows software | GPU stress test |
+
+<ConceptCallout type="info">
+**Prime95** is a CPU stress testing tool that runs computations 24/7 to find instability. If a system crashes or BSODs during Prime95 but is stable at normal usage, the CPU cooler is inadequate, the CPU is overclocked too aggressively, or the RAM is unstable under load. Run Prime95 in the "Blend" mode to stress both CPU and RAM simultaneously.
+</ConceptCallout>

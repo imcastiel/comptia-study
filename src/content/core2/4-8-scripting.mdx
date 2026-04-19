@@ -1,0 +1,290 @@
+# Scripting Basics
+
+Scripting is automation — writing code that executes a sequence of steps so a human does not have to. For A+ technicians, scripting means automating repetitive administrative tasks: creating user accounts, scheduling backups, monitoring systems, deploying software. The exam tests recognition of scripting concepts and use cases, not the ability to write complex programs.
+
+---
+
+## Why Scripting Matters
+
+Manual processes introduce human error. A script runs the same way every time. Key benefits:
+
+- **Consistency:** Every execution follows the same steps. No missed steps, no typos in usernames.
+- **Speed:** A script that creates 200 user accounts takes seconds. Doing it manually takes hours.
+- **Scheduling:** Scripts can run unattended at 2am — when users are not affected.
+- **Documentation:** A well-written script is self-documenting — it shows exactly what was done and in what order.
+- **Repeatability:** Run the same deployment script on 500 machines with identical results.
+
+---
+
+## PowerShell
+
+PowerShell is Microsoft's primary scripting platform for Windows administration. It replaced the old Command Prompt for serious administrative work.
+
+<ConceptCallout type="tip">PowerShell cmdlets follow a Verb-Noun format — Get-Process, Set-Service, New-ADUser. If you can identify what you want to do (verb) and what you want to do it to (noun), you can usually guess the cmdlet name. Memorize the most common verbs: Get, Set, New, Remove, Start, Stop, Invoke.</ConceptCallout>
+
+### Key Characteristics
+
+- Built on .NET — outputs **objects**, not just text. You can pipe objects between cmdlets and access their properties.
+- File extension: `.ps1`
+- Available on all modern Windows versions; also cross-platform (PowerShell Core / PowerShell 7) on macOS and Linux
+- Deep integration with Active Directory, Azure, Exchange, and virtually all Microsoft products
+
+### Execution Policy
+
+PowerShell has a built-in safety mechanism — the **execution policy** — that controls whether scripts can run:
+
+| Policy | Behavior |
+|---|---|
+| Restricted | No scripts can run (default on new installations) |
+| AllSigned | Only scripts signed by a trusted publisher can run |
+| RemoteSigned | Local scripts can run unsigned; downloaded scripts must be signed |
+| Unrestricted | All scripts run; warns about downloaded scripts |
+
+Check current policy: `Get-ExecutionPolicy`
+Change policy: `Set-ExecutionPolicy RemoteSigned` (requires admin)
+
+### Common Cmdlets to Know
+
+| Cmdlet | Purpose |
+|---|---|
+| `Get-Help` | Display help for any cmdlet |
+| `Get-Command` | List all available cmdlets |
+| `Get-Process` | List running processes |
+| `Get-Service` | List Windows services and their status |
+| `Start-Service` / `Stop-Service` | Start or stop a service |
+| `Get-EventLog` | Read Windows event log entries |
+| `Get-ADUser` | Query Active Directory user accounts |
+| `New-ADUser` | Create an Active Directory user |
+| `Invoke-Command` | Run commands on remote computers |
+| `Get-Item` / `Set-Item` | Read/write files and registry keys |
+| `ForEach-Object` | Iterate through a collection |
+| `Where-Object` | Filter objects by property value |
+
+### Simple PowerShell Examples
+
+```powershell
+# List all stopped services
+Get-Service | Where-Object { $_.Status -eq "Stopped" }
+
+# Get top 10 processes by CPU usage
+Get-Process | Sort-Object CPU -Descending | Select-Object -First 10
+
+# Create a new local user
+New-LocalUser -Name "jsmith" -Password (ConvertTo-SecureString "P@ssw0rd" -AsPlainText -Force)
+
+# Check disk space on all drives
+Get-PSDrive -PSProvider FileSystem | Select-Object Name, Used, Free
+```
+
+---
+
+## Python
+
+Python is a general-purpose, cross-platform language widely used in IT automation, network management, and data processing.
+
+### Key Characteristics
+
+- File extension: `.py`
+- **Interpreted** — runs through the Python interpreter, no compilation step
+- Cross-platform: runs identically on Windows, macOS, and Linux
+- Massive standard library plus third-party packages via `pip`
+- Human-readable syntax — good for teams with mixed skill levels
+
+### IT Uses
+
+- Network device automation (via Netmiko, Paramiko, NAPALM libraries)
+- Log file parsing and analysis
+- API interaction (REST APIs via the `requests` library)
+- System monitoring scripts
+- Data processing and reporting
+
+### Key Concepts
+
+```python
+# Variables and basic output
+hostname = "WORKSTATION-01"
+print(f"Connecting to {hostname}")
+
+# Reading a file
+with open("logfile.txt", "r") as f:
+    for line in f:
+        if "ERROR" in line:
+            print(line)
+
+# Installing packages with pip
+# pip install requests paramiko
+
+# Simple HTTP API call
+import requests
+response = requests.get("https://api.example.com/devices")
+data = response.json()
+```
+
+**pip:** Python's package manager. `pip install packagename` downloads and installs third-party libraries. `pip list` shows installed packages.
+
+**Virtual environments:** Isolate project dependencies. `python -m venv myenv` creates a virtual environment. Prevents package version conflicts between projects.
+
+---
+
+## Bash / Shell Scripting
+
+Bash is the default shell on Linux and macOS, making Bash scripting the primary automation language for Unix-based systems.
+
+### Key Characteristics
+
+- File extension: `.sh`
+- Available on Linux/macOS natively; available on Windows via WSL (Windows Subsystem for Linux) or Git Bash
+- Ideal for: Linux system administration, cron jobs, server automation
+- Strings together existing command-line tools
+
+### Shebang Line
+
+The first line of a Bash script specifies which interpreter to use:
+
+```bash
+#!/bin/bash
+```
+
+This tells the system to run the script with `/bin/bash` even if the user's default shell is different.
+
+### Basic Script Structure
+
+```bash
+#!/bin/bash
+
+# Variables
+BACKUP_DIR="/var/backups"
+DATE=$(date +%Y-%m-%d)
+
+# Check if directory exists, create if not
+if [ ! -d "$BACKUP_DIR" ]; then
+    mkdir -p "$BACKUP_DIR"
+    echo "Created backup directory"
+fi
+
+# Loop through files and back them up
+for FILE in /etc/important/*.conf; do
+    cp "$FILE" "$BACKUP_DIR/${DATE}_$(basename $FILE)"
+    echo "Backed up: $FILE"
+done
+
+echo "Backup complete: $DATE"
+```
+
+**Cron jobs:** Schedule Bash scripts to run automatically. Edit with `crontab -e`. Example — run backup every night at 2am: `0 2 * * * /scripts/backup.sh`
+
+---
+
+## Other Scripting Languages
+
+### VBScript (.vbs)
+
+Legacy Windows scripting language. Once common for Windows automation and login scripts in older environments. **Largely replaced by PowerShell** on modern systems. The exam may reference it in the context of legacy environments or malware (VBS malware was common in the early 2000s). Not used for new development.
+
+### JavaScript (.js)
+
+Primarily a web scripting language (runs in browsers). However, **Node.js** enables JavaScript to run server-side, making it usable for IT automation. Less common in enterprise IT admin compared to PowerShell, Python, and Bash, but increasingly relevant as web-based management interfaces become standard.
+
+---
+
+## Language and Use Case Comparison
+
+| Scripting Language | Primary Platform | Best Use Cases | File Extension |
+|---|---|---|---|
+| PowerShell | Windows (also cross-platform) | Active Directory, Windows admin, Microsoft 365, remote execution | `.ps1` |
+| Python | Cross-platform | Network automation, log analysis, API interaction, data processing | `.py` |
+| Bash | Linux / macOS | Linux system admin, cron jobs, file operations, server automation | `.sh` |
+| VBScript | Windows (legacy) | Legacy login scripts, older Windows automation | `.vbs` |
+| JavaScript / Node.js | Cross-platform | Web automation, API scripting, modern DevOps tooling | `.js` |
+
+---
+
+## Universal Scripting Concepts
+
+These concepts apply across all scripting languages. The exam may test them in a language-agnostic context.
+
+### Variables
+
+Store a value and refer to it by name rather than repeating the value.
+
+```
+# PowerShell
+$username = "jsmith"
+
+# Python
+username = "jsmith"
+
+# Bash
+USERNAME="jsmith"
+```
+
+### Conditionals
+
+Execute different code paths based on a condition.
+
+```python
+# Python
+if disk_usage > 90:
+    send_alert("Disk almost full")
+elif disk_usage > 75:
+    log_warning("Disk usage high")
+else:
+    log_info("Disk usage normal")
+```
+
+### Loops
+
+Repeat an action for each item in a collection, or while a condition is true.
+
+```powershell
+# PowerShell - for each user in a list, create AD account
+$users = Import-Csv "new_users.csv"
+ForEach ($user in $users) {
+    New-ADUser -Name $user.Name -SamAccountName $user.Username
+}
+```
+
+### Functions
+
+Reusable named blocks of code. Define once, call multiple times.
+
+### Comments
+
+Notes in the code that are not executed. Critical for maintainability — explain the "why," not just the "what."
+
+```bash
+# This deletes log files older than 30 days to prevent disk filling up
+find /var/log -name "*.log" -mtime +30 -delete
+```
+
+### Error Handling
+
+Prevent scripts from failing silently when something goes wrong.
+
+```python
+# Python
+try:
+    result = connect_to_server("192.168.1.1")
+except ConnectionError as e:
+    print(f"Failed to connect: {e}")
+    log_error(e)
+finally:
+    cleanup()
+```
+
+---
+
+## Common A+ Exam Scripting Scenarios
+
+The exam focuses on recognizing which scripting tool is appropriate for a given task:
+
+| Task | Best Tool |
+|---|---|
+| Create 500 AD user accounts from a CSV | PowerShell |
+| Monitor Linux server disk space and email alert | Bash + cron |
+| Pull device inventory from network gear via REST API | Python |
+| Automate patch deployment across Windows fleet | PowerShell |
+| Back up configuration files on Linux servers nightly | Bash |
+| Parse large log files for error patterns | Python |
+| Manage Group Policy settings remotely | PowerShell |
+| Automate SSH connections to multiple network switches | Python (Paramiko/Netmiko) |

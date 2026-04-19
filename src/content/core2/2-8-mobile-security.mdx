@@ -1,0 +1,162 @@
+# Mobile Device Security
+
+Mobile devices are high-value targets: they carry personal and corporate data, have persistent network connectivity, and are frequently lost or stolen. The exam tests your knowledge of both the controls available and how organizations enforce them through MDM.
+
+---
+
+## Screen Lock Methods
+
+A screen lock is the first barrier preventing unauthorized physical access to a device. The strength of the lock method varies significantly.
+
+| Lock Type | Description | Security Level | Notes |
+|---|---|---|---|
+| Swipe | No authentication — just swipe to unlock | None | No security; disables accounted access |
+| PIN (4 digit) | Four-digit numeric code | Low | 10,000 combinations; too easily guessed |
+| PIN (6 digit) | Six-digit numeric code | Medium | 1,000,000 combinations; much stronger |
+| Pattern | Connect dots on 3x3 grid | Low–Medium | Smudge attack — oil residue reveals pattern |
+| Password | Alphanumeric, any length | High | Most secure; slowest to type |
+| Fingerprint | Capacitive sensor reads fingerprint | High | Fast, very common; not foolproof (lifted print attacks) |
+| Facial recognition | Camera-based face mapping | Medium–High | Quality varies: Face ID (3D, high) vs basic 2D (lower) |
+| Smart lock | Trust agents that conditionally skip lock | Variable | Trusted place, trusted device, trusted face |
+
+<ConceptCallout type="warning">Pattern locks are vulnerable to smudge attacks. The oil residue from your finger on the screen reveals the pattern to anyone looking carefully. For corporate devices, require at minimum a 6-digit PIN or password.</ConceptCallout>
+
+**Smart lock trust agents:**
+- **Trusted places**: unlocks when GPS detects the device is at a saved location (e.g., home address)
+- **Trusted devices**: unlocks when paired Bluetooth device (watch, car) is connected
+- **On-body detection**: stays unlocked while you are carrying it (uses accelerometer)
+- **Smart lock is a convenience feature** — an attacker at your home, or who steals your Bluetooth watch, bypasses the lock entirely. Disable Smart Lock on corporate devices.
+
+**Failed attempt lockout:** After a configurable number of failed attempts (commonly 10), the device can be set to wipe all data. This is the last line of defense against persistent PIN-guessing attacks.
+
+---
+
+## Full Device Encryption (FDE)
+
+Full device encryption encrypts all data stored on the device so that it is unreadable without the unlock credential.
+
+- **iOS**: enabled by default as soon as a passcode is set. Uses hardware AES-256. The encryption key is derived from the passcode + hardware UID. Apple cannot decrypt a locked iPhone — there is no backdoor.
+- **Android**: default on all devices shipping with Android 6.0+ (Marshmallow) and required by Android 10+. Uses file-based encryption (FBE) on modern devices — different files can have different keys.
+- **Key point**: FDE is only as strong as the PIN or password protecting the key. A 4-digit PIN provides very little protection — a motivated attacker can brute-force it once the device is decrypted with a cracking tool.
+
+<ConceptCallout type="tip">FDE protects data at rest — if the device is powered off and stolen, the data is encrypted. It does NOT protect data in use while the device is unlocked. This is why remote wipe is a complementary control.</ConceptCallout>
+
+---
+
+## Remote Wipe and Remote Locate
+
+### Remote Wipe
+
+Remote wipe erases all data on the device when the device is lost or stolen and cannot be physically recovered.
+
+- **iOS**: Find My (previously Find My iPhone) — erase via iCloud.com or the Find My app
+- **Android**: Find My Device — erase via google.com/android/find
+- **MDM-initiated wipe**: enterprise MDM platforms (Intune, Jamf) can push a wipe command remotely
+- **Requirement**: device must be connected to the internet (cellular or Wi-Fi) to receive the wipe command. An offline device cannot be wiped remotely — it will wipe when it reconnects.
+- **Full wipe vs selective wipe**: full wipe erases everything including the OS (returns to factory state). Selective wipe removes only corporate data and MDM profiles, leaving personal data intact.
+
+### Remote Locate
+
+- **Find My iPhone / Find My**: shows device location on a map in real time. Can play a sound to help find a nearby device.
+- **Google Find My Device**: same functionality for Android. Also allows remote lock with a custom message.
+- **MDM location tracking**: enterprise MDM may track device location continuously for asset management.
+- **Privacy consideration**: employees using personal devices for work should be aware if MDM tracks location.
+
+---
+
+## Mobile Device Management (MDM)
+
+MDM is the central platform through which organizations enforce security policies on mobile devices. It is the enterprise answer to securing a diverse fleet of phones, tablets, and laptops.
+
+<ProcessSteps
+  title="MDM Device Enrollment Flow"
+  color="blue"
+  steps={[
+    { title: "User Receives Enrollment Invitation", description: "IT sends enrollment link via email or the user opens the corporate portal. For company-owned devices, IT may pre-enroll during provisioning." },
+    { title: "Install MDM Profile / Agent", description: "On iOS, the user installs an MDM configuration profile. On Android, the user installs the MDM agent app (e.g., Microsoft Intune Company Portal). Corporate device enrollment may be automated via Apple DEP or Android Zero-Touch." },
+    { title: "Device Authenticates to MDM Server", description: "Device registers with the MDM server (Intune, Jamf, Workspace ONE). The MDM server issues a certificate to the device for ongoing management." },
+    { title: "MDM Policies Are Applied", description: "MDM pushes configuration profiles: encryption enforcement, minimum PIN length, screen timeout, app restrictions, VPN profiles, Wi-Fi profiles." },
+    { title: "Compliance Check", description: "MDM evaluates device compliance: Is the OS up to date? Is encryption enabled? Is the device jailbroken/rooted? Non-compliant devices may be blocked from corporate resources." },
+    { title: "Ongoing Management", description: "IT can push app installs, policy changes, and remote actions (lock, wipe) at any time. Compliance status is reported in the MDM console." }
+  ]}
+/>
+
+**Key MDM capabilities:**
+
+| Capability | Description |
+|---|---|
+| Encryption enforcement | Require device encryption; block access if not enabled |
+| Screen lock enforcement | Require minimum PIN length and maximum timeout |
+| OS version minimum | Block devices running outdated OS versions |
+| App distribution | Push required apps silently; block prohibited apps |
+| VPN configuration | Deploy VPN profiles automatically |
+| Certificate management | Push internal CA certificates for corporate Wi-Fi and apps |
+| Remote lock | Lock device with custom message (e.g., contact info if found) |
+| Remote wipe | Full device wipe or selective corporate data wipe |
+| Jailbreak/root detection | Flag compromised devices and restrict access |
+
+### Containerization and Work Profiles
+
+Containerization separates corporate data from personal data on the same device — solving the "bring your own device" (BYOD) privacy challenge.
+
+- **iOS MDM profiles**: corporate apps and data are managed by the MDM. The MDM can wipe managed apps without touching personal apps.
+- **Android Work Profile**: creates a separate, isolated work environment (visible as a second icon set with a briefcase badge). Work apps run in this profile. IT manages the work profile only — personal apps are invisible to IT.
+- **Selective wipe**: removes the work container (all corporate apps and data) without erasing the personal side of the phone. Critical for BYOD — employees are more willing to enroll if they know IT cannot wipe their personal photos.
+
+<ConceptCallout type="info">Android Work Profile and iOS managed apps are the technical implementation of what the exam calls "containerization." The key benefit is that a selective MDM wipe removes corporate data without touching personal data.</ConceptCallout>
+
+---
+
+## App Store Policies and Sideloading
+
+| Platform | Default Policy | Sideloading | Risk |
+|---|---|---|---|
+| iOS | App Store only; every app reviewed by Apple | Requires developer account + provisioning, or jailbreak | Low (walled garden) |
+| Android | Google Play default; sideloading APKs allowed | Enable "Install unknown apps" in settings | Higher — no mandatory review for sideloaded APKs |
+
+- **Sideloading** (Android): installing APKs from outside the Play Store. Users may sideload pirated apps or intentionally install modified apps. Malware frequently spreads via fake sideloaded APKs (e.g., fake version of a popular app with spyware added).
+- **App permissions review**: before installing, review requested permissions. A flashlight app that requests contact list access and microphone is a red flag.
+- **Enterprise app management**: MDM can restrict app installation to a curated catalog and block apps that request excessive permissions.
+
+---
+
+## VPN on Mobile
+
+A VPN encrypts all network traffic from the device, protecting data on untrusted Wi-Fi networks (airports, hotels, coffee shops).
+
+- **Per-app VPN**: only traffic from specified apps (usually corporate apps) is tunneled through VPN. Personal browsing is not routed through the corporate VPN. Common in enterprise MDM configurations.
+- **Always-on VPN**: all device traffic routes through VPN at all times. Maximum security but increases latency and battery use.
+- **IKEv2**: most common VPN protocol for mobile — reconnects quickly when switching between Wi-Fi and cellular, making it suitable for mobile use.
+- **Split tunneling**: corporate traffic goes through VPN; internet traffic goes direct. Reduces VPN server load but means internet traffic is not protected by the VPN.
+
+---
+
+## Jailbreaking and Rooting
+
+<ConceptCallout type="warning">Jailbroken (iOS) or rooted (Android) devices should not be allowed on corporate networks. MDM platforms can detect jailbreak/root status and block or quarantine these devices. They present unacceptable security risk.</ConceptCallout>
+
+- **Jailbreaking (iOS)**: exploits iOS vulnerabilities to remove Apple's code signing restrictions. Allows sideloading unsigned apps, accessing the filesystem, and bypassing MDM profiles.
+- **Rooting (Android)**: gains root (superuser) access to the Android OS. Allows modifying system files, bypassing app sandbox, and defeating security controls.
+
+**Why it is dangerous:**
+- Removes OS-level security sandboxing — any app can access any data
+- Bypasses app signing requirements — untrusted code runs freely
+- MDM profiles can be removed by the user
+- Voids manufacturer warranty
+- Exposes OS internals — security patches may not apply cleanly
+
+---
+
+## Mobile Threats
+
+Understanding the threat landscape helps contextualize why the above controls matter.
+
+| Threat | Description | Defense |
+|---|---|---|
+| Smishing | SMS-based phishing — link in text message leads to credential harvest page | User awareness training; do not click links in unsolicited texts |
+| Malicious apps | Apps containing spyware, adware, or ransomware | Official app stores only; review permissions |
+| Unencrypted Wi-Fi | Data transmitted in cleartext on open networks | VPN; only use HTTPS sites |
+| Bluejacking | Sending unsolicited Bluetooth messages to nearby devices | Disable Bluetooth when not in use |
+| Bluesnarfing | Unauthorized access to device data via Bluetooth exploit | Keep Bluetooth off; keep OS patched |
+| Physical theft | Device taken; data accessed if not encrypted/locked | FDE + strong PIN + remote wipe |
+| SIM swapping | Attacker convinces carrier to transfer phone number to attacker's SIM | Use authenticator app instead of SMS for MFA |

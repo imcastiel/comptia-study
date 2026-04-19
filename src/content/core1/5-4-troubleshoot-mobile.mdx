@@ -1,0 +1,340 @@
+# Troubleshooting Mobile Device Issues
+
+## Battery Issues
+
+### Rapid Battery Drain
+
+Battery drain that is faster than expected is one of the most common mobile device complaints.
+
+**Primary causes of excessive battery drain:**
+
+| Cause | Description | Fix |
+|---|---|---|
+| Background app activity | Apps running background refresh, fetching data | Review app background usage; disable background refresh for non-essential apps |
+| Screen brightness | High brightness is the single largest battery consumer | Reduce brightness; enable auto-brightness |
+| Weak cellular signal | Phone increases radio transmit power to maintain connection | Enable Wi-Fi when available; consider Wi-Fi Calling |
+| Wi-Fi constantly scanning | Always-on location scanning uses Wi-Fi | Disable Wi-Fi scanning when not needed |
+| Location services | GPS and constant location polling drain battery fast | Limit to "While Using" permission for apps; disable for apps that don't need it |
+| Push email / notifications | Constant server polling or push connections | Reduce push frequency; change to manual fetch |
+| Aging battery | Li-ion cells lose capacity with age and charge cycles | Check battery health; replace battery |
+| Rogue app | Misbehaving app in crash loop or running full CPU | Check battery usage in Settings; uninstall suspect app |
+
+### Checking Battery Health
+
+**iOS:**
+- Settings → Battery → Battery Health & Charging
+- 100% = new; 80% = Apple recommends service; below 80% = significantly degraded
+
+**Android:**
+- Settings → Battery → Battery Usage (shows per-app consumption)
+- *#*#4636#*#* (dialer code on some Android devices) shows battery stats
+- Third-party apps: AccuBattery shows measured capacity vs rated capacity
+
+<ConceptCallout type="info">
+Li-ion batteries have a rated number of charge cycles — typically 300–500 full cycles for smartphones before significant capacity loss. A "cycle" is a full 100% charge, which can be accumulated over multiple partial charges. After 2–3 years of normal use, most phone batteries are noticeably degraded.
+</ConceptCallout>
+
+### Battery Replacement
+
+**Signs that battery replacement is needed:**
+- Phone shuts off unexpectedly at 20–30% battery
+- Battery health below 80%
+- Battery physically swollen (bulging back cover — address immediately, fire risk)
+- Charge no longer lasts through the day with normal use
+
+**Process:**
+1. Back up the device fully before any hardware work
+2. Power off completely
+3. On most modern phones: remove display assembly (glued in place; use heat gun to soften adhesive), disconnect battery connector, remove battery
+4. Replace with OEM or quality aftermarket battery
+5. Recalibrate: charge to 100%, then use until low before recharging once
+
+<ConceptCallout type="warning">
+A swollen (puffed up) Li-ion battery is a **fire and explosion hazard**. Do not puncture, compress, or heat it. Store the device in a fireproof container or bag until the battery can be safely replaced. Swelling is caused by gas buildup from electrolyte breakdown — typically caused by overcharging, heat damage, or manufacturing defects.
+</ConceptCallout>
+
+---
+
+## Overheating
+
+### Causes of Mobile Device Overheating
+
+| Cause | Scenario |
+|---|---|
+| CPU/GPU load | Gaming, video encoding, AR applications |
+| Ambient temperature | Using device in direct sunlight or hot car |
+| Charging while gaming | Combined load of charging + gaming generates significant heat |
+| Defective battery | Failing battery generates heat during charging |
+| Blocked ventilation | Thick case trapping heat |
+| Cellular data in weak signal | Radio working at high power to maintain connection |
+
+### Normal vs Abnormal Temperatures
+
+- **Warm to the touch:** Normal during demanding use
+- **Too hot to hold comfortably:** Abnormal — device thermal throttling is occurring
+- **Automatic shutdown:** Device exceeded safe temperature limit — typically 35–40°C surface temperature
+
+### Responding to Overheating
+
+1. Remove the device from direct sunlight or hot environment
+2. Stop the high-load activity (game, video recording)
+3. Remove the case temporarily to improve heat dissipation
+4. Disconnect charger if charging
+5. Do not put the device in a refrigerator (condensation risk)
+6. If the device shuts down due to heat, allow it to cool before restarting
+
+### Safe Charging Practices
+
+- Do not charge the device face-down on a soft surface (bed, pillow) — blocks heat dissipation
+- Remove thick cases during charging if the device gets very warm
+- Use manufacturer-approved chargers — counterfeit chargers may lack thermal protection
+- Avoid charging in hot environments (e.g., a closed car in summer)
+
+---
+
+## Touchscreen Issues
+
+### Unresponsive Areas
+
+When part of the touchscreen does not respond to touch:
+
+| Cause | Diagnosis | Fix |
+|---|---|---|
+| Digitizer failure | Area completely unresponsive even with firm touch | Digitizer/display assembly replacement |
+| Cracked screen | Damage beneath crack; digitizer traces broken | Display assembly replacement |
+| Screen protector interference | Thick or damaged screen protector | Remove screen protector and test |
+| Firmware / software glitch | Whole screen unresponsive | Force restart |
+| Moisture on screen | Wet touch unresponsive | Dry screen and hands |
+
+**Force restart steps:**
+- **iPhone 8+:** Press and release Volume Up, press and release Volume Down, hold Side button until Apple logo
+- **iPhone 7:** Hold Volume Down + Sleep/Wake until Apple logo
+- **Android (most):** Hold Power + Volume Down 10–15 seconds
+
+### Ghost Touches
+
+Ghost touches (the screen responding to touches that aren't happening) are a serious issue:
+
+| Cause | Description |
+|---|---|
+| Cracked digitizer | Broken digitizer glass creates false electrical contacts |
+| Moisture under screen | Liquid inside the device shorting digitizer traces |
+| Defective screen protector | Poor quality protector with electrical interference |
+| EMI interference | Near-field electromagnetic interference (rare) |
+| Digitizer connector loose | Intermittent connection at the motherboard connector |
+
+**Fixes:**
+1. Remove screen protector and test
+2. If water damage suspected: dry device thoroughly (see water damage section)
+3. Inspect for cracked glass
+4. If digitizer connector is accessible: reseat the ribbon cable connector
+5. Replace digitizer/display assembly
+
+<ConceptCallout type="tip">
+Ghost touches on a device that was working fine and hasn't been dropped often indicate the digitizer connector has come loose inside the device. This happens when a phone has been under flexion (slight bending in a pocket) or has expanded from battery swelling pushing on the display assembly.
+</ConceptCallout>
+
+---
+
+## App Crashes and Freezes
+
+### Troubleshooting App Crashes
+
+Work through these steps in order (least invasive to most invasive):
+
+**Step 1: Force stop the app**
+- iOS: Swipe up from bottom to app switcher; swipe the app card away
+- Android: Settings → Apps → [App name] → Force Stop
+
+**Step 2: Clear the app cache**
+- iOS: No individual cache clearing; apps manage their own cache. Offload and reinstall the app.
+- Android: Settings → Apps → [App name] → Storage → Clear Cache
+
+**Step 3: Clear app data (resets app to fresh state)**
+- Android only: Settings → Apps → [App name] → Storage → Clear Data
+- Warning: this deletes app preferences and local data
+
+**Step 4: Reinstall the app**
+- Uninstall fully and download fresh from App Store / Play Store
+- Resolves corrupted app installation
+
+**Step 5: Check for app updates**
+- A known bug in the installed version may be fixed in a newer version
+
+**Step 6: Check for OS update**
+- App may require a newer OS version; OS bug may affect the app
+
+**Step 7: Factory reset (last resort)**
+- Backs up data first (iCloud Backup, Google Backup)
+- Erases all content and settings
+- Reinstall apps fresh
+
+<ConceptCallout type="info">
+If an app crashes consistently only on your device but works for others, the issue is device-specific — likely corrupted app data, incompatible OS version, or insufficient RAM. If the app crashes on all devices, it's a bug in the app itself — wait for the developer to release an update.
+</ConceptCallout>
+
+---
+
+## Connectivity Issues
+
+### Wi-Fi Troubleshooting
+
+| Problem | Steps |
+|---|---|
+| Can't connect to known network | Forget network and reconnect; check password; toggle Wi-Fi off/on |
+| Connected but no internet | Airplane mode toggle; check other devices on same network; restart router |
+| Slow Wi-Fi | Check frequency band — 5 GHz is faster but shorter range; check for interference |
+| Won't connect to 5 GHz | Verify device supports 5 GHz Wi-Fi 5/6; check router 5 GHz is enabled |
+| IP conflict | Release and renew DHCP lease; check for static IP conflict |
+
+**Forget and reconnect:**
+- iOS: Settings → Wi-Fi → tap (i) next to network → Forget This Network → reconnect and enter password
+- Android: Settings → Network & Internet → Wi-Fi → long press network → Forget → reconnect
+
+**Airplane mode toggle:** Quickly disables and re-enables all radios. Often resolves transient connection issues.
+
+### Bluetooth Troubleshooting
+
+| Problem | Steps |
+|---|---|
+| Device not found | Ensure accessory is in discoverable mode; move devices within 1 meter |
+| Pairing fails | Remove existing pairing on both devices; retry |
+| Connected but no audio | Verify A2DP profile is connected, not just HFP |
+| Intermittent disconnections | Interference from 2.5 GHz Wi-Fi; move to 5 GHz Wi-Fi |
+| Device was paired, now won't reconnect | "Forget" on both devices and re-pair fresh |
+
+### Cellular Troubleshooting
+
+| Problem | Steps |
+|---|---|
+| No cellular service | Toggle airplane mode; check for carrier outage; reseat SIM card |
+| Can't make calls | Check for "No service"; verify VoLTE is enabled if on LTE-only network |
+| No mobile data | Check APN settings; verify data is enabled in settings; contact carrier |
+| Slow data speeds | Check signal strength; carrier throttling (check data limit); network congestion |
+| SIM not detected | Power off, remove SIM, reinsert firmly; try SIM in another device |
+
+**APN (Access Point Name) settings:**
+APN settings tell the phone how to connect to the carrier's data network. Incorrect APN settings result in no data connectivity even with a strong cellular signal. Settings are usually provisioned automatically when a SIM is inserted, but manual configuration may be needed for certain carriers or MVNOs:
+- iOS: Settings → Cellular → Cellular Data Network → APN
+- Android: Settings → Network & Internet → Mobile Network → Advanced → APNs
+
+---
+
+## OS Update and Software Issues
+
+### Performing OS Updates
+
+**iOS:**
+Settings → General → Software Update → Download and Install
+
+**Android:**
+Settings → System → System Update → Check for Update (path varies by manufacturer)
+
+### App Updates
+
+**iOS:** App Store → Account icon → Update All
+**Android:** Play Store → tap profile icon → Manage apps and device → Update All
+
+### Rollback Options
+
+**iOS:** Apple signs only the current and one previous version of iOS. Downgrading:
+- Possible only while Apple is still signing the older version (typically 2–3 weeks after a new release)
+- Requires iTunes/Finder and an IPSW file for the target version
+- Becomes impossible once Apple stops signing the older version
+
+**Android:** More flexible but device-specific:
+- Stock Android (Pixel): Sideload a factory image via fastboot
+- Samsung: Sideload via Odin
+- Not all devices support easy rollback
+
+<ConceptCallout type="warning">
+Rolling back an iOS device erases all data on the device. Always have a current backup (iCloud or local Finder/iTunes backup) before attempting an OS downgrade or restore.
+</ConceptCallout>
+
+---
+
+## Broken Screen
+
+Understanding whether the digitizer or LCD has failed helps determine what needs to be replaced.
+
+| Scenario | Meaning | Repair Needed |
+|---|---|---|
+| Touch works but no image visible | LCD panel has failed; digitizer intact | Replace LCD/display assembly |
+| Image works but touch doesn't respond | Digitizer has failed; LCD intact | Replace digitizer |
+| Both touch and image broken | Both layers failed (common after severe impact) | Replace full display assembly |
+| Black spot spreading from impact point | LCD liquid crystal layer cracked | Replace LCD assembly |
+| White or multicolored lines across screen | LCD controller or panel broken | Replace LCD assembly |
+
+On most modern smartphones, the digitizer and LCD are **fused together** as a single unit. Even if only the glass is cracked, both must often be replaced together (only specialty repair shops separate glass from LCD).
+
+---
+
+## Water Damage
+
+### Immediate Response to Water Exposure
+
+1. **Power off immediately** — do not attempt to use or charge
+2. Remove the SIM card and tray
+3. Gently shake water from ports
+4. Pat dry with absorbent cloth — do NOT rub (can push water further in)
+5. Place in a dry, well-ventilated area or in a container with **silica gel packets** (desiccant)
+
+### What NOT to Do
+
+| Action | Why Not |
+|---|---|
+| Put in rice | Ineffective — rice does not absorb moisture well from electronics; dust gets inside |
+| Use a hair dryer or oven | Heat damages battery and plastic components |
+| Shake vigorously | Spreads water to dry areas of the device |
+| Turn on to test | Short circuits cause permanent damage |
+| Charge immediately | Charging with moisture present causes shorts |
+
+<ConceptCallout type="warning">
+**Do not use rice.** This is a persistent myth. Rice is a poor desiccant — it absorbs atmospheric moisture slowly but cannot draw moisture out of electronics effectively. Use proper silica gel packets instead. More importantly, even if the device appears to work after drying, water can leave mineral deposits (corrosion) that cause failure days or weeks later.
+</ConceptCallout>
+
+### IP Ratings
+
+Modern flagship phones have IP (Ingress Protection) ratings:
+- **IP67:** Dust tight + water resistant to 1 meter for 30 minutes
+- **IP68:** Dust tight + water resistant to 1.5–6 meters for 30 minutes (varies by manufacturer)
+
+Note: IP ratings are laboratory ratings under controlled conditions. Real-world protection is lower, especially as the seals age or after the phone has been dropped. Water resistance is not waterproofing.
+
+### After Drying
+
+- Wait 24–48 hours before attempting to power on
+- If device powers on: test all functions (speakers, microphone, cameras, ports)
+- If device doesn't work: take to repair shop — ultrasonic cleaning can remove corrosion
+- Corrosion from saltwater or chlorinated water is much more damaging than fresh water
+
+---
+
+## GPS Not Working
+
+### GPS Troubleshooting Steps
+
+**Step 1: Check Location Services**
+- iOS: Settings → Privacy & Security → Location Services → verify it is On
+- Android: Settings → Location → verify Location is On
+- Verify the specific app has permission to use location
+
+**Step 2: Toggle Location Off and On**
+This clears the cached location and forces a fresh acquisition.
+
+**Step 3: Enable High Accuracy Mode (Android)**
+- Settings → Location → Location Mode → High Accuracy (uses GPS, Wi-Fi, and cellular for fastest fix)
+
+**Step 4: Cold Start vs Assisted GPS (A-GPS)**
+- **Cold start GPS:** Acquires satellites from scratch — can take 1–5 minutes in open sky with no cellular data
+- **A-GPS (Assisted GPS):** Downloads current satellite position data (ephemeris) from servers via cellular/Wi-Fi — dramatically speeds up GPS acquisition to seconds
+- If GPS is slow, ensure A-GPS data is fresh: some Android apps have an "A-GPS reset" option that re-downloads ephemeris data
+
+**Step 5: Check for Obstructions**
+- GPS requires line-of-sight to satellites — does not work well indoors, in underground parking, or in urban canyons
+- Metal cases can attenuate GPS signal
+
+**Step 6: Reset Network Settings**
+- Resets Wi-Fi, Bluetooth, and cellular settings including A-GPS data
+- iOS: Settings → General → Transfer or Reset iPhone → Reset → Reset Network Settings
+- Android: Settings → General Management → Reset → Reset Network Settings

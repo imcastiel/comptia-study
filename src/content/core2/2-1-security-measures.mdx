@@ -1,0 +1,146 @@
+# Security Measures and Their Purposes
+
+Security on the 220-1202 exam is divided into two broad categories: physical controls that protect hardware and facilities, and logical/technical controls that protect data and accounts. You need to recognize which control applies to which threat scenario.
+
+## Physical Security
+
+Physical security prevents unauthorized physical access to equipment, facilities, and sensitive information. No amount of software security matters if an attacker can walk out the door with a server.
+
+### Door and Facility Access Controls
+
+| Control | How It Works | Use Case |
+|---|---|---|
+| Key fob / smart card | RFID or NFC token carried by user | Office doors, data center access |
+| PIN pad | Numeric code entered at keypad | Supplemental or standalone door access |
+| Biometric | Fingerprint scanner, retina scan, facial recognition | High-security areas requiring strong identity proof |
+| Mantrap | Two-door airlock — first door must close before second opens | Data centers, server rooms — prevents tailgating |
+
+<ConceptCallout type="tip">Mantraps are the exam answer for preventing tailgating at high-security doors. If a question asks how to stop someone from "piggybacking" through a secure entrance, the answer is a mantrap.</ConceptCallout>
+
+### Badge and Access Control
+
+Organizations issue **RFID badges** to employees that grant access to authorized areas only. Key policies:
+- **Visitor logs**: all non-employees sign in and sign out, recording purpose and host employee
+- **Escort policy**: visitors must be accompanied at all times in sensitive areas — never left alone
+- **Challenge policy**: employees are expected to challenge anyone not wearing a badge or in an area they shouldn't be. This is a cultural control, not a technical one.
+
+### Surveillance
+
+**Security cameras (CCTV)** serve two purposes: deterrence (people behave differently when watched) and forensic evidence (footage reviewed after an incident). Placement matters — cover entrances, server rooms, and common areas. Cameras alone do not stop determined attackers but are a critical layer of the defense-in-depth strategy.
+
+### Physical Device Locks
+
+- **Cable locks**: steel cable with combination or key lock, loops around laptop chassis and anchors to desk. Standard in open offices and conference rooms.
+- **Server rack locks**: locking rack doors and side panels prevent unauthorized access to rack-mounted equipment
+- **Equipment cages**: physical cages around servers or networking gear in colocation facilities
+
+### Guards and Reception
+
+Security guards provide real-time human judgment that cameras cannot. A staffed reception desk forces all visitors through a single checkpoint. Guards can verify identity, issue visitor badges, and physically respond to incidents.
+
+### Privacy Screens
+
+Privacy screens are polarized overlays for laptop and monitor screens that make the display unreadable from side angles. They directly counter **shoulder surfing** — someone next to you on a plane or in a coffee shop reading your screen.
+
+---
+
+## Logical and Technical Security
+
+Logical security controls protect data and systems through software, policies, and authentication mechanisms.
+
+<CompareCards
+  title="Physical vs Logical Security Controls"
+  left={{ title: "Physical Security", icon: "Lock", color: "blue", points: ["Mantraps and key card access", "CCTV surveillance", "Cable locks and rack locks", "Security guards and escorts", "Privacy screens", "Visitor logs and badges"] }}
+  right={{ title: "Logical Security", icon: "Shield", color: "green", points: ["Principle of least privilege", "Multi-factor authentication", "Password policies and lockout", "Encryption at rest and in transit", "Firewalls and IDS/IPS", "Access control models (DAC/MAC/RBAC)"] }}
+/>
+
+### Principle of Least Privilege
+
+<ConceptCallout type="warning">Principle of least privilege is one of the most frequently tested concepts in the security domain. Know the definition cold: users and systems should have only the minimum permissions required to perform their job function — nothing more.</ConceptCallout>
+
+Users should not have local administrator rights unless their job requires it. Service accounts should not run as SYSTEM. An HR clerk does not need read access to engineering file shares. Excess privilege is the root cause of countless security breaches — a compromised account with limited permissions does far less damage than a compromised admin account.
+
+### Zero Trust
+
+Zero Trust is a security model built on the principle of **"never trust, always verify."** Traditional security assumed that everything inside the corporate network could be trusted. Zero Trust rejects this:
+
+- Assume breach — operate as if attackers are already inside
+- Verify every request explicitly — identity, device health, location, and risk
+- Apply least privilege access — just-in-time and just-enough access
+- Use micro-segmentation to limit lateral movement
+
+Zero Trust is increasingly relevant as organizations move to cloud resources and remote work, where the traditional network perimeter no longer exists.
+
+### Multi-Factor Authentication (MFA)
+
+MFA requires two or more of the following factors:
+
+| Factor | Category | Examples |
+|---|---|---|
+| Password, PIN, security questions | Something you know | Windows login password, ATM PIN |
+| Hardware token, authenticator app, smart card, phone | Something you have | RSA SecurID, Google Authenticator, FIDO2 key |
+| Fingerprint, retina scan, facial recognition, voice | Something you are | Windows Hello, Touch ID, Face ID |
+| GPS location, IP address, time of day | Somewhere you are | Conditional access policies |
+
+Using two factors from the same category (two passwords) is NOT true MFA — the factors must come from different categories.
+
+### Password Policies
+
+Strong password policies are configured via **Local Security Policy** (secpol.msc) or Group Policy on a domain. Key settings:
+
+| Policy | Recommended Setting | Purpose |
+|---|---|---|
+| Minimum length | 12+ characters | Increases brute-force time exponentially |
+| Complexity requirements | Uppercase, lowercase, numbers, symbols | Prevents simple dictionary words |
+| Maximum age | 90 days (or longer with MFA) | Limits exposure window if compromised |
+| Minimum age | 1 day | Prevents immediate reuse cycling |
+| Password history | Remember last 24 | Prevents reuse of recent passwords |
+| Account lockout threshold | 3–5 attempts | Stops online brute-force attacks |
+| Lockout duration | 15–30 minutes | Slows automated attacks |
+
+### Encryption
+
+**Encryption at rest** protects data stored on drives if physical media is stolen:
+- Windows: **BitLocker** (full-disk encryption, requires Pro or higher)
+- macOS: **FileVault** (full-disk encryption, built into all modern versions)
+
+**Encryption in transit** protects data moving across a network:
+- **TLS/HTTPS**: encrypts web traffic (port 443). The padlock icon in a browser indicates TLS.
+- **VPN**: encrypts all network traffic between a client and corporate network. Protocols include IPsec, SSL/TLS (OpenVPN), and WireGuard.
+- **SSH**: encrypted replacement for Telnet for remote terminal access
+
+### Access Control Models
+
+| Model | How Access Is Determined | Example |
+|---|---|---|
+| DAC (Discretionary Access Control) | Resource **owner** decides who gets access | NTFS file permissions set by the file's creator |
+| MAC (Mandatory Access Control) | **Policy** (classification labels) determines access, not owners | Government systems: Top Secret, Secret, Unclassified |
+| RBAC (Role-Based Access Control) | Access granted based on **job role/function** | All Sales employees get CRM access, all HR employees get HRIS access |
+
+---
+
+## Account Security Hardening
+
+### Default Credentials
+
+Every new device — routers, switches, printers, cameras, NAS devices — ships with a default username and password. These are publicly listed in vendor documentation and immediately targeted by attackers. **Always change default credentials before deploying any device.**
+
+### Screensaver Lock
+
+Configure screen locks to activate after a short inactivity period (5–10 minutes). On domain machines, this is enforced via Group Policy. The lock screen requires re-authentication before the session is accessible. This prevents an unattended workstation from being accessed by a passerby.
+
+### Guest Accounts
+
+The built-in Windows Guest account provides limited, unauthenticated access to a machine. **Disable guest accounts when not required.** Enabled guest accounts can be exploited as initial footholds in an attack.
+
+---
+
+## Network Security Basics
+
+Network controls form a perimeter defense layer. Key technologies:
+
+- **Firewalls**: filter traffic based on IP address, port, and protocol. Stateful firewalls track connection state.
+- **IDS (Intrusion Detection System)**: monitors traffic and alerts on suspicious patterns — detects but does not block
+- **IPS (Intrusion Prevention System)**: monitors and actively blocks suspicious traffic inline
+- **VPN**: creates an encrypted tunnel for remote access to internal resources
+- **Network segmentation**: divides a network into subnets or VLANs to contain breaches and limit lateral movement. A compromised machine in the guest VLAN cannot reach the server VLAN.

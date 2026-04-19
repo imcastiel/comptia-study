@@ -1,0 +1,157 @@
+# Cables, Connectors, Features, and Purposes
+
+This objective covers every major cable type you'll encounter as a technician: network, video, storage, USB, and power. Knowing which cable does what — and why — is fundamental to the job.
+
+## Network Cables
+
+### Twisted Pair (Ethernet)
+
+Twisted pair cable is the standard for LAN connections. Pairs of wires twist around each other to cancel electromagnetic interference (EMI) through a principle called *differential signaling*.
+
+<NetworkConnectors />
+
+*All use RJ-45 connectors (except Cat7/8 variants). Cat6a is the current recommended standard for new installs.*
+
+| Category | Max Speed | Max Distance | Notes |
+| --- | --- | --- | --- |
+| Cat5e | 1 Gbps | 100 m | Most common legacy cable in existing installs |
+| Cat6 | 10 Gbps | 55 m (at 10G) | Thicker, internal separator reduces crosstalk |
+| Cat6a | 10 Gbps | 100 m | Augmented — maintains 10G full distance |
+| Cat7 | 10 Gbps | 100 m | Fully shielded (S/FTP), uses GG45 or TERA connectors |
+| Cat8 | 25–40 Gbps | 30 m | Data center use only, very thick |
+
+**UTP vs STP:** Unshielded Twisted Pair (UTP) is standard for most installations. Shielded Twisted Pair (STP or S/FTP) adds a foil or braid shield for high-EMI environments like factory floors or near electrical equipment. STP requires proper grounding.
+
+**T568A vs T568B:** Two wiring standards for pinning RJ-45 connectors. T568B is the most common in the US. A *straight-through* cable uses the same standard on both ends (connects different device types: PC to switch). A *crossover* cable uses T568A on one end and T568B on the other (connects like devices). Modern switches and NICs include Auto-MDI/MDIX — they detect and automatically compensate, making crossover cables largely obsolete.
+
+**Plenum vs Riser vs PVC:** Cable jacket material matters for safety:
+- **PVC jacket** — standard, flexible, used in most locations. Releases toxic HCl gas when burned.
+- **Riser-rated (CMR)** — required in vertical runs between floors. Better fire resistance than PVC.
+- **Plenum-rated (CMP)** — required in plenum spaces (above drop ceilings, below raised floors where air circulates for HVAC). Low-smoke, fire-resistant jacket. Required by fire code.
+
+<ConceptCallout type="tip">
+  The exam loves plenum-rated cables. Remember: **plenum spaces = air handling spaces = require plenum-rated (CMP) cable** because toxic smoke from PVC would circulate through the building's air system.
+</ConceptCallout>
+
+### Coaxial Cable
+
+Coaxial cable has a central conductor, dielectric insulator, braided shield, and outer jacket — all sharing the same axis (hence *co-axial*).
+
+- **RG-6** — used for cable TV, satellite, and broadband internet (cable modem). Standard in homes. Uses F-type connectors.
+- **RG-59** — thinner, lower quality, used for short CCTV runs and older analog cable TV. Lower shielding.
+
+### Fiber Optic Cable
+
+Fiber transmits data as light pulses, immune to EMI and capable of much longer distances than copper.
+
+| Type | Core Size | Jacket Color | Max Distance | Use Case |
+| --- | --- | --- | --- | --- |
+| Multimode OM1 | 62.5 μm | Orange | 300 m (1G) | Legacy, existing installs |
+| Multimode OM3 | 50 μm | Aqua | 300 m (10G) | Data centers, within buildings |
+| Multimode OM4 | 50 μm | Aqua/Erika violet | 400 m (10G) | Higher-performance data centers |
+| Single-mode OS2 | 8–10 μm | Yellow | Up to 100 km | WAN, campus backbone, ISP |
+
+**Single-mode:** One light path (mode) through the small core eliminates modal dispersion, enabling extremely long distances. Requires a laser light source.
+
+**Multimode:** Multiple light paths. Cheaper, uses LED or VCSEL sources, but dispersion limits distance. Used within buildings and data centers.
+
+**Fiber connectors:**
+- **LC** (Lucent Connector) — small form factor with push-pull latch. Most common in data centers and patch panels.
+- **SC** (Subscriber Connector) — square push-pull design. Widely used.
+- **ST** (Straight Tip) — bayonet (twist-lock) design. Older, still found in legacy installations.
+- **MPO/MTP** — multi-fiber (12–72 fibers in one connector). Used for 40G/100G high-density environments.
+
+## Video Cables
+
+<VideoConnectors />
+
+Already covered in detail in Objective 3.1. Quick reference:
+
+| Connector | Signal | Audio | Common on |
+|-----------|--------|-------|-----------|
+| VGA | Analog | No | Legacy monitors, projectors |
+| DVI-D/I | Digital/Both | No | Desktop monitors, older GPUs |
+| HDMI | Digital | Yes | TVs, monitors, projectors |
+| DisplayPort | Digital | Yes | PC monitors, GPUs |
+| Thunderbolt | Digital | Yes | Laptops (USB-C), docking stations |
+
+## Storage Cables
+
+<StorageConnectors />
+
+### SATA
+
+Serial ATA is the standard interface for HDDs, SSDs, and optical drives. Uses a 7-pin data connector and a separate 15-pin SATA power connector.
+
+| Version | Speed | Real-World SSD Max | Notes |
+| --- | --- | --- | --- |
+| SATA I | 1.5 Gbps | ~130 MB/s | Legacy |
+| SATA II | 3 Gbps | ~270 MB/s | Older systems |
+| SATA III | 6 Gbps | ~550 MB/s | Current standard — all modern drives |
+
+All SATA generations are backward compatible. A SATA III SSD in a SATA II port runs at SATA II speeds.
+
+### eSATA
+
+External SATA — extends SATA to external enclosures with a shielded cable (2m max). Provides native SATA speeds without USB overhead. Does **not** supply power (the drive needs a separate power adapter). Less common in modern systems, largely replaced by USB 3.x and Thunderbolt.
+
+### NVMe / M.2
+
+NVMe (Non-Volatile Memory Express) drives connect via PCIe lanes, bypassing the slower SATA/AHCI protocol entirely. NVMe drives typically connect via an **M.2 slot** on the motherboard (covered in Objective 3.4).
+
+## USB Standards
+
+USB is the universal standard for peripheral connectivity.
+
+*USB 3.x is backward compatible with USB 2.0. Blue port = USB 3.x Gen 1 minimum.*
+
+| Standard | Speed | Connector | Port Color |
+| --- | --- | --- | --- |
+| USB 1.1 | 12 Mbps (Full Speed) | Type-A/B | — |
+| USB 2.0 | 480 Mbps (Hi-Speed) | Type-A/B/Micro/Mini | Black/white |
+| USB 3.2 Gen 1 | 5 Gbps (SuperSpeed) | Type-A/C | Blue |
+| USB 3.2 Gen 2 | 10 Gbps (SuperSpeed+) | Type-A/C | Teal/red |
+| USB 3.2 Gen 2×2 | 20 Gbps | Type-C only | — |
+| USB4 Gen 2×2 | 20 Gbps | Type-C only | — |
+| USB4 Gen 3×2 | 40 Gbps | Type-C only | — |
+
+<USBConnectors />
+
+**USB connector types:**
+- **Type-A** — rectangular, the common "host" side on computers
+- **Type-B** — square with beveled corners, used on older printers/devices
+- **Micro-B** — small, used on older Android phones and many peripherals
+- **Mini-B** — older standard, used on early MP3 players and cameras
+- **Type-C** — oval, reversible, carries USB 3.x, USB4, Thunderbolt, DisplayPort, and power
+
+**Thunderbolt 3 and 4** both use the USB-C connector and are physically compatible with USB-C devices. Thunderbolt 4 is the current standard with guaranteed 40 Gbps data, 100W power delivery, and mandatory dual 4K display output support.
+
+<ConceptCallout type="warning">
+  Not all USB-C cables and ports are equal. A USB-C cable might support only USB 2.0 speeds. Thunderbolt 4 cables are certified for 40 Gbps but cost more. Always check cable specifications — the connector shape alone tells you nothing about speed.
+</ConceptCallout>
+
+## Power Connectors
+
+### ATX 24-pin
+
+The main motherboard power connector. Provides +3.3V, +5V, +12V, -12V, +5VSB, and control signals. Older systems used a 20-pin connector; 24-pin backward-compatible adapters exist.
+
+### EPS 8-pin CPU Power
+
+Separate connector providing dedicated +12V to the CPU's voltage regulator. Also called ATX12V or P4 connector. High-end motherboards use two 8-pin connectors.
+
+### PCIe 6+2-pin
+
+Provides supplemental power to graphics cards. Can be used as 6-pin (75W) or 8-pin (150W). Modern high-end GPUs use the 16-pin 12VHPWR connector (up to 600W).
+
+### SATA Power (15-pin)
+
+Powers SATA drives and optical drives. Provides +3.3V, +5V, and +12V. The L-shaped connector prevents incorrect insertion.
+
+### Molex (4-pin)
+
+Legacy large connector providing +5V (red) and +12V (yellow). Originally for IDE hard drives. Still used for some fans, LED strips, and older peripherals.
+
+<ConceptCallout type="tip">
+  Know these connector PIN COUNTS for the exam: **24-pin** ATX motherboard power, **8-pin** EPS CPU power, **6 or 8-pin** PCIe GPU power, **15-pin** SATA power, **4-pin** Molex.
+</ConceptCallout>

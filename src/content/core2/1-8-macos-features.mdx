@@ -1,0 +1,263 @@
+# macOS Features and Tools
+
+macOS is Apple's desktop operating system, built on a Unix/BSD foundation. For the 220-1202 exam, you need to recognize core macOS tools and understand how they map to their Windows equivalents. Expect scenario questions where you identify the correct macOS utility for a given task.
+
+## Finder
+
+Finder is the macOS file manager — the equivalent of Windows File Explorer.
+
+**Key Finder features:**
+- **Sidebar**: Quick access to Favorites (Desktop, Documents, Downloads), iCloud Drive, tags, network locations, connected servers, and external drives.
+- **Views**: Icon view, List view, Column view (shows full path hierarchy), Gallery view (large previews). Toggle with Cmd+1/2/3/4.
+- **Tags**: Color-code files for quick visual organization. Tags appear in the sidebar for one-click filtering.
+- **Connected Servers**: Finder can connect to network shares via `Go > Connect to Server` (Cmd+K). Supports SMB (`smb://server/share`), AFP, and FTP.
+- **Go Menu**: Quick navigation to specific directories — Computer, Home (~), Desktop, Documents, Applications, Utilities, and "Go to Folder" (Cmd+Shift+G) for direct path entry.
+- **Trash**: Equivalent to Windows Recycle Bin. Files are moved here before permanent deletion. `Finder > Empty Trash` or right-click > Empty Trash to permanently delete.
+
+<ConceptCallout type="tip">To show hidden files in Finder, press Cmd+Shift+. (period). On the exam, if asked how to reveal hidden system files in macOS, this is the keyboard shortcut answer. The Terminal equivalent is `ls -la`.</ConceptCallout>
+
+### Finder vs Windows Explorer
+
+| Feature | Finder (macOS) | File Explorer (Windows) |
+|---|---|---|
+| Open | Dock (always visible) | Taskbar or Win+E |
+| Path bar | View > Show Path Bar | Address bar always visible |
+| Cut files | Not supported (use Cmd+Option+V to move) | Ctrl+X then Ctrl+V |
+| Connect to server | Go > Connect to Server (Cmd+K) | Map Network Drive or `\\server\share` |
+| Sidebar | Favorites, iCloud, Tags, Locations | Quick Access, This PC, Network |
+| File preview | Quick Look (spacebar) | Preview pane |
+
+## Spotlight
+
+**Keyboard shortcut: Cmd+Space**
+
+Spotlight is macOS's system-wide search and quick-launch tool. It indexes the entire file system and provides instant results as you type.
+
+**What Spotlight can do:**
+- Launch applications (type the app name)
+- Find files and documents
+- Search email messages and calendar events
+- Perform math calculations (`42 * 8.5` returns the result instantly)
+- Convert units (`100 USD to EUR`, `5 miles to km`)
+- Show word definitions (type a word)
+- Search the web (opens results in browser)
+- Find contacts
+
+<ConceptCallout type="info">Spotlight is the macOS equivalent of Windows Search. On the exam, if asked how to quickly launch an application on macOS without using the Dock, the answer is Spotlight (Cmd+Space).</ConceptCallout>
+
+## Mission Control
+
+**Shortcut: F3, or swipe up with three fingers on trackpad**
+
+Mission Control provides an overview of all open windows, Spaces (virtual desktops), and full-screen apps simultaneously — like a bird's-eye view of everything running.
+
+**Key Mission Control features:**
+- **Spaces**: macOS's virtual desktop feature. Create multiple desktops to separate work contexts (e.g., one Space for work apps, one for personal). Switch with Ctrl+Arrow keys.
+- **Full-screen apps**: Apps in full-screen mode appear as their own Space in Mission Control.
+- **App Exposé**: Show all windows of the current application (swipe down with three fingers, or right-click Dock icon > Show All Windows).
+
+## Terminal
+
+Terminal is macOS's command-line interface. It runs **zsh** by default (since macOS Catalina 10.15), with bash available. Because macOS is Unix-based, standard POSIX commands work natively.
+
+### Essential Terminal Commands
+
+| Command | Function | Example |
+|---|---|---|
+| `ls` | List directory contents | `ls -la` (all files with details) |
+| `cd` | Change directory | `cd ~/Documents` |
+| `pwd` | Print working directory | `pwd` |
+| `cp` | Copy files | `cp file.txt ~/Desktop/` |
+| `mv` | Move or rename | `mv old.txt new.txt` |
+| `rm` | Remove files | `rm -rf folder/` |
+| `mkdir` | Make directory | `mkdir ProjectFiles` |
+| `sudo` | Run as root | `sudo rm /Library/file` |
+| `chmod` | Change permissions | `chmod 755 script.sh` |
+| `chown` | Change owner | `chown user:staff file.txt` |
+| `diskutil` | Disk management | `diskutil list` |
+| `brew` | Homebrew package manager | `brew install wget` |
+| `top` | Process monitor | `top` (like Task Manager) |
+| `ps` | List processes | `ps aux` |
+| `kill` | Terminate process | `kill -9 1234` |
+
+**Homebrew** (`brew`) is the unofficial macOS package manager. It installs command-line tools and GUI apps not available in the App Store. Common on developer machines.
+
+<ConceptCallout type="tip">Terminal is the macOS equivalent of both Command Prompt and PowerShell. For the exam, recognize that macOS has a full Unix terminal with commands like chmod, chown, and sudo — things that don't exist in Windows cmd.exe.</ConceptCallout>
+
+## Disk Utility
+
+**Location: /Applications/Utilities/Disk Utility**
+
+Disk Utility is the macOS graphical tool for managing disks and disk images — equivalent to Disk Management in Windows plus some additional features.
+
+### What Disk Utility Can Do
+
+| Function | Description |
+|---|---|
+| Format/Erase | Format a drive with a chosen file system |
+| Partition | Create, resize, and delete partitions |
+| First Aid | Check and repair file system errors (like chkdsk) |
+| Disk Images | Create, mount, and convert .dmg files |
+| RAID | Set up software RAID (Stripe, Mirror, Concat) |
+| Restore | Clone one disk to another |
+
+### macOS File System Formats
+
+| Format | Use Case |
+|---|---|
+| APFS | Default for macOS 10.13+. SSD-optimized, snapshots, encryption |
+| HFS+ (Mac OS Extended) | Legacy format, older drives and macOS versions |
+| exFAT | Cross-platform (macOS + Windows), external drives |
+| FAT32 | Maximum compatibility, 4 GB file size limit |
+| NTFS | Windows-native; macOS can read but NOT write without third-party tools |
+
+<ConceptCallout type="warning">macOS can read NTFS drives but cannot write to them by default. If a tech needs to transfer files from a Mac to a Windows-formatted external drive, either reformat the drive as exFAT (best compatibility) or install a third-party NTFS driver like Paragon NTFS.</ConceptCallout>
+
+**First Aid** verifies and repairs the file system structure. Run it when a drive is acting erratically or after an improper shutdown. For the boot drive, run First Aid from macOS Recovery (hold Cmd+R at startup).
+
+## FileVault
+
+FileVault is macOS's full-disk encryption — equivalent to BitLocker on Windows.
+
+**How it works:**
+- Encrypts the entire startup disk using XTS-AES-128 encryption
+- Encryption/decryption is transparent to the user after unlocking with their login password
+- Uses the user's login password as the encryption key (tied to their Apple ID or recovery key)
+
+**Setup: System Settings > Privacy & Security > FileVault**
+
+**Recovery options:**
+- **Recovery key**: A 24-character code shown during setup. Store securely — losing both the password and recovery key means permanent data loss.
+- **Apple ID recovery**: Option to use iCloud account to unlock (for personal Macs)
+- **MDM recovery**: In enterprise environments, the MDM (e.g., Jamf) escrows the recovery key
+
+<ConceptCallout type="warning">FileVault recovery key management is critical in enterprise deployments. IT must use MDM to escrow recovery keys — if a user forgets their password and no key is escrowed, the data is unrecoverable. This is the macOS equivalent of BitLocker recovery key management.</ConceptCallout>
+
+## Gatekeeper
+
+Gatekeeper is macOS's application security system that controls which apps can run based on their source and signing status.
+
+### Gatekeeper Security Levels
+
+| Setting | What Can Run |
+|---|---|
+| App Store | Only apps downloaded from the Mac App Store |
+| App Store and identified developers | App Store apps + apps signed with an Apple Developer certificate |
+| Anywhere | All apps, regardless of source (disabled by default in modern macOS) |
+
+**System Settings > Privacy & Security** — the "Allow applications downloaded from" setting.
+
+### How Gatekeeper Works
+
+1. **Code signing**: Developers sign their apps with an Apple Developer ID certificate
+2. **Notarization**: Apple scans submitted apps for malware before approving distribution. Required for apps outside the App Store since macOS Catalina.
+3. **XProtect**: Built-in malware signature database. Automatically checks apps against known malware definitions.
+4. **Quarantine flag**: Any file downloaded from the internet is tagged with a quarantine flag. Gatekeeper checks this flag before allowing execution.
+
+To run an unsigned app temporarily: **right-click > Open** (bypasses Gatekeeper for that specific instance with user confirmation).
+
+<ConceptCallout type="info">Gatekeeper is the macOS equivalent of Windows SmartScreen. Both warn users about unsigned or unrecognized applications. The right-click > Open workaround for Gatekeeper is similar to "Run anyway" in Windows SmartScreen.</ConceptCallout>
+
+## Time Machine
+
+Time Machine is macOS's built-in automatic backup system.
+
+**Backup schedule:**
+- Hourly backups for the past 24 hours
+- Daily backups for the past month
+- Weekly backups for everything older (until the backup drive fills)
+- Old backups are automatically deleted when space is needed
+
+**Backup destinations:**
+- External USB/Thunderbolt drive (most common)
+- Network Attached Storage (NAS) supporting AFP or SMB with Time Machine support
+- Apple Time Capsule (discontinued AirPort device with built-in drive)
+
+**Restoring files:**
+- Enter Time Machine from the menu bar icon to browse past versions of the file system
+- Select a date/time and restore individual files without restoring the entire system
+- Full system restore: boot from macOS Recovery, choose "Restore from Time Machine Backup"
+
+<ConceptCallout type="tip">Time Machine stores all backups as incremental snapshots — only changed files are stored each hour, so a full 1 TB drive doesn't use 1 TB per backup. Space is reclaimed automatically as the drive fills by deleting the oldest backups.</ConceptCallout>
+
+## iCloud
+
+iCloud is Apple's cloud platform, integrated throughout macOS and iOS.
+
+**Key iCloud services:**
+
+| Service | Description |
+|---|---|
+| iCloud Drive | File storage and sync (like OneDrive). Appears as a location in Finder. |
+| iCloud Photos | Photo library stored in cloud, accessible on all Apple devices |
+| iCloud Keychain | Password manager and credential sync across Apple devices |
+| iCloud Mail | Apple's email service (@icloud.com) |
+| iCloud Backup | iOS device backup (not macOS) |
+| Handoff/Continuity | Start a task on iPhone, continue on Mac (requires same iCloud account) |
+| Find My | Device location tracking and remote lock/wipe |
+
+**Storage:** 5 GB free. Paid plans: 50 GB, 200 GB, 2 TB.
+
+**Optimize Mac Storage:** When iCloud Drive is enabled, macOS can keep only recently used files locally and store older files in iCloud only. Files appear in Finder with a cloud icon if they are cloud-only; clicking them downloads on demand.
+
+## System Settings (formerly System Preferences)
+
+**System Settings** (renamed in macOS Ventura 13) is the macOS equivalent of Windows Control Panel / Settings app.
+
+### Key Sections
+
+| Section | Windows Equivalent |
+|---|---|
+| General > About | System Properties |
+| Displays | Display Settings |
+| Network | Network and Sharing Center |
+| Printers & Scanners | Printers & Scanners |
+| Users & Groups | User Accounts |
+| Battery / Energy Saver | Power Options |
+| Privacy & Security | Security & Privacy / Windows Security |
+| Software Update | Windows Update |
+| Keyboard / Mouse / Trackpad | Mouse and Keyboard settings |
+| Sound | Sound settings |
+| Bluetooth | Bluetooth & devices |
+| Notifications | Notification settings |
+| Accessibility | Ease of Access |
+
+<ConceptCallout type="info">Prior to macOS Ventura (version 13), this was called System Preferences. Both names refer to the same tool. Exam questions may use either term. The functionality is identical regardless of the name.</ConceptCallout>
+
+## macOS File System Structure
+
+| Path | Contents | Windows Equivalent |
+|---|---|---|
+| `/Applications` | Installed applications | `C:\Program Files` |
+| `/Users/username` | User's home folder | `C:\Users\username` |
+| `/Users/username/Desktop` | Desktop files | Desktop |
+| `/Users/username/Documents` | Documents | Documents |
+| `/Library` | System-wide app support, preferences | (No direct equivalent) |
+| `/Users/username/Library` | Per-user app support, preferences | AppData |
+| `/System` | macOS core OS files | `C:\Windows` |
+| `/bin`, `/usr/bin` | Command-line utilities | `C:\Windows\System32` |
+| `/etc` | Configuration files | (No direct equivalent) |
+| `/tmp` | Temporary files | `C:\Windows\Temp` |
+| `~` | Shorthand for the current user's home directory | `%USERPROFILE%` |
+
+## macOS vs Windows: Exam Comparison Table
+
+| Function | macOS | Windows |
+|---|---|---|
+| File manager | Finder | File Explorer |
+| Search/launcher | Spotlight (Cmd+Space) | Windows Search (Win+S) |
+| Terminal | Terminal (zsh/bash) | Command Prompt / PowerShell |
+| Task manager | Activity Monitor | Task Manager |
+| Control panel | System Settings | Settings / Control Panel |
+| Disk management | Disk Utility | Disk Management (diskmgmt.msc) |
+| Full-disk encryption | FileVault | BitLocker |
+| App security | Gatekeeper + XProtect | SmartScreen |
+| Backup | Time Machine | File History / Backup and Restore |
+| Screenshot | Cmd+Shift+3 (full), Cmd+Shift+4 (selection) | Win+PrintScreen / Snipping Tool |
+| Force quit | Cmd+Option+Esc | Ctrl+Alt+Del > Task Manager |
+| Default modifier key | Command (Cmd) | Control (Ctrl) |
+| Copy/Paste | Cmd+C / Cmd+V | Ctrl+C / Ctrl+V |
+| Virtual desktops | Spaces (Mission Control) | Virtual Desktops (Win+Tab) |
+| Package manager | Homebrew (third-party) | winget (built-in since Win 10) |
+
+<ConceptCallout type="tip">The most common exam trap: the macOS modifier key is **Command (Cmd)**, not Control. Copy is Cmd+C, not Ctrl+C. Undo is Cmd+Z. When a question gives a macOS keyboard shortcut, the Cmd key is the Windows Ctrl equivalent in almost every case.</ConceptCallout>

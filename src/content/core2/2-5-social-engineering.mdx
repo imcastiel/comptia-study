@@ -1,0 +1,132 @@
+# Social Engineering Attacks and Vulnerabilities
+
+Social engineering attacks target human psychology rather than technical vulnerabilities. An attacker who can trick a person into handing over credentials or opening a door bypasses every technical control in place. Understanding these attack types — and how to defend against them — is a significant portion of the security domain.
+
+<ConceptCallout type="warning">The majority of successful security breaches begin with social engineering. Technical controls like firewalls and antivirus are largely irrelevant if an employee is convinced to hand over their password or let an attacker through the front door. Security awareness training is consistently the highest-ROI security investment.</ConceptCallout>
+
+## Social Engineering Fundamentals
+
+Attackers exploit predictable human behaviors:
+
+- **Trust**: we assume people are who they say they are, especially if they seem authoritative
+- **Urgency and fear**: "Your account will be closed in 24 hours" — pressure prevents careful thinking
+- **Authority**: people comply with requests from those in perceived positions of power (IT, management, government)
+- **Reciprocity**: if someone does you a favor, you feel obligated to return it
+- **Social proof**: "Everyone else has already done this" reduces individual resistance
+- **Scarcity**: "This is your only chance" creates panic-driven decisions
+
+---
+
+## Attack Types
+
+| Attack | Vector | Description | Defense |
+|---|---|---|---|
+| Phishing | Email | Fraudulent email impersonating trusted org (bank, Microsoft, IRS); generic targets | Email filtering, user training, verify sender |
+| Spear phishing | Email | Targeted phishing using personal details about the victim; far more convincing | Same as phishing; verify requests via separate channel |
+| Whaling | Email | Spear phishing targeting C-suite executives (CEO, CFO, board members) | Executive-specific training, strict wire transfer procedures |
+| Vishing | Phone | Voice calls impersonating IT support, banks, government ("Your SSN has been compromised") | Never give credentials by phone; call back on known number |
+| Smishing | SMS | Text messages with malicious links or requests ("Your package could not be delivered, click here") | Never click SMS links from unknown numbers |
+| Tailgating | Physical | Following authorized person through secure door without using own credentials | Mantraps, badge awareness, challenge policy |
+| Shoulder surfing | Physical | Watching someone enter PIN, password, or view sensitive data | Privacy screens, positional awareness |
+| Dumpster diving | Physical | Searching discarded documents and hardware for sensitive data | Cross-cut shredding, drive wiping before disposal |
+| Impersonation | In person / phone | Claiming to be IT support, vendor, delivery person, or authority figure | Verify identity independently before granting access |
+| Pretexting | Any | Creating a fabricated scenario to justify an unusual request | Train staff to verify unusual requests regardless of pretext |
+| Quid pro quo | Phone / in person | Offering a service in exchange for information or access ("I'll fix your slow PC if you give me your login") | Never share credentials; report offers |
+| Watering hole | Web | Compromising websites that the target group is known to visit | Keep software patched, endpoint protection |
+| BEC | Email | Spoofed or compromised executive email authorizing wire transfers or data disclosure | Out-of-band verification for financial requests |
+
+---
+
+## Phishing in Depth
+
+Phishing is the most common social engineering vector because it scales — one email can be sent to millions of targets simultaneously.
+
+### Phishing Indicators
+
+Know these warning signs for the exam and for real-world identification:
+
+- **Generic greetings**: "Dear Customer" or "Dear User" instead of your name
+- **Urgency and threats**: "Your account will be suspended," "Unauthorized access detected," "Immediate action required"
+- **Mismatched or spoofed URLs**: the link text says `paypal.com` but hovering shows `paypa1.com` or `paypal.security-check.ru`
+- **Spelling and grammar errors**: legitimate organizations proofread their communications
+- **Unexpected attachments**: invoices, shipping notifications, or "secure documents" you were not expecting
+- **Requests for credentials**: no legitimate service will ask you to reply with your password via email
+- **Sender domain mismatch**: `support@apple-security-alert.com` is not Apple
+- **Unusual sender for the content**: an email from "IT Department" asking you to click a link to reset your password, when you did not initiate a reset
+
+### Spear Phishing and Whaling
+
+Spear phishing is personalized. The attacker researches the target (LinkedIn, company website, social media, data breach dumps) to include specific details that make the email believable: the target's name, their manager's name, a recent project, a colleague's email address. Detection requires critical thinking rather than pattern matching.
+
+Whaling targets executives specifically because they have the authority to approve large wire transfers, access sensitive data, and override security controls. A CFO receiving an email that appears to come from the CEO requesting an urgent wire transfer is a common whaling scenario.
+
+### Vishing: Tech Support Scams
+
+Tech support scams are a prevalent form of vishing. Common patterns:
+- Unsolicited phone call claiming to be from "Microsoft Support" — "We've detected a virus on your computer"
+- Pop-up in browser with a phone number claiming your computer is infected, directing you to call "Microsoft"
+- Attacker asks victim to install remote access software (AnyDesk, TeamViewer) then takes control of the machine
+
+<ConceptCallout type="tip">Microsoft, Apple, and legitimate tech companies do not proactively call customers about viruses or security problems. If someone calls you claiming to be tech support, hang up and call the company's official number directly if you have concerns.</ConceptCallout>
+
+---
+
+## Physical Social Engineering
+
+### Tailgating and Piggybacking
+
+**Tailgating** is following an authorized employee through a secure door before it closes. **Piggybacking** involves the authorized person actively holding the door — often because the attacker is carrying boxes or appears to need assistance.
+
+Defenses:
+- Mantraps at high-security entrances (physical barrier prevents more than one person from passing at a time)
+- Badge readers on both sides of doors to enforce accountability
+- Challenge policy: employees are expected to ask anyone without a visible badge "Can I help you?" and not allow them to proceed unescorted
+
+### Dumpster Diving
+
+Discarded documents can contain employee names and phone numbers (useful for impersonation), client information, account numbers, internal network diagrams, and even printed credentials. Policy requirements:
+- All documents containing sensitive information must be cross-cut shredded (not strip-cut — strip-cut documents can be reassembled)
+- Storage media (drives, USB sticks, CDs) must be wiped or physically destroyed before disposal
+- Dumpsters containing sensitive material should be locked
+
+---
+
+## Business Email Compromise (BEC)
+
+BEC is a high-value attack where criminals either compromise a real executive email account or create a convincing spoofed account. The attacker then emails the finance team, HR, or a vendor to authorize a fraudulent wire transfer or request W-2/payroll data.
+
+BEC attacks have cost businesses billions of dollars. The FBI's IC3 consistently lists BEC as the highest-dollar-loss internet crime category.
+
+**Defenses specific to BEC**:
+- Implement **DMARC, SPF, and DKIM** email authentication to prevent domain spoofing
+- Establish out-of-band verification procedures (phone call to a known number) for all wire transfer requests above a threshold
+- Train finance staff to recognize urgency manipulation ("Do it right now, don't verify, I'm in a meeting")
+- No exceptions to wire transfer approval procedures, regardless of who is asking
+
+---
+
+## Defense Strategies
+
+### Security Awareness Training
+
+Training is the most important and most cost-effective defense against social engineering. Effective programs:
+- Conducted regularly (not just once at onboarding)
+- Include simulated phishing exercises with immediate feedback when employees click
+- Cover current and evolving attack techniques
+- Create a culture where reporting suspicious contacts is encouraged, not embarrassing
+
+### Process Controls
+
+- **Never share credentials** via phone, email, chat, or any channel — for any reason, to anyone, even IT
+- **Verify caller identity independently**: hang up, look up the company's official number, call back
+- **Out-of-band verification** for sensitive requests: if an email asks for a wire transfer or credential change, verify via a separate channel (phone, in person)
+- **Challenge policy**: every employee is empowered and expected to challenge unescorted visitors
+- **Shred everything**: all documents with any PII, account numbers, or internal information before disposal
+
+### Technical Controls Supporting Human Defenses
+
+- **Email filtering**: spam and phishing filters to reduce volume of malicious email reaching users
+- **DMARC/SPF/DKIM**: email authentication standards that prevent domain spoofing
+- **Multi-factor authentication**: even if an attacker obtains a password, MFA prevents immediate account compromise
+- **URL filtering / web proxy**: blocks known malicious URLs before the user can reach them
+- **Caller ID verification policies**: do not rely solely on caller ID, which can be spoofed

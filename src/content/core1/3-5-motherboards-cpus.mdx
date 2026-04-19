@@ -1,0 +1,171 @@
+# Motherboards, CPUs, and Add-On Cards
+
+The motherboard is the central interconnection point for every component in the system. Understanding its layout, the CPU it supports, and how expansion cards attach is foundational knowledge for any technician.
+
+## Motherboard Form Factors
+
+Form factor determines physical size, mounting hole locations, power connector placement, and maximum expansion slot count. The **ATX standard** defines these so motherboards and cases are interchangeable across manufacturers.
+
+*Smaller boards fit in larger cases (mATX fits ATX tower). Larger boards never fit smaller cases.*
+
+| Form Factor | Dimensions | PCIe Slots | RAM Slots | Common Use |
+| --- | --- | --- | --- | --- |
+| ATX | 305 × 244 mm | Up to 7 | 2–8 | Standard desktop builds |
+| Micro-ATX (mATX) | 244 × 244 mm | Up to 4 | 2–4 | Compact desktops |
+| Mini-ITX | 170 × 170 mm | 1 | 2 | Small form factor (SFF) builds |
+| E-ATX | 305 × 330 mm | Up to 8 | 4–8 | High-end workstations, servers |
+
+## CPU Sockets
+
+The CPU socket physically and electrically connects the processor to the motherboard. CPU generations require specific sockets — you cannot mix and match.
+
+**Intel LGA (Land Grid Array):** The pin array is in the *socket*, not the CPU. The CPU bottom has flat contact pads. A retention arm holds the CPU. Current socket: **LGA1700** (Intel 12th/13th/14th gen Core).
+
+**AMD PGA (Pin Grid Array):** Pins are on the *CPU* bottom, and the socket has corresponding holes. Used through AMD AM4 (Ryzen 1000–5000 series).
+
+**AMD AM5:** AMD switched to LGA design for Ryzen 7000+. Both CPU and socket now have contacts (no pins on CPU).
+
+<ConceptCallout type="warning">
+  Never force a CPU into a socket. Intel CPUs with LGA sockets: if you accidentally bend a pin in the *socket*, the motherboard is potentially ruined. AMD AM4 CPUs: if you bend a pin on the *CPU*, the processor is damaged. Handle both carefully.
+</ConceptCallout>
+
+## PCIe — Peripheral Component Interconnect Express
+
+PCIe is the high-speed serial bus that connects GPUs, NVMe drives, sound cards, capture cards, and other expansion devices.
+
+### PCIe Lanes and Speeds
+
+| PCIe Version | Speed Per Lane (each direction) | ×16 Slot Bandwidth | Notes |
+| --- | --- | --- | --- |
+| PCIe 3.0 | ~1 GB/s (8 GT/s) | ~16 GB/s | Common in 2015–2020 systems |
+| PCIe 4.0 | ~2 GB/s (16 GT/s) | ~32 GB/s | Current mainstream (Ryzen 3000+, Intel 12th gen+) |
+| PCIe 5.0 | ~4 GB/s (32 GT/s) | ~64 GB/s | Latest gen, mostly NVMe SSDs and enterprise GPUs |
+
+PCIe is **backward compatible** — a PCIe 3.0 card in a PCIe 4.0 slot runs at PCIe 3.0 speeds.
+
+**Slot sizes:** ×1, ×4, ×8, ×16. The slot size is the physical length — a ×4 card will physically fit in a ×16 slot (electrically running at ×4 speed). GPU typically uses ×16. NVMe M.2 typically uses ×4 lanes.
+
+### Add-On Cards
+
+Common expansion cards you'll install in PCIe slots:
+- **GPU (Graphics Card)** — dedicated display output and 3D rendering. Uses ×16 PCIe slot.
+- **NIC (Network Interface Card)** — adds wired Ethernet or other network interfaces
+- **Sound Card** — dedicated audio processing (rare now that motherboards include integrated audio)
+- **Capture Card** — records HDMI/SDI video input for streaming
+- **HBA (Host Bus Adapter)** — adds SAS/SATA ports
+- **Riser Card** — extends a slot for different orientation (common in servers)
+
+## BIOS and UEFI
+
+**BIOS (Basic Input/Output System)** is the legacy firmware that initializes hardware at boot. It has severe limitations:
+- 16-bit real mode only
+- Cannot boot from drives > 2 TB
+- Uses MBR (Master Boot Record) partition table
+- Text-only interface, no mouse
+
+**UEFI (Unified Extensible Firmware Interface)** is the modern replacement:
+- 32/64-bit mode
+- Supports drives > 2 TB via **GPT** (GUID Partition Table)
+- **Secure Boot** — verifies bootloader cryptographic signature before execution
+- Mouse support in setup menus
+- Faster boot (native NVMe support, reduced POST time)
+- **CSM (Compatibility Support Module)** can emulate legacy BIOS for older OS
+
+<ConceptCallout type="tip">
+  The exam tests UEFI vs BIOS differences frequently. Key points: UEFI supports **>2 TB drives** (BIOS cannot), UEFI uses **GPT** (BIOS uses MBR), UEFI has **Secure Boot**, UEFI has **mouse support**. Both provide the same fundamental function: initializing hardware and starting the bootloader.
+</ConceptCallout>
+
+### Key BIOS/UEFI Settings
+
+- **Boot order** — which device to boot from first (SSD, USB, network PXE)
+- **Secure Boot** — require signed bootloader (enable for Windows 11)
+- **Virtualization (VT-x / AMD-V)** — must be enabled for VMware, VirtualBox, Hyper-V
+- **BIOS password** — supervisor password protects settings; user password controls boot
+- **XMP/EXPO** — enable to run RAM at rated speed
+- **Fan curves** — control CPU/case fan response to temperature
+
+## CMOS Battery
+
+The **CMOS chip** (Complementary Metal-Oxide Semiconductor) stores BIOS/UEFI settings (date, time, hardware configuration, boot order, passwords) using minimal power. A **CR2032 coin cell battery** (~3V) on the motherboard keeps the CMOS chip powered when the computer is unplugged.
+
+**Symptoms of a dead CMOS battery:**
+- System date/time resets to Jan 1, 2000 (or similar default) at every boot
+- "CMOS checksum error" or "BIOS settings reset" message
+- BIOS settings lost after shutdown
+
+**Fix:** Replace the CR2032 battery (about $1–3). Reconfigure BIOS settings afterward.
+
+## CPU Architecture
+
+### Cores and Threads
+
+**Core:** A physical, independent processing unit on the CPU die. Each core can execute instructions simultaneously with other cores. A 6-core CPU runs 6 instruction streams in parallel.
+
+**Thread:** A software sequence of instructions. A single-core CPU handles one thread at a time.
+
+**Hyper-Threading (Intel HT) / SMT (AMD Simultaneous Multi-Threading):** Hardware technique that duplicates the thread-state portion of the core, allowing one physical core to handle two threads simultaneously. A 6-core/12-thread CPU appears to the OS as 12 logical processors. Improves throughput in multi-threaded workloads by 20–30%.
+
+### CPU Cache
+
+*Cache hit rate determines CPU efficiency. Larger caches = more data stays on-chip = fewer slow RAM accesses.*
+
+| Level | Size (typical) | Latency | Scope | Purpose |
+| --- | --- | --- | --- | --- |
+| L1 | 32–128 KB per core | 1–4 cycles | Per core (split I + D) | Fastest access — instruction and data cache |
+| L2 | 256 KB – 4 MB per core | 10–14 cycles | Per core (unified) | Second-level cache |
+| L3 | 8–64+ MB total | 30–50 cycles | Shared across all cores | Last-level cache before main RAM |
+
+### CPU TDP
+
+**TDP (Thermal Design Power)** specifies the maximum sustained heat the CPU produces that the cooling system must dissipate, in watts. This is a *cooling specification*, not an exact power draw measurement.
+
+Typical TDP ranges:
+- Thin laptop CPU: 10–28W
+- Standard laptop CPU: 28–55W
+- Desktop mainstream: 65–125W
+- High-end desktop (HEDT): 125–253W
+
+### Virtualization Technology
+
+**Intel VT-x** and **AMD-V** are CPU features that enable efficient virtual machine execution by allowing hypervisors (VMware, VirtualBox, Hyper-V, KVM) to run guest OS code directly on the CPU hardware with minimal overhead.
+
+**VT-d (Intel) / AMD-Vi:** Extends virtualization to I/O — allows direct assignment of physical devices (like GPUs) to virtual machines (passthrough).
+
+Must be enabled in UEFI/BIOS. Disabled by default on some platforms.
+
+## POST — Power-On Self-Test
+
+POST is the diagnostic sequence run by BIOS/UEFI at every startup:
+
+1. CPU and cache initialization
+2. Memory controller and RAM testing
+3. Video card initialization
+4. Storage controller detection
+5. Other device enumeration
+6. Hand off to bootloader
+
+**POST failure indicators:**
+- **Beep codes** — patterns of short/long beeps indicate which component failed (varies by BIOS manufacturer: AMI, Phoenix, Award)
+- **POST LED codes** — enthusiast motherboards include LED digit displays showing hex POST codes
+- **No video output** — GPU failed POST or not detected
+
+**Common POST errors and causes:**
+- 1 long + 2 short beeps (AMI): video card failure
+- 1 long + 3 short beeps: memory issue
+- Continuous beeping: RAM not seated or incompatible
+
+## Front Panel Connectors
+
+The small header pins on the motherboard where the case connects power button, reset button, power LED, HDD LED, and USB ports. These must be connected correctly:
+
+- **PWR_SW** (power switch) — 2-pin, no polarity
+- **RESET_SW** (reset switch) — 2-pin, no polarity
+- **PWR_LED** — LED, polarity matters (+ and -)
+- **HDD_LED** — LED, polarity matters
+- **SPEAKER** — 4-pin internal speaker connector
+- **USB 2.0 header** — 9-pin (8 + 1 key)
+- **USB 3.x header** — 19-pin rectangular connector
+
+<ConceptCallout type="tip">
+  When troubleshooting a computer that won't power on, always check that the **PWR_SW pins** are correctly connected to the motherboard header. This is one of the most common "new build won't start" causes.
+</ConceptCallout>

@@ -1,0 +1,189 @@
+# Windows OS Security Settings
+
+Windows includes a layered set of built-in security tools that A+ technicians are expected to configure and troubleshoot. This objective covers the major settings, where to find them, and how they interact.
+
+## User Account Control (UAC)
+
+UAC prevents unauthorized changes to the operating system by requiring explicit approval before any action that needs elevated privileges. It is the prompt that appears when you try to install software, modify system settings, or run a program as administrator.
+
+### UAC Notification Levels
+
+UAC has four configurable levels, accessible via **Control Panel > User Accounts > Change UAC settings** or through `secpol.msc`:
+
+<CompareCards
+  title="UAC Levels: Most Secure vs Least Secure"
+  left={{ title: "Always Notify (Highest)", icon: "Shield", color: "green", points: ["Notifies on ALL changes — both apps and user actions", "Desktop dims and everything pauses (secure desktop)", "Most secure but most disruptive", "Recommended for high-risk environments"] }}
+  right={{ title: "Never Notify (Disabled)", icon: "Monitor", color: "red", points: ["No prompts for any changes whatsoever", "Malware can silently elevate privileges", "Essentially disables UAC protection", "Never use in a managed environment"] }}
+/>
+
+The two middle levels notify only when **apps** try to make changes (not when the user makes changes through Windows settings). The default level dims the desktop (secure desktop mode) to prevent spoofing of the UAC dialog.
+
+<ConceptCallout type="warning">Disabling UAC (Never Notify) is a significant security risk. Malware running as a standard user can silently escalate to administrator privileges without triggering any warning. UAC is not a foolproof barrier, but it is an important layer.</ConceptCallout>
+
+---
+
+## Windows Defender Antivirus
+
+Windows Defender is the built-in antivirus and anti-malware solution included in all modern Windows editions. It is managed through the **Windows Security** dashboard (formerly Windows Defender Security Center).
+
+### Key Features
+
+| Feature | What It Does |
+|---|---|
+| Real-time protection | Scans files as they are opened, downloaded, or executed |
+| Cloud-delivered protection | Sends suspicious file samples to Microsoft for rapid analysis |
+| Tamper protection | Prevents malware (or users) from disabling Windows Defender settings |
+| Automatic definition updates | Downloads updated malware signatures via Windows Update |
+| Controlled folder access | Blocks unauthorized apps from modifying protected folders (ransomware protection) |
+
+### Scan Types
+
+- **Quick scan**: checks most likely locations for malware (startup entries, common infection locations). Fastest.
+- **Full scan**: scans every file on every drive. Takes much longer but is thorough.
+- **Custom scan**: targets specific folders or drives you specify.
+- **Windows Defender Offline scan**: reboots into a clean environment to scan before the OS loads — used when malware is active and blocking normal scans.
+
+### Exclusions
+
+You can configure folders, file types, or processes to exclude from scanning. This is necessary for some legitimate applications (e.g., development tools, certain databases) that trigger false positives. Exclusions should be minimal and documented — improperly configured exclusions are a common attack vector.
+
+---
+
+## Windows Defender Firewall
+
+Windows Defender Firewall controls which inbound and outbound network connections are allowed on the machine.
+
+### Network Profiles
+
+Windows applies different firewall rules based on the network type:
+
+| Profile | When Applied | Default Stance |
+|---|---|---|
+| Domain | Machine is joined to a domain and domain controller is reachable | Most permissive — managed by IT |
+| Private | Home or trusted office network | Moderate — allows file/printer sharing |
+| Public | Coffee shop, airport, hotel Wi-Fi | Most restrictive — blocks most inbound |
+
+<ConceptCallout type="tip">The Public profile is your safest default for unknown networks. When Windows asks "Is this a public or private network?" on first connection, always choose Public for unknown networks — it applies stricter firewall rules automatically.</ConceptCallout>
+
+### Configuring Rules
+
+The basic firewall is accessible via **Control Panel > Windows Defender Firewall**. For full control, use **Advanced Security** (`wf.msc`), which allows:
+- Inbound rules: control what traffic can reach your machine
+- Outbound rules: control what traffic your machine can send
+- Connection security rules: configure IPsec authentication
+- Rules can match by application, port/protocol, IP address range, or service
+
+### Application vs Port Rules
+
+- **Application rules**: allow or block a specific executable regardless of what port it uses. More flexible — apps that use dynamic ports still work correctly.
+- **Port rules**: allow or block a specific TCP/UDP port regardless of application. Simpler but less targeted.
+
+---
+
+## BitLocker Drive Encryption
+
+BitLocker is Windows' full-disk encryption feature that protects data if a drive is physically removed from a machine.
+
+<ConceptCallout type="warning">BitLocker requires Windows Pro, Enterprise, or Education. It is NOT available on Windows Home. This distinction appears on the exam.</ConceptCallout>
+
+### How BitLocker Works
+
+BitLocker encrypts the entire volume using **AES** (128-bit or 256-bit). The encryption key is protected by one of several methods:
+
+| Protector Method | Description | Use Case |
+|---|---|---|
+| TPM only | Key stored in TPM chip, unlocks automatically at boot | Standard laptops — transparent to user |
+| TPM + PIN | TPM chip + user-entered PIN required at startup | Higher security — prevents cold boot attacks |
+| TPM + USB key | TPM chip + specific USB drive must be present | Specialized environments |
+| USB startup key (no TPM) | Specific USB drive required at boot | Older hardware without TPM |
+| Password | Password entered at startup | Removable drives (BitLocker To Go) |
+
+### TPM (Trusted Platform Module)
+
+The TPM is a dedicated security chip on the motherboard that securely stores the BitLocker encryption key. If the drive is removed and placed in another machine, the TPM key is absent and the drive cannot be decrypted.
+
+<ConceptCallout type="tip">If BitLocker won't enable, the most common causes are: (1) no TPM chip present, (2) TPM is present but disabled in UEFI/BIOS, or (3) Windows Home edition. Check all three before assuming a hardware fault.</ConceptCallout>
+
+### Recovery Key
+
+The BitLocker recovery key is a **48-digit numeric key** used to unlock the drive if the normal unlock method fails (TPM changed, PIN forgotten, hardware modification detected). It must be backed up before it is needed:
+- Saved to a Microsoft account
+- Saved to Azure Active Directory (domain-joined machines)
+- Printed and stored securely
+- Saved to a USB drive
+- Saved to a file on a separate drive
+
+**BitLocker To Go** extends BitLocker encryption to removable drives (USB flash drives, external hard drives). The user sets a password to unlock the drive on any Windows machine.
+
+### Managing BitLocker
+
+- **GUI**: Control Panel > BitLocker Drive Encryption
+- **Command line**: `manage-bde` (e.g., `manage-bde -status`, `manage-bde -protectors -get C:`)
+
+---
+
+## NTFS Permissions
+
+NTFS permissions control access to files and folders on NTFS-formatted volumes. They are configured via the Security tab in file/folder Properties.
+
+### Standard NTFS Permissions
+
+| Permission | What It Allows |
+|---|---|
+| Full Control | Read, write, modify, delete, change permissions, take ownership |
+| Modify | Read, write, modify, and delete files and subfolders |
+| Read & Execute | View and run files; traverse folders |
+| List Folder Contents | View folder contents (folders only) |
+| Read | View file contents and attributes |
+| Write | Create files and folders, modify file contents |
+
+### Key Rules
+
+- **Inheritance**: by default, subfolders and files inherit permissions from their parent folder. Inheritance can be broken to set custom permissions.
+- **Deny overrides Allow**: if a user has Allow for Read through one group membership but Deny for Read through another, Deny wins. Use Deny sparingly — it creates unexpected access problems.
+- **Effective permissions**: when a user belongs to multiple groups with different permissions, the effective permission is the **cumulative union** of all Allow permissions (except where Deny overrides).
+- **NTFS + Share permissions**: when a file is accessed over the network, both NTFS permissions and Share permissions apply. The **more restrictive** of the two wins.
+
+---
+
+## Local Security Policy (secpol.msc)
+
+`secpol.msc` (Local Security Policy) is a snap-in available on Pro and higher editions. It provides centralized configuration for:
+
+| Section | What You Configure |
+|---|---|
+| Account Policies > Password Policy | Minimum length, complexity, age, history |
+| Account Policies > Account Lockout Policy | Threshold, duration, reset counter |
+| Local Policies > User Rights Assignment | Who can log on locally, shut down, manage audit logs, etc. |
+| Local Policies > Audit Policy | What events to log (logon success/failure, object access, privilege use) |
+| Local Policies > Security Options | Network access behavior, UAC settings, shutdown behavior |
+
+<ConceptCallout type="info">On domain-joined machines, Group Policy (GPO) from the domain controller overrides Local Security Policy for any setting that conflicts. Local policy only applies to standalone machines or as a baseline before GPO is applied.</ConceptCallout>
+
+---
+
+## EFS (Encrypting File System)
+
+EFS provides file-level encryption for individual files and folders on NTFS volumes, as opposed to BitLocker's full-volume encryption.
+
+- Encryption is **tied to the user's certificate** (stored in their profile). Only that user (and designated recovery agents) can decrypt the file.
+- Encrypted files and folders appear in **green** in Windows Explorer.
+- EFS is transparent to the authenticated owner — they open and edit files normally.
+- **Limitation**: EFS does not protect against an administrator accessing the file through an OS-level recovery mechanism. If the user's certificate is lost (e.g., profile deleted without backup), the files may be permanently inaccessible.
+- EFS and BitLocker can be used together: BitLocker protects the drive if physically removed; EFS protects individual files from other OS users on the same machine.
+
+---
+
+## Windows Hello
+
+Windows Hello provides biometric and PIN-based authentication as an alternative to traditional passwords.
+
+| Method | Hardware Required | Notes |
+|---|---|---|
+| Facial recognition | Infrared camera (required — standard RGB camera won't work) | Fast, hands-free, very secure |
+| Fingerprint | Fingerprint sensor (built-in or USB) | Common on modern laptops |
+| PIN | No special hardware | Device-specific; different from account password |
+
+<ConceptCallout type="tip">A Windows Hello PIN is NOT the same as a password. The PIN is device-specific and stored locally — it only works on the device it was set up on. If someone knows your PIN, they cannot use it to log into your account from another machine. This is actually more secure than a password in many scenarios.</ConceptCallout>
+
+Windows Hello uses asymmetric key cryptography (public/private key pair). The private key never leaves the device and is protected by the TPM when available.

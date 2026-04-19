@@ -1,0 +1,165 @@
+# Policies, Licensing, and Privacy
+
+CompTIA A+ technicians are not lawyers, but they are expected to understand the policies that govern how technology is used, what data requires protection, and how software must be licensed. Violations carry legal and employment consequences.
+
+---
+
+## Acceptable Use Policy (AUP)
+
+An **Acceptable Use Policy** defines what employees may and may not do with organizational technology, networks, and internet access. It is a foundational document in any organization's security posture.
+
+Key points:
+- Users must **sign the AUP** before receiving network access — typically part of onboarding
+- Covers: personal use of work equipment, prohibited websites, social media, email, removable media, software installation
+- Violations are grounds for disciplinary action up to and including termination
+- The AUP gives the organization legal basis to monitor network activity and enforce consequences
+
+Common prohibited activities in AUPs: downloading pirated software, visiting inappropriate websites on company equipment, sending company data to personal accounts, installing unauthorized software, sharing login credentials.
+
+---
+
+## BYOD (Bring Your Own Device) Policy
+
+BYOD policies govern the use of personally-owned devices (phones, tablets, laptops) to access organizational resources.
+
+Key considerations:
+
+**MDM enrollment:** Devices accessing corporate email or data must typically enroll in Mobile Device Management. MDM can enforce encryption, passcode requirements, and remote wipe.
+
+**Data containerization:** Enterprise solutions like Microsoft Intune create a separate "work container" on personal devices, keeping corporate data isolated from personal apps and storage.
+
+**Remote wipe implications:** If a corporate MDM profile is installed on a personal device, remote wipe may erase personal data alongside corporate data. Employees should understand this risk before enrolling.
+
+**Support boundaries:** IT typically supports the corporate applications on BYOD devices, not the personal OS, hardware, or non-work apps.
+
+**Supported OS versions:** Organizations specify minimum OS versions (e.g., iOS 16+, Android 12+) to ensure security patch coverage.
+
+<ConceptCallout type="warning">BYOD remote wipe is a frequent exam scenario. If an employee with a personal device enrolled in MDM is terminated or loses their device, the organization can wipe the device — potentially erasing personal photos, apps, and data alongside corporate data.</ConceptCallout>
+
+---
+
+## DLP (Data Loss Prevention)
+
+**Data Loss Prevention** refers to both policies and technical tools that prevent sensitive data from leaving the organization without authorization.
+
+DLP controls:
+- **Email scanning**: inspect outbound email for SSNs, credit card numbers, proprietary keywords; block or quarantine suspicious messages
+- **USB port blocking / endpoint DLP**: prevent copying sensitive files to USB drives or external storage via Group Policy or endpoint agents
+- **Print controls**: log or restrict printing of sensitive documents
+- **Cloud upload monitoring**: detect and block uploads to personal cloud storage (Dropbox, Google Drive) from managed devices
+- **Network DLP**: deep packet inspection at the network perimeter to detect data exfiltration
+
+DLP systems must be configured with data classification rules — they need to know what "sensitive" looks like. Common patterns: 9-digit SSN format, 16-digit credit card numbers, specific document classification labels.
+
+---
+
+## PII and Privacy Regulations
+
+**Personally Identifiable Information (PII)** is any data that can identify a specific individual, either alone or in combination with other data.
+
+Examples of PII:
+- Full name, address, phone number, email address
+- Social Security Number (SSN), passport number, driver's license number
+- Date of birth, place of birth
+- Biometric data (fingerprints, facial recognition data, retinal scans)
+- IP addresses and device identifiers (context-dependent)
+- Financial account numbers, medical record numbers
+
+### Privacy Regulations
+
+| Regulation | Scope | Applies To |
+|---|---|---|
+| GDPR (General Data Protection Regulation) | EU | Any organization handling EU resident data |
+| CCPA (California Consumer Privacy Act) | California, USA | Businesses meeting revenue/data thresholds |
+| HIPAA (Health Insurance Portability and Accountability Act) | USA | Healthcare providers, insurers, business associates |
+| FERPA (Family Educational Rights and Privacy Act) | USA | Educational institutions receiving federal funding |
+| PCI DSS (Payment Card Industry Data Security Standard) | Global | Any entity handling credit/debit card data |
+
+<ConceptCallout type="info">You do not need to know the full text of these regulations for the A+ exam — but you must recognize what each one protects. HIPAA = health data, FERPA = student education records, PCI DSS = payment card data, GDPR = EU personal data broadly.</ConceptCallout>
+
+---
+
+## Copyright and EULAs
+
+Software is intellectual property protected by copyright law from the moment it is created. Purchasing software does not transfer copyright ownership — it grants a **license** to use the software under specified terms.
+
+### End-User License Agreement (EULA)
+
+The EULA is the legal contract between the software vendor and the end user. You must agree to it before installation.
+
+The EULA typically defines:
+- How many machines the software can be installed on
+- Whether the license can be transferred to another person or machine
+- Whether you can make backup copies
+- Restrictions on reverse engineering, decompilation
+- The software vendor's liability limitations
+
+**Important:** Clicking "I Agree" creates a binding legal agreement. Most users never read EULAs, but they are enforceable.
+
+### Software Piracy
+
+Making unauthorized copies of software = piracy = a criminal offense under copyright law (in addition to civil liability). This includes:
+- Installing a single-user license on multiple machines
+- Sharing a download link that bypasses the vendor's distribution
+- Using a keygen or crack to activate software without payment
+- Sharing activation keys beyond what the license permits
+
+---
+
+## Software Licensing Types
+
+| License Type | Description | Transferable? | Cost Model |
+|---|---|---|---|
+| OEM (Original Equipment Manufacturer) | Bundled with hardware at purchase; tied to that specific machine | No — hardware-bound | Included in hardware price |
+| Retail / FPP (Full Packaged Product) | Purchased standalone from a store or vendor | Yes — can move to new hardware | One-time purchase, higher price |
+| Volume / Enterprise | Single key or server activates multiple machines in an organization | Varies by agreement | Per-seat or site license |
+| Subscription | Access granted for duration of payment (monthly/annual) | N/A — tied to account | Recurring payment |
+| Open Source | Source code available; use governed by open source license terms | Generally yes | Usually free |
+| Freeware | Free to download and use; source code not available | Varies | Free |
+| Shareware | Trial version (limited features or time) to evaluate before purchase | N/A | Free trial, paid full version |
+
+<ConceptCallout type="warning">OEM licenses are one of the most tested licensing concepts on the exam. OEM software is tied to the original hardware it shipped with and cannot be transferred to a new machine. If the motherboard dies and you replace it, the OEM Windows license does not move with you.</ConceptCallout>
+
+### Volume Licensing Activation Methods
+
+**MAK (Multiple Activation Key):** A single product key that can activate a specific number of machines. Activations are validated against Microsoft's servers. Once the count is exhausted, no more activations.
+
+**KMS (Key Management Service):** An on-premises activation server within the organization. Machines check in with the KMS server (every 180 days by default) to renew activation. Works without internet access to Microsoft. Common in large enterprise environments.
+
+### Open Source License Key Types
+
+| License | Permissiveness | Key Requirement |
+|---|---|---|
+| MIT | Very permissive | Can use, modify, redistribute, include in proprietary software; must retain copyright notice |
+| Apache 2.0 | Permissive | Similar to MIT; also includes patent grant |
+| GNU GPL (v2/v3) | Copyleft | Derivatives must also be GPL — cannot include in proprietary software |
+| GNU LGPL | Weak copyleft | Can link from proprietary software without GPL obligation |
+
+---
+
+## Incident Reporting and Chain of Custody
+
+### When to Escalate
+
+A+ technicians are not investigators, lawyers, or HR personnel. When you discover a potential policy violation or illegal activity, the appropriate response is to escalate — not to investigate independently.
+
+Situations requiring escalation:
+- Suspected illegal content on a company device
+- Evidence of data theft or exfiltration
+- Suspected harassment or workplace misconduct
+- Ransomware or active security incident
+
+Escalation chain: direct supervisor → IT security team → HR → legal department → law enforcement (if criminal activity is involved).
+
+### Chain of Custody
+
+**Chain of custody** documents every person who handles evidence from the moment of discovery through legal proceedings. Without an unbroken chain of custody, evidence may be inadmissible in court.
+
+Chain of custody documentation includes:
+- Description of the evidence (device serial number, drive make/model)
+- Date and time evidence was collected
+- Name and signature of each person who handled it
+- Purpose of each transfer (analysis, secure storage, court submission)
+- Storage conditions (locked evidence bag, secure room)
+
+<ConceptCallout type="info">If you discover potential evidence of a crime on a company device, do not continue using the device, do not delete anything "to protect the company," and do not investigate on your own. Document what you observed, preserve the device in its current state, and report immediately up the chain.</ConceptCallout>

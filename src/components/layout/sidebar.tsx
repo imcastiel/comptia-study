@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
-import { ChevronRight, BookOpen, Wifi, Cpu, Cloud, Wrench, Monitor, Shield, Bug, ClipboardList } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { ChevronRight, BookOpen, Wifi, Cpu, Cloud, Wrench, Monitor, Shield, Bug, ClipboardList, Layers, Trophy, Terminal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Topic {
@@ -174,7 +174,7 @@ const STATIC_EXAMS: Exam[] = [
   },
 ]
 
-function DomainItem({ domain, examCode }: { domain: Domain; examCode: string }) {
+function DomainItem({ domain, examRouteId }: { domain: Domain; examRouteId: string }) {
   const pathname = usePathname()
   const [open, setOpen] = useState(() =>
     domain.topics.some((t) => pathname?.includes(t.slug))
@@ -202,7 +202,7 @@ function DomainItem({ domain, examCode }: { domain: Domain; examCode: string }) 
       {open && (
         <div className="ml-[22px] mt-0.5 flex flex-col gap-px border-l border-[var(--apple-separator)] pl-3">
           {domain.topics.map((topic) => {
-            const href = `/study/${examCode.toLowerCase().replace('-', '')}/${topic.slug}`
+            const href = `/study/${examRouteId}/${domain.slug}/${topic.slug}`
             const isActive = pathname === href
             return (
               <Link
@@ -235,7 +235,14 @@ function DomainItem({ domain, examCode }: { domain: Domain; examCode: string }) 
 }
 
 export function Sidebar() {
-  const [activeExam, setActiveExam] = useState<string>('exam-core1')
+  const pathname = usePathname()
+  const defaultExam = pathname?.includes('/study/core2') ? 'exam-core2' : 'exam-core1'
+  const [activeExam, setActiveExam] = useState<string>(defaultExam)
+
+  // Sync active exam tab when navigating via URL
+  useEffect(() => {
+    setActiveExam(pathname?.includes('/study/core2') ? 'exam-core2' : 'exam-core1')
+  }, [pathname])
 
   return (
     <aside className="w-[260px] shrink-0 fixed left-0 top-14 bottom-0 bg-card border-r border-[var(--apple-separator)] overflow-y-auto">
@@ -263,8 +270,38 @@ export function Sidebar() {
       <div className="p-2 flex flex-col gap-0.5">
         {STATIC_EXAMS.find((e) => e.id === activeExam)?.domains.map((domain) => {
           const exam = STATIC_EXAMS.find((e) => e.id === activeExam)!
+          const examRouteId = exam.code === '220-1201' ? 'core1' : 'core2'
           return (
-            <DomainItem key={domain.id} domain={domain} examCode={exam.code} />
+            <DomainItem key={domain.id} domain={domain} examRouteId={examRouteId} />
+          )
+        })}
+      </div>
+
+      {/* Bottom nav */}
+      <div className="p-2 border-t border-[var(--apple-separator)] mt-2">
+        {[
+          { href: '/flashcards', icon: Layers, label: 'Flashcards', color: 'var(--apple-green)' },
+          { href: '/practice', icon: Trophy, label: 'Practice Tests', color: 'var(--apple-orange)' },
+          { href: '/labs', icon: Terminal, label: 'PBQ Labs', color: 'var(--apple-purple)' },
+        ].map(({ href, icon: Icon, label, color }) => {
+          const isActive = pathname?.startsWith(href)
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={cn(
+                'flex items-center gap-2.5 px-3 py-[7px] rounded-[10px] text-[13px] font-medium transition-colors duration-150',
+                isActive
+                  ? 'text-foreground bg-[var(--apple-fill)]'
+                  : 'text-[var(--apple-label-secondary)] hover:bg-[var(--apple-fill)] hover:text-foreground'
+              )}
+            >
+              <Icon
+                className="w-3.5 h-3.5 shrink-0"
+                style={{ color: isActive ? color : undefined }}
+              />
+              {label}
+            </Link>
           )
         })}
       </div>

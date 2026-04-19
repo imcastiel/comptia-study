@@ -1,0 +1,166 @@
+# Common Networking Hardware Devices
+
+Network hardware forms the physical and logical infrastructure connecting devices. You need to know what each device does, at which OSI layer it operates, and when to use each one.
+
+## OSI Model Layers (Quick Reference)
+
+Network devices are often described by the OSI layer they operate at:
+
+| Layer | Name | What It Handles |
+| --- | --- | --- |
+| Layer 1 | Physical | Bits, cables, signals |
+| Layer 2 | Data Link | MAC addresses, frames, switches |
+| Layer 3 | Network | IP addresses, routing, packets |
+| Layer 4 | Transport | TCP/UDP ports, segments |
+| Layer 7 | Application | Application protocols, data |
+
+## Hub
+
+A hub is a Layer 1 device — it has no intelligence whatsoever. When it receives a signal on one port, it repeats that signal out **every other port**.
+
+**Problems with hubs:**
+- All connected devices share the same collision domain
+- Only one device can transmit at a time (CSMA/CD)
+- Broadcasts and all traffic visible to all ports (security risk)
+- Half-duplex only
+
+**Status:** Obsolete. Replaced entirely by switches. You'll encounter hubs only on the exam and in legacy environments.
+
+## Switch
+
+A switch is a **Layer 2** device that forwards frames based on **MAC addresses**. It learns which MAC address is connected to which port by observing source addresses, building a **MAC address table** (also called CAM table).
+
+**How switching works:**
+1. Frame arrives on a port
+2. Switch reads the source MAC and records port → MAC mapping
+3. Switch looks up destination MAC in its table
+4. If found → forwards only to that specific port (unicast)
+5. If not found → floods to all ports except source (unknown unicast flooding)
+
+**Benefits over hubs:**
+- Each port is its own collision domain — full-duplex possible
+- Bandwidth not shared — dedicated bandwidth per connection
+- Traffic only sent where needed (except broadcasts and unknown unicasts)
+
+**Managed vs unmanaged switches:**
+- **Unmanaged** — plug and play, no configuration. For home and small offices.
+- **Managed** — configurable (VLANs, port security, STP, monitoring). For enterprise environments.
+
+**Layer 3 switch:** Has routing capabilities built in — can route between VLANs without a separate router. Used in enterprise core/distribution layers.
+
+<ConceptCallout type="tip">
+  **Hub vs switch exam gotcha:** A hub creates one shared collision domain for all ports. A switch creates a separate collision domain per port. All ports on both share the same broadcast domain (unless VLANs are used on a switch).
+</ConceptCallout>
+
+## Router
+
+A router is a **Layer 3** device that forwards packets based on **IP addresses**. It connects different networks together and chooses the best path for traffic.
+
+**Router functions:**
+- Routes packets between networks (including between local network and internet)
+- Maintains a routing table (learned via static config, RIP, OSPF, BGP, etc.)
+- Provides NAT/PAT for internet access
+- Enforces basic firewall rules (ACLs)
+- Separates broadcast domains — broadcasts don't cross routers
+
+**Routing table:** Lists destination networks, the interface/next-hop to reach them, and metrics. Router compares destination IP against table entries, picks longest prefix match.
+
+**Default route (0.0.0.0/0):** The "catch-all" route — if no more specific route exists, send traffic here (usually toward the internet).
+
+## Wireless Access Point (WAP/AP)
+
+An AP provides wireless (802.11) connectivity and bridges wireless clients to the wired network. Most APs are Layer 2 devices — they extend the same broadcast domain as the wired switch they connect to.
+
+**AP modes:**
+- **Access mode (infrastructure)** — standard: clients connect to the AP, AP connects to switch
+- **Repeater/extender** — rebroadcasts signal to extend range (reduces throughput by ~50%)
+- **Bridge** — connects two separate network segments wirelessly
+
+**Placement considerations:**
+- Overlap cells by ~15–20% for roaming without dead spots
+- Keep APs away from interference sources (microwave ovens, cordless phones)
+- Use non-overlapping channels (1, 6, 11 on 2.4 GHz) on adjacent APs
+- Power over Ethernet (PoE) eliminates need for local power outlet
+
+**Controller-based vs standalone:**
+- **Standalone/fat AP** — configured individually; for small deployments
+- **Controller-based/thin AP** — central controller manages all APs (firmware, config, roaming); for enterprise
+
+## Firewall
+
+A firewall filters network traffic based on rules to allow or block connections.
+
+**Types by implementation:**
+
+| Type | Description |
+| --- | --- |
+| Packet filter (stateless) | Examines individual packets against ACL rules (src/dst IP, port, protocol). No session awareness. |
+| Stateful firewall | Tracks connection state — allows reply traffic for established sessions automatically. |
+| Application-layer (NGFW) | Inspects application content (HTTP, DNS, TLS); blocks by app, user, or content category. |
+| Host-based firewall | Software running on a single device (Windows Firewall, iptables). |
+| Network firewall | Hardware/VM appliance protecting network segments. |
+
+**DMZ (Demilitarized Zone):** A network segment between the internet and the internal network. Public-facing servers (web, email, DNS) live in the DMZ. If a DMZ server is compromised, the attacker doesn't gain direct access to the internal network.
+
+## Modem
+
+A **modem** (modulator/demodulator) converts digital data to/from the analog or carrier signal used by the internet connection medium.
+
+| Type | What It Connects | Notes |
+| --- | --- | --- |
+| Cable modem | Coaxial cable (DOCSIS) → Ethernet | ISP cable internet |
+| DSL modem | Phone line (DSL) → Ethernet | ISP DSL service |
+| Fiber ONT | Fiber optic → Ethernet | ISP fiber (ONT = Optical Network Terminal) |
+| Cellular modem | LTE/5G cellular → Ethernet/USB | Mobile broadband, backup connectivity |
+
+In home setups, the "router" from an ISP is often a modem + router + wireless AP combined in one box.
+
+## Patch Panel
+
+A **patch panel** is a passive panel with ports where permanent cable runs terminate. Technicians use short patch cables to connect ports on the patch panel to the switch, making cabling changes quick and organized.
+
+**Why use patch panels:**
+- Clean wiring in the network closet
+- Easy moves, adds, and changes without disturbing cable runs in walls/ceilings
+- Protect switch ports from wear (patch cables absorb the plug/unplug cycles)
+
+**568A vs 568B:** Wiring standards for terminating RJ-45 connectors. Both work; 568B is more common in the US. Both ends of a **straight-through cable** use the same standard. A **crossover cable** uses 568A on one end and 568B on the other.
+
+## PoE — Power over Ethernet
+
+PoE delivers electrical power through Ethernet cables, eliminating the need for separate power adapters.
+
+| Standard | Max Power to Device | Common Use |
+| --- | --- | --- |
+| PoE (802.3af) | 15.4W | IP phones, basic APs |
+| PoE+ (802.3at) | 30W | APs, IP cameras, video phones |
+| PoE++ (802.3bt) | 60W or 90W | PTZ cameras, laptops, high-power APs |
+
+**PoE injector:** Adds PoE to a non-PoE switch on a single port. The injector sits between the switch and the powered device.
+
+**PoE switch:** Has PoE built in on multiple or all ports.
+
+## Cable Types
+
+| Cable | Max Speed | Max Distance | Notes |
+| --- | --- | --- | --- |
+| Cat 5e | 1 Gbps | 100 m | Minimum for modern installs |
+| Cat 6 | 1–10 Gbps | 100 m (1G) / 55 m (10G) | Common for new installations |
+| Cat 6a | 10 Gbps | 100 m | Augmented — better shielding |
+| Cat 7 | 10 Gbps | 100 m | Shielded; uses GG45 or TERA connectors |
+| Fiber (MM) | 10+ Gbps | Up to 550 m | Multimode — shorter runs, cheaper lasers |
+| Fiber (SM) | 10+ Gbps | Many km | Single-mode — long distance, expensive |
+
+**STP vs UTP:**
+- **UTP (Unshielded Twisted Pair)** — standard; no shielding; most common
+- **STP (Shielded Twisted Pair)** — shielded against EMI; used in industrial/high-interference environments
+
+## Cable Connectors
+
+| Connector | Used For |
+| --- | --- |
+| RJ-45 | Ethernet (Cat 5e/6/6a/7) |
+| RJ-11 | Telephone lines, DSL |
+| LC, SC, ST | Fiber optic |
+| BNC | Coaxial (legacy token ring, CCTV) |
+| F-type | Coaxial (cable TV, DOCSIS) |

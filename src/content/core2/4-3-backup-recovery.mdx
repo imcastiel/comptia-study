@@ -1,0 +1,141 @@
+# Workstation Backup and Recovery Methods
+
+Backup and recovery is one of the highest-stakes topics in IT support. When a drive fails, ransomware strikes, or a user deletes critical files, the backup determines whether the outcome is a minor inconvenience or a catastrophic loss. The A+ exam tests your knowledge of backup types, the 3-2-1 rule, Windows backup tools, and recovery concepts like RTO and RPO.
+
+## Backup Types
+
+The four backup types differ in what data they capture and how they interact with the archive bit (a file system attribute that marks files as changed since the last backup).
+
+| Backup Type | What Gets Backed Up | Archive Bit After | Backup Speed | Restore Complexity |
+|---|---|---|---|---|
+| Full | All selected data, every time | Cleared | Slowest | Simplest — one set |
+| Incremental | Only data changed since the LAST backup (full or incremental) | Cleared | Fastest | Most complex — full + every incremental in sequence |
+| Differential | Only data changed since the LAST FULL backup | Not cleared | Medium (grows over time) | Medium — full + most recent differential |
+| Synthetic Full | Constructs a new full backup from previous full + incrementals without re-reading source | N/A | Fast (no source re-read) | Simple — one set (like full) |
+
+<CompareCards
+  title="Incremental vs. Differential Backup"
+  left={{ title: "Incremental", icon: "Database", color: "blue", points: ["Backs up changes since LAST backup of any type", "Each backup is small and fast", "Monday: full. Tuesday: changes from Mon. Wednesday: changes from Tue.", "Restore requires: full + every incremental in order", "Most backups needed for a full restore", "Best when backup window is short"] }}
+  right={{ title: "Differential", icon: "HardDrive", color: "orange", points: ["Backs up all changes since LAST FULL backup", "Each backup grows larger over the week", "Monday: full. Tuesday: all changes since Mon. Wednesday: all changes since Mon.", "Restore requires: full + most recent differential only", "Faster restore than incremental", "Best when restore speed matters more than backup speed"] }}
+/>
+
+<ConceptCallout type="info">The 3-2-1 backup rule: keep **3** copies of data, on **2** different media types, with **1** copy offsite. Memorize this — it appears directly on the exam. Example: original data on workstation (copy 1), local NAS backup (copy 2, different media), cloud backup (copy 3, offsite).</ConceptCallout>
+
+## Backup Media Types
+
+| Media | Characteristics | Best Use |
+|---|---|---|
+| Local external hard drive | Fast, inexpensive, portable | Quick local backup; not a complete solution alone (no offsite) |
+| NAS (Network Attached Storage) | Centralized, accessible from network, supports RAID | Departmental or whole-office backup destination |
+| Tape (LTO) | Sequential, slow to restore, very low cost per GB, very durable | Long-term archival, regulated industries, large data sets |
+| Cloud storage (S3, Azure Blob, Backblaze B2) | Offsite by nature, scalable, pay-per-use | Offsite copy; satisfies the "1 offsite" in 3-2-1 |
+| Optical (Blu-ray) | Archival, read-only once written (WORM), low capacity | Long-term archival for small data sets; regulatory compliance |
+
+**Tape (LTO)** is still widely used in enterprise environments for long-term archival despite being slower than disk. LTO-9 cartridges hold up to 45 TB compressed. Tape is read sequentially, making random-file restores slow, but full archive restores efficient. Tape has a 30-year shelf life when stored properly.
+
+## Windows Backup Tools
+
+### File History
+
+File History continuously monitors selected folders (Documents, Desktop, Pictures, Music, Videos, and any additional folders you add) and backs up changed files to an external drive or network location. It keeps a version history — you can browse back through time to recover previous versions of files.
+
+**Access**: Settings → System → Storage → Advanced storage settings → Backup options, or Control Panel → File History.
+
+**Limitations**: File History backs up user files only — not the OS, applications, or settings. It requires the backup drive to be connected (for external drives) to keep versions current.
+
+### Windows Backup (cloud integration)
+
+In Windows 11, Settings → Accounts → Windows Backup integrates with OneDrive to back up folders, settings, credentials, and apps. This replaces the old "Backup and Restore (Windows 7)" as Microsoft's consumer backup tool.
+
+### Backup and Restore (Windows 7)
+
+Still available in Windows 10/11 via Control Panel → Backup and Restore (Windows 7). Allows creating a **System Image** and scheduling file backups to a drive or network location. The "Windows 7" label is historical — it works on current Windows versions.
+
+### System Image
+
+A **system image** is a sector-by-sector snapshot of an entire drive — OS, applications, settings, and data all captured at once. It allows a complete bare-metal restore: if the drive fails, you can restore the system image to a new drive and be exactly where you were.
+
+**Windows built-in**: Control Panel → Backup and Restore (Windows 7) → Create a system image.
+
+**Third-party tools**: Macrium Reflect (free and paid), Acronis True Image, Veeam Agent for Windows. Third-party tools often have more features — incremental system images, bootable recovery media, scheduled imaging, and bare-metal restore to different hardware.
+
+### System Restore
+
+System Restore creates **restore points** — snapshots of Windows system files and the registry. It does NOT back up personal files.
+
+Restore points are created automatically before: Windows Updates, device driver installs, and application installs. You can also create them manually.
+
+**What it restores**: system files, drivers, registry settings.
+**What it does NOT restore**: user documents, photos, email, or any personal files.
+**Access**: System Properties → System Protection → System Restore, or via WinRE for systems that won't boot.
+
+**When to use**: after a driver install makes the system unstable, after an application breaks Windows, or after a registry change causes problems. Fast and preserves user data. Not a substitute for full backup.
+
+## Windows Recovery Environment (WinRE)
+
+WinRE provides recovery tools accessible when Windows cannot boot normally.
+
+| Tool | Function |
+|---|---|
+| Startup Repair | Diagnoses and automatically fixes common boot problems |
+| System Restore | Rolls back to a previous restore point |
+| System Image Recovery | Restores a previously created system image from drive or network |
+| Reset this PC | Reinstalls Windows — option to keep personal files or remove everything |
+| Command Prompt | Manual repair using bootrec, diskpart, sfc, etc. |
+| Uninstall Updates | Removes the most recently installed quality or feature update |
+
+**Access methods**: Settings → System → Recovery → Advanced startup → Restart now, or interrupt boot three times in a row (Windows enters recovery automatically), or boot from Windows installation media and choose "Repair your computer."
+
+## RTO and RPO
+
+These two metrics define the recovery requirements that drive backup frequency and technology choices.
+
+**RPO (Recovery Point Objective)**: the maximum acceptable amount of data loss, measured in time. "We can tolerate losing up to 4 hours of data" means backups must run at least every 4 hours. A shorter RPO requires more frequent backups and more storage.
+
+**RTO (Recovery Time Objective)**: the maximum acceptable time to restore service after an incident. "We must be back online within 2 hours" means the recovery process — backup retrieval, restoration, verification — must complete within 2 hours. A shorter RTO requires faster restore technology (local backup restores faster than cloud; disk restores faster than tape).
+
+| RPO | RTO | Implication |
+|---|---|---|
+| 24 hours | 8 hours | Daily backup to local NAS is sufficient |
+| 4 hours | 1 hour | Incremental backups every 4 hours; local fast restore |
+| 1 hour | 15 minutes | Continuous data protection; local high-speed restore |
+| Near-zero | Near-zero | High availability clustering, synchronous replication |
+
+RPO and RPO are defined by the business based on the cost of downtime and data loss versus the cost of the backup infrastructure.
+
+## Backup Verification Procedure
+
+<ConceptCallout type="warning">A backup that has never been tested is not a backup — it is an assumption. Backup media fails, software corrupts archives, and configuration errors silently exclude critical files. Verify restores on a regular schedule.</ConceptCallout>
+
+<ProcessSteps title="Backup Verification Procedure" color="green" steps={[
+  { title: "Review backup job logs", description: "Check that the backup completed successfully. Look for errors, warnings, or files that were skipped. Most backup software emails or logs a job summary." },
+  { title: "Verify catalog and contents", description: "Open the backup software and browse the backup catalog. Confirm the expected files and folders are present. Spot-check critical directories." },
+  { title: "Test file restore", description: "Select a sample of files (including recently modified ones) and restore them to a test location. Open and verify the content is correct and not corrupted." },
+  { title: "Test full system restore (periodically)", description: "For system images, perform a full restore to a test machine or virtual machine at least quarterly. Confirm the OS boots, services start, and data is intact." },
+  { title: "Document results", description: "Record the date of verification, what was tested, who performed it, and the outcome. This creates an audit trail and helps track when verifications are due." },
+  { title: "Remediate any failures", description: "If verification reveals problems — missing files, corruption, failed restore — investigate and fix before the next backup cycle. A failed verification is urgent." }
+]} />
+
+## Backup Rotation Schemes
+
+**GFS (Grandfather-Father-Son)** is the traditional rotation scheme for tape and managed backups:
+- **Son (daily)**: backup taken every day of the week — typically incremental or differential
+- **Father (weekly)**: full backup taken once a week, retained for a month
+- **Grandfather (monthly)**: one full backup per month, retained for a year or longer
+
+GFS balances storage cost with recovery options. You can restore to any day in the current week, any week in the current month, and any month in the past year — without storing a full backup for every single day.
+
+**Cloud backup rotation** is typically handled automatically by the backup service with configurable retention policies (e.g., keep daily backups for 30 days, weekly for 90 days, monthly for 1 year).
+
+## Cloud Backup Services
+
+| Service | Platform | Notes |
+|---|---|---|
+| OneDrive + Windows Backup | Windows | Built-in; backs up folders and settings to Microsoft's cloud |
+| iCloud | macOS / iOS | Apple's native cloud backup |
+| Backblaze | Windows, macOS | Unlimited personal backup for a flat monthly fee; popular for consumers |
+| Acronis Cyber Protect | Windows, macOS | Full system image + file backup + cloud + antivirus in one |
+| Veeam Agent | Windows, Linux | Enterprise-grade; backs up workstations to local or cloud destinations |
+| Amazon S3 / Azure Blob | Any | Cloud storage targets for scripts and enterprise backup tools |
+
+Cloud backup satisfies the "1 offsite" requirement in the 3-2-1 rule. The primary limitation is restore speed — restoring a large backup over the internet takes significantly longer than restoring from local media.

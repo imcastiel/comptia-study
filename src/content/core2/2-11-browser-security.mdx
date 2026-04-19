@@ -1,0 +1,200 @@
+# Browser Security Configuration
+
+The web browser is the application through which most malware, phishing, and data theft occur. Knowing how to configure and harden browsers — and understanding what each security feature does and does not do — is directly tested on the exam.
+
+---
+
+## HTTPS and TLS
+
+HTTPS (HTTP Secure) is HTTP transmitted over a TLS (Transport Layer Security) encrypted connection. It protects data in transit between the browser and the server.
+
+- **Port**: HTTPS uses port 443; HTTP uses port 80
+- **What it protects**: encrypts all data exchanged between browser and server — login credentials, form data, page content
+- **What it does NOT protect**: it authenticates the server (the certificate proves you are talking to the real site) but does not protect against server-side breaches or malware on your device
+- **Visual indicator**: padlock icon in the address bar. Modern browsers remove the padlock for HTTPS (expected baseline) and actively warn on HTTP with "Not secure" labels.
+- **HTTPS-only mode**: available in modern browsers (Firefox, Chrome). Browser refuses to load HTTP pages or automatically upgrades them to HTTPS. Recommended setting.
+
+---
+
+## TLS/SSL Certificates
+
+A TLS certificate is issued by a Certificate Authority (CA) and binds a domain name to a public key. Before encrypting, the browser verifies the certificate to confirm it is communicating with the legitimate site.
+
+| Certificate Type | Validation Level | Who Issues | Typical Use |
+|---|---|---|---|
+| DV (Domain Validation) | Proves the applicant controls the domain | Automated (Let's Encrypt, DigiCert) | Personal sites, blogs, small businesses |
+| OV (Organization Validation) | Verifies domain control + organization identity | CA manual review | Business websites, public-facing services |
+| EV (Extended Validation) | Highest level — verifies legal entity, address, phone | CA extended manual review | Banks, e-commerce, high-security sites |
+| Self-signed | No CA validation — anyone can create | Generated internally | Internal test servers, lab environments |
+| Wildcard | Covers all subdomains of a domain | Issued by CA | `*.example.com` covers `mail.example.com`, `www.example.com`, etc. |
+
+**Certificate errors — what each means:**
+
+| Error | Cause | Action |
+|---|---|---|
+| Expired certificate | Certificate validity period has passed | Do not proceed; contact site owner |
+| Self-signed certificate | No trusted CA in the chain | Safe only for known internal servers; never on the public internet |
+| Hostname mismatch | Certificate issued for different domain | Possible MITM attack or misconfiguration; do not proceed |
+| Untrusted CA | Issuing CA is not in the browser's trusted root store | Do not proceed unless you know and trust the CA (e.g., internal corporate CA) |
+| Revoked certificate | Certificate was explicitly revoked by the CA | Do not proceed — possible compromise |
+
+<ConceptCallout type="warning">Never click through certificate errors on sites handling sensitive data. A certificate error is the browser telling you something is wrong with the server's identity. MITM (man-in-the-middle) attacks use certificate errors as their foothold. The correct action is to stop and not proceed.</ConceptCallout>
+
+### Certificate Pinning
+
+Certificate pinning is a mechanism where an application or browser is hardcoded to expect a specific certificate or public key from a specific server, rejecting all others — even valid certificates from trusted CAs.
+
+- **Purpose**: prevents MITM attacks that use fraudulently issued (but technically valid) certificates
+- **Use case**: mobile banking apps, high-security services
+- **Downside**: requires updating the pin when the certificate is renewed; can cause outages if pin is not updated
+
+### Certificate Management in the Enterprise
+
+Organizations with internal HTTPS services need browsers to trust their internal CA:
+- Deploy the internal root CA certificate to all workstations via Group Policy (GPO)
+- Without this, browsers will show "untrusted CA" errors for all internal HTTPS sites
+- `certmgr.msc` (Windows) — manage trusted CAs on individual machines; GPO for enterprise-wide deployment
+
+---
+
+## Private / Incognito Browsing
+
+Private browsing (Chrome: Incognito, Firefox: Private Window, Edge: InPrivate) creates a temporary browser session that does not save history, cookies, or form data locally.
+
+<CompareCards
+  title="Private Browsing: What It Does vs What It Doesn't Do"
+  left={{ title: "What Private Browsing DOES", icon: "Shield", color: "green", points: ["Prevents saving of browsing history on this device", "Deletes cookies and session data when window is closed", "Does not save form data or autofill entries", "Does not record downloads in the browser download list (files still exist on disk)", "Useful for borrowing a device or checking logged-in accounts"] }}
+  right={{ title: "What Private Browsing Does NOT Do", icon: "Lock", color: "blue", points: ["Does NOT hide traffic from your ISP — they still see your DNS queries and IP connections", "Does NOT hide traffic from your employer on a corporate network", "Does NOT make you anonymous to websites you visit — they see your IP address", "Does NOT protect against malware or keyloggers on the device", "Does NOT encrypt your connection — use HTTPS and VPN for that"] }}
+/>
+
+<ConceptCallout type="warning">Private browsing is NOT anonymous. It only prevents local storage of history and cookies. Your ISP, network administrator, and visited websites still have full visibility into your activity. This is the most commonly misunderstood browser security feature.</ConceptCallout>
+
+---
+
+## Browser Extensions and Plugins
+
+Extensions add functionality to the browser but run with significant permissions — they can read and modify web page content, intercept network requests, and access stored credentials.
+
+- **Review permissions carefully**: an extension requesting "Read and change all your data on all websites" has access to every page you visit, including banking and email. This is the same access malicious extensions exploit.
+- **Common attack**: fake ad-blocker or utility extension published to the Chrome Web Store that steals browsing data, credentials, and cookies. These appear legitimate until reported.
+- **Best practice**: install only from official extension stores; check ratings, reviews, and developer reputation; keep the number of extensions minimal.
+- **Enterprise control**: via Group Policy or MDM, administrators can restrict which extensions users can install and force-install required extensions (e.g., a content filter or certificate management extension).
+- **Legacy plugins (Java, Flash)**: Java browser plugin and Adobe Flash are end-of-life. Both had massive attack surfaces and were the source of countless zero-day exploits. They should be disabled or uninstalled from all browsers. Flash was officially killed in December 2020.
+
+---
+
+## Pop-Up Blockers
+
+Browsers block pop-up windows by default. Pop-ups were widely used for advertising and are still used by malicious sites to display fake alerts ("Your computer is infected — call this number") or to force-open malware download pages.
+
+- **Exception allowlist**: legitimate sites (banking apps, ticketing systems) sometimes require pop-ups. Add trusted sites to the allowlist.
+- **Fake security alerts**: pop-ups claiming to detect viruses and urging you to call a phone number are scareware / tech support scams. Close the window; do not call.
+
+---
+
+## Cookie Management
+
+Cookies are small text files stored by websites to maintain session state and user preferences.
+
+| Cookie Type | Description | Persistence | Privacy Impact |
+|---|---|---|---|
+| Session cookie | Maintains login state for current visit | Deleted when browser closes | Low |
+| Persistent cookie | Remembers preferences, login, between visits | Stored for days/months/years | Medium |
+| First-party cookie | Set by the site you are visiting | Varies | Low |
+| Third-party cookie | Set by embedded content from other domains (ads) | Varies | High — enables cross-site tracking |
+
+- **Third-party cookies**: used by ad networks to track you across multiple websites — a single ad network's cookie follows you from news sites to shopping sites to social media. GDPR and similar laws require consent for non-essential cookies.
+- **Browser setting**: most modern browsers now block third-party cookies by default (Firefox, Safari) or are phasing them out (Chrome). Enabling this setting improves privacy.
+- **Private browsing**: deletes all cookies when the session ends — cannot be used to maintain persistent tracking across sessions.
+
+---
+
+## Password Managers
+
+Passwords should be long, random, and unique per site — which is impossible to remember. Password managers solve this.
+
+| Type | Examples | Pros | Cons |
+|---|---|---|---|
+| Browser built-in | Chrome, Edge, Firefox, Safari | Seamless integration, free, syncs across devices | Tied to browser/account; limited features vs standalone |
+| Standalone application | 1Password, Bitwarden, LastPass | Cross-browser, advanced features, audit tools, team sharing | Additional cost (most); another app to manage |
+| Hardware token | YubiKey (can store TOTP seeds) | Hardware security; not software-based | Limited use; mainly for 2FA not password storage |
+
+- **Single point of failure**: if your master password or password manager is compromised, all passwords are exposed. Mitigate with strong master password + MFA on the password manager account.
+- **Autofill security**: password managers autofill only on the exact matching domain. They will not autofill `paypa1.com` when credentials are saved for `paypal.com` — this is a phishing defense.
+
+---
+
+## Autofill Risks
+
+Browser autofill for forms (not just passwords) can be exploited:
+
+- **Hidden field attack**: malicious web pages include hidden form fields not visible to the user. When autofill populates visible fields (name, email), it may also populate hidden fields (phone, address, credit card) that the user never sees being submitted.
+- **Mitigation**: disable autofill for sensitive data categories (credit cards, addresses) in browser settings. Use a dedicated password manager with domain-matching protection instead.
+
+---
+
+## SmartScreen and Safe Browsing
+
+Both Microsoft and Google maintain databases of known malicious URLs and file hashes that their browsers check in real time.
+
+- **Microsoft SmartScreen** (Edge, Internet Explorer): checks URLs against Microsoft's phishing and malware URL database. Checks downloaded files against known-malicious file hashes. Shows a warning page before loading dangerous URLs. Warns before running suspicious downloaded executables.
+- **Google Safe Browsing** (Chrome, Firefox, Safari): same concept — blocklist of phishing, malware, and unwanted software URLs. Updated several times per day.
+- **Both should be enabled**: they are enabled by default and should not be disabled. They add negligible performance overhead and block significant threats.
+
+---
+
+## Browser Hardening Summary
+
+| Setting | Recommended Action |
+|---|---|
+| HTTPS-only mode | Enable |
+| SmartScreen / Safe Browsing | Enable (on by default) |
+| Third-party cookie blocking | Enable |
+| Pop-up blocker | Enable (on by default); allow exceptions for trusted sites |
+| Java plugin | Disable or uninstall |
+| Flash plugin | Disable or uninstall (EOL December 2020) |
+| Extension permissions | Audit and minimize; remove unused |
+| Auto-updates | Enable — keep browser current |
+| Password manager | Use one; create unique passwords for every site |
+| Private browsing misuse | Educate users — not anonymous; does not replace VPN |
+
+---
+
+## Browser Hijacking
+
+Browser hijacking is when malware or a malicious extension modifies browser settings without user consent.
+
+**Signs of browser hijacking:**
+- Homepage changed to an unknown site
+- Default search engine changed (searches redirect to unfamiliar engine)
+- Unknown extensions installed
+- Constant redirects to unrelated sites
+- Excessive pop-up advertisements even on trusted sites
+
+**Removal steps:**
+
+<ProcessSteps
+  title="Browser Hijacking Removal"
+  color="blue"
+  steps={[
+    { title: "Remove Unknown Extensions", description: "Open browser extensions settings. Remove any extension you do not recognize or did not intentionally install." },
+    { title: "Run Anti-Malware Scan", description: "Use Windows Defender or a dedicated malware removal tool (Malwarebytes). A full scan may find the underlying adware or PUP (Potentially Unwanted Program) that installed the extension." },
+    { title: "Reset Browser Settings", description: "Use the browser's built-in reset function: Chrome: Settings > Reset settings > Restore settings to original defaults. This clears homepage, search engine, pinned tabs, and extensions without deleting bookmarks or passwords." },
+    { title: "Clear Cookies and Cache", description: "Clear all browsing data including cookies, cache, and site data. Malicious persistent cookies should be removed." },
+    { title: "Verify Search Engine and Homepage", description: "After reset, verify the default search engine and startup page are set correctly. Some hijackers reinstall themselves via remaining processes — re-run the malware scan after resetting." },
+    { title: "Check Scheduled Tasks and Startup Items", description: "Open Task Scheduler and msconfig (Startup tab) for unfamiliar entries that may be reinstalling the hijacker on each boot. Remove any suspicious startup items." }
+  ]}
+/>
+
+---
+
+## Trusted Sites Zone (Legacy)
+
+Internet Explorer and Edge (legacy mode) support security zones that apply different trust levels to websites.
+
+- **Internet zone**: default for all websites — standard security restrictions apply
+- **Trusted sites zone**: user-defined list of websites that receive lower security restrictions (e.g., allow ActiveX, allow pop-ups)
+- **Restricted sites zone**: explicit blocklist — highest restrictions applied
+- **Local intranet zone**: internal network sites — somewhat lower restrictions than internet
+
+This is a legacy concept from the IE era. Modern browsers do not use zone-based security in the same way. However, enterprise environments using internal web applications built for IE may still configure trusted sites via Group Policy. The exam may reference "trusted sites" in the context of Internet Options.

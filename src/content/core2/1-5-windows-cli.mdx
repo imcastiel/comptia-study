@@ -1,0 +1,492 @@
+# Windows Command-Line Tools
+
+Command-line tools are tested heavily on the A+ exam. You need to know what each command does, the most important flags, and when to use each one. Many commands require an **elevated (Administrator) command prompt** — a common exam question.
+
+## Quick Reference Table
+
+| Command | Purpose | Key Flags |
+|---------|---------|-----------|
+| `ipconfig` | Display and manage IP configuration | `/all` `/release` `/renew` `/flushdns` |
+| `ping` | Test network connectivity | `-t` `-n` `-a` |
+| `tracert` | Trace the path packets take to a host | `-d` `-h` |
+| `nslookup` | Query DNS servers | (interactive mode, `set type=`) |
+| `netstat` | Display network connections and statistics | `-a` `-b` `-n` `-o` `-r` |
+| `nbtstat` | Display NetBIOS over TCP/IP stats | `-a` `-A` `-c` `-n` `-r` |
+| `net` | Manage users, shares, services, connections | `user` `localgroup` `share` `use` `view` `start` `stop` |
+| `sfc` | System File Checker — scan/repair Windows files | `/scannow` |
+| `chkdsk` | Check and repair file system errors | `/f` `/r` |
+| `diskpart` | Manage disks and partitions | (interactive) |
+| `xcopy` | Copy files and directory trees | `/s` `/e` `/h` `/i` |
+| `robocopy` | Robust file copy with retries and mirroring | `/MIR` `/E` `/Z` `/LOG` |
+| `shutdown` | Shut down, restart, or log off | `/s` `/r` `/l` `/t` `/a` `/f` |
+| `gpupdate` | Refresh Group Policy | `/force` |
+| `gpresult` | Show applied Group Policy results | `/r` `/h` |
+
+<ConceptCallout type="warning">
+  **`sfc /scannow` and `chkdsk /f` both require an elevated (Run as Administrator) command prompt.** Running them in a standard prompt will fail or give incomplete results. This is a frequent exam trap.
+</ConceptCallout>
+
+---
+
+## Network Commands
+
+### ipconfig — IP Configuration
+
+`ipconfig` is the primary tool for viewing and resetting a Windows machine's IP configuration.
+
+```
+ipconfig                    Display basic IP info for all adapters
+ipconfig /all               Full details: MAC address, DHCP server, DNS servers, lease info
+ipconfig /release           Release the current DHCP lease (sets IP to 0.0.0.0)
+ipconfig /renew             Request a new IP address from the DHCP server
+ipconfig /flushdns          Clear the local DNS resolver cache
+ipconfig /displaydns        Show the contents of the DNS cache
+ipconfig /registerdns       Re-register the hostname with the DNS server
+```
+
+<ConceptCallout type="tip">
+  If a user has a **169.254.x.x** IP address, DHCP failed. Run `ipconfig /release` then `ipconfig /renew` to retry. If it still fails, the DHCP server is unreachable or the network connection is broken.
+</ConceptCallout>
+
+Key fields in `ipconfig /all` output:
+
+| Field | What It Means |
+|-------|--------------|
+| Physical Address | MAC address of the adapter |
+| DHCP Enabled | Yes = address was assigned by DHCP |
+| IPv4 Address | Current IP (asterisk = DHCP address tentatively held) |
+| Subnet Mask | Network portion vs. host portion |
+| Default Gateway | Router IP for off-subnet traffic |
+| DHCP Server | IP of the server that handed out the address |
+| DNS Servers | Name servers Windows uses for resolution |
+| Lease Obtained / Expires | When the DHCP lease was issued and when it expires |
+
+---
+
+### ping — Connectivity Test
+
+`ping` sends ICMP Echo Request packets and listens for Echo Replies, measuring whether a host is reachable and how long each round-trip takes.
+
+```
+ping comptia.org              Send 4 pings to comptia.org (default)
+ping -t 192.168.1.1           Ping continuously until Ctrl+C
+ping -n 10 192.168.1.1        Send exactly 10 pings
+ping -a 192.168.1.1           Resolve the IP to a hostname
+ping -l 1500 192.168.1.1      Set packet size to 1500 bytes (MTU testing)
+ping -4 comptia.org           Force IPv4
+ping -6 comptia.org           Force IPv6
+```
+
+**Interpreting results:**
+
+| Result | Meaning |
+|--------|---------|
+| Reply from x.x.x.x: bytes=32 time=Xms | Host is reachable; time is round-trip latency |
+| Request timed out | Packet sent, no reply (host down, firewall blocking ICMP, or host doesn't respond) |
+| Destination host unreachable | No route to the host (routing table problem or gateway is down) |
+| TTL expired in transit | Too many hops; packet was discarded by a router |
+
+<ConceptCallout type="tip">
+  The standard ping troubleshooting sequence: **1)** `ping 127.0.0.1` (loopback — tests TCP/IP stack) → **2)** `ping <own IP>` (tests NIC) → **3)** `ping <gateway>` (tests LAN) → **4)** `ping 8.8.8.8` (tests internet) → **5)** `ping google.com` (tests DNS).
+</ConceptCallout>
+
+---
+
+### tracert — Trace Route
+
+`tracert` maps every router (hop) between your machine and a destination, showing latency at each step. Uses ICMP with incrementing TTL values.
+
+```
+tracert comptia.org           Trace route to comptia.org
+tracert -d comptia.org        Do not resolve IP addresses to hostnames (faster)
+tracert -h 15 comptia.org     Set maximum hops to 15 (default is 30)
+tracert -w 1000 comptia.org   Wait 1000ms per reply (default 4000ms)
+```
+
+<ConceptCallout type="tip">
+  **tracert uses ICMP on Windows; traceroute uses UDP on Linux/macOS.** Both probe TTL values. If hops stop responding partway through and show `* * *`, a firewall is blocking ICMP — not necessarily a routing failure. Look at the hop where latency suddenly spikes to find the bottleneck.
+</ConceptCallout>
+
+---
+
+### nslookup — DNS Query Tool
+
+`nslookup` queries DNS servers to resolve names or look up records. It can run in single-query mode or interactive mode.
+
+```
+nslookup comptia.org                    Look up the A record for comptia.org
+nslookup comptia.org 8.8.8.8            Query 8.8.8.8 specifically (bypass default DNS)
+nslookup -type=MX comptia.org          Look up the MX (mail) records
+nslookup -type=NS comptia.org          Look up the name servers
+nslookup -type=PTR 142.251.163.100     Reverse lookup (IP to hostname)
+```
+
+**Interactive mode:**
+
+```
+nslookup                   Enters interactive mode (prompt changes to >)
+> set type=MX              Change query type to MX records
+> comptia.org              Query for MX records
+> exit                     Leave interactive mode
+```
+
+<ConceptCallout type="info">
+  Use `nslookup` to confirm whether DNS resolution is working. If `ping google.com` fails but `ping 8.8.8.8` succeeds, DNS is the problem — `nslookup google.com` will confirm.
+</ConceptCallout>
+
+---
+
+### netstat — Network Statistics
+
+`netstat` displays active TCP connections, listening ports, routing tables, and network interface statistics.
+
+```
+netstat               Show active connections
+netstat -a            Show all connections AND listening ports
+netstat -n            Show numeric addresses (no DNS resolution — faster)
+netstat -b            Show the executable associated with each connection (requires admin)
+netstat -o            Show the Process ID (PID) for each connection
+netstat -r            Show the routing table (same as route print)
+netstat -s            Show per-protocol statistics (TCP, UDP, ICMP, IP)
+netstat -an           Combine: all connections + numeric output
+netstat -ano          All connections + numeric + PIDs
+```
+
+**State column values:**
+
+| State | Meaning |
+|-------|---------|
+| LISTENING | Waiting for an incoming connection on this port |
+| ESTABLISHED | Active connection |
+| TIME_WAIT | Connection closed; waiting to ensure remote side received the close |
+| CLOSE_WAIT | Remote side closed; local side hasn't yet |
+| SYN_SENT | Waiting for a matching SYN from the remote side |
+
+<ConceptCallout type="tip">
+  `netstat -ano` is the go-to command for finding out which process is listening on a specific port. Match the PID from the last column to Task Manager's Details tab to identify the program.
+</ConceptCallout>
+
+---
+
+### nbtstat — NetBIOS Statistics
+
+`nbtstat` displays NetBIOS name cache, registered names, and NetBIOS over TCP/IP statistics. Useful for diagnosing Windows file-sharing name resolution issues.
+
+```
+nbtstat -a COMPUTERNAME     Display the NetBIOS name table for a remote host by name
+nbtstat -A 192.168.1.10     Display the NetBIOS name table for a remote host by IP
+nbtstat -c                  Display the local NetBIOS name cache (cached remote names)
+nbtstat -n                  Display local NetBIOS name registrations
+nbtstat -r                  Display NetBIOS name resolution statistics
+nbtstat -R                  Purge and reload the NetBIOS name cache
+nbtstat -s                  Display NetBIOS sessions (by name)
+nbtstat -S                  Display NetBIOS sessions (by IP)
+```
+
+<ConceptCallout type="info">
+  `-a` (lowercase) uses a computer name; `-A` (uppercase) uses an IP address. This uppercase/lowercase distinction is tested on the exam.
+</ConceptCallout>
+
+---
+
+## System Commands
+
+### sfc — System File Checker
+
+`sfc` scans all protected Windows system files and replaces corrupted or missing ones with a cached copy from the Windows component store (`C:\Windows\WinSxS`).
+
+```
+sfc /scannow          Scan all protected system files and repair automatically
+sfc /verifyonly       Scan only — do not repair
+sfc /scanfile=<path>  Scan and repair a specific file
+sfc /verifyfile=<path>  Verify integrity of a specific file without repairing
+```
+
+<ConceptCallout type="warning">
+  `sfc /scannow` **must be run from an elevated (Administrator) command prompt.** After it completes, check the results in `%windir%\Logs\CBS\CBS.log`. The summary line near the end says whether it found and fixed anything.
+</ConceptCallout>
+
+If `sfc` cannot fix files on a running system (because they are in use), run it from Windows RE (Recovery Environment) or from a bootable USB.
+
+**DISM** (Deployment Image Servicing and Management) repairs the component store that `sfc` draws from:
+```
+DISM /Online /Cleanup-Image /RestoreHealth
+```
+Run DISM before sfc if sfc keeps finding problems it cannot fix.
+
+---
+
+### chkdsk — Check Disk
+
+`chkdsk` checks the file system metadata and, optionally, the physical disk sectors for errors.
+
+```
+chkdsk C:             Display status without fixing (read-only scan)
+chkdsk C: /f          Fix file system errors (requires reboot if drive is in use)
+chkdsk C: /r          Locate bad sectors and recover readable data (implies /f; slow)
+chkdsk C: /x          Force dismount before checking (for non-system drives)
+chkdsk C: /scan       Run online scan (Windows 8+; doesn't require exclusive access)
+```
+
+<ConceptCallout type="warning">
+  Running `chkdsk /f` on the C: drive requires a **reboot** — Windows schedules it to run before the next OS load because it cannot fix the active system volume while it's in use. Other drives can be checked live with `/x` to force dismount.
+</ConceptCallout>
+
+**chkdsk vs sfc:**
+
+| Tool | Checks | Requires Admin |
+|------|--------|---------------|
+| `chkdsk` | File system structure, bad disk sectors | Yes |
+| `sfc /scannow` | Integrity of Windows OS files | Yes |
+
+---
+
+### shutdown — Shut Down and Restart
+
+```
+shutdown /s           Shut down the computer
+shutdown /r           Restart the computer
+shutdown /l           Log off the current user
+shutdown /h           Hibernate (if enabled)
+shutdown /s /t 60     Shut down after 60-second delay
+shutdown /a           Abort a pending shutdown (within the timeout window)
+shutdown /f           Force close all running applications without warning
+shutdown /r /f /t 0   Immediate restart, force-close apps
+shutdown /s /m \\COMPUTERNAME   Shut down a remote computer (requires admin rights)
+```
+
+<ConceptCallout type="tip">
+  `shutdown /a` is the command to cancel a scheduled shutdown — useful if a script or remote command triggered an unwanted shutdown. You only have the timeout window to run it.
+</ConceptCallout>
+
+---
+
+### gpupdate and gpresult — Group Policy
+
+```
+gpupdate              Refresh only changed Group Policy settings
+gpupdate /force       Reapply ALL Group Policy settings (even unchanged ones)
+gpupdate /target:user Refresh user-side policies only
+gpupdate /target:computer Refresh computer-side policies only
+gpupdate /logoff      Log off after applying (for policies that require logoff)
+gpupdate /boot        Restart after applying (for policies that require restart)
+```
+
+```
+gpresult /r           Display RSoP (Resultant Set of Policy) summary in the console
+gpresult /v           Verbose output — shows all applied policies
+gpresult /h gpo.html  Generate an HTML report of all applied policies
+gpresult /scope user  Show only user-side policies
+gpresult /scope computer  Show only computer-side policies
+```
+
+<ConceptCallout type="info">
+  `gpresult /r` is the fastest way to verify that a Group Policy Object is actually applying to a computer or user. Run it when a policy is configured but not taking effect.
+</ConceptCallout>
+
+---
+
+## User and Network Management — net Commands
+
+The `net` command family manages users, groups, shares, and network connections from the command line.
+
+### net user
+
+```
+net user                          List all local user accounts
+net user username                 Display details about a specific user
+net user username password /add   Create a new local user
+net user username /delete         Delete a local user account
+net user username password        Change a user's password
+net user username /active:yes     Enable a disabled account
+net user username /active:no      Disable an account without deleting it
+```
+
+### net localgroup
+
+```
+net localgroup                    List all local groups
+net localgroup Administrators     Show members of the Administrators group
+net localgroup Administrators username /add    Add user to Administrators
+net localgroup Administrators username /delete Remove user from Administrators
+```
+
+### net share and net use
+
+```
+net share                         List all shared resources
+net share ShareName=C:\Path       Create a new share
+net share ShareName /delete       Remove a share
+
+net use                           List current network connections
+net use Z: \\server\share         Map a drive letter to a network share
+net use Z: \\server\share /persistent:yes   Map permanently (survives reboot)
+net use Z: /delete                Disconnect the mapped drive
+net use * /delete                 Disconnect all mapped drives
+```
+
+### net view, net start, net stop
+
+```
+net view                          List computers visible on the network
+net view \\COMPUTERNAME           List shared resources on a specific computer
+
+net start                         List running services
+net start "Print Spooler"         Start the Print Spooler service
+net stop "Print Spooler"          Stop the Print Spooler service
+```
+
+---
+
+## Disk Commands — diskpart
+
+`diskpart` is a powerful command-line disk partitioning tool. It is interactive — you run `diskpart` to enter the interpreter, then type sub-commands.
+
+<ProcessSteps
+  title="diskpart — Typical New Disk Workflow"
+  color="blue"
+  steps={[
+    { title: "Launch diskpart", description: "Open an elevated command prompt and type `diskpart`. The prompt changes to DISKPART>." },
+    { title: "List disks", description: "Type `list disk` to see all physical disks. Identify your target disk by size (Disk 0, Disk 1, etc.)." },
+    { title: "Select the disk", description: "Type `select disk 1` (or the appropriate number). All subsequent commands apply to this disk." },
+    { title: "Clean the disk", description: "Type `clean` to remove all partition and volume information. WARNING: this destroys all data on the selected disk." },
+    { title: "Create partition", description: "Type `create partition primary` to create a single primary partition using all available space. Use `size=<MB>` to specify a size." },
+    { title: "Format the volume", description: "Type `format fs=ntfs quick label=MyDrive` to quickly format with NTFS and assign a label." },
+    { title: "Assign a drive letter", description: "Type `assign letter=D` to assign the drive letter D. Windows Explorer will now show the drive." },
+    { title: "Exit diskpart", description: "Type `exit` to close diskpart." }
+  ]}
+/>
+
+### Essential diskpart Commands
+
+```
+list disk             Show all physical disks
+list partition        Show partitions on selected disk
+list volume           Show all volumes on the system
+select disk 1         Target disk 1 for subsequent operations
+select partition 2    Target partition 2 for subsequent operations
+detail disk           Show details about selected disk
+detail partition      Show details about selected partition
+create partition primary size=50000   Create 50 GB primary partition
+delete partition      Delete selected partition
+extend size=20000     Extend volume by 20 GB
+shrink desired=10000  Shrink volume by 10 GB
+format fs=ntfs quick  Quick format as NTFS
+assign letter=E       Assign drive letter E
+active                Mark partition as active (bootable, MBR only)
+clean                 Remove all partition info from selected disk
+convert gpt           Convert disk to GPT (requires no partitions)
+convert mbr           Convert disk to MBR (requires no partitions)
+```
+
+<ConceptCallout type="warning">
+  `clean` and `delete partition` in diskpart are **immediately destructive** — there is no undo and no confirmation prompt. Always double-check the selected disk number before running these commands.
+</ConceptCallout>
+
+---
+
+## File Copy Commands
+
+### xcopy
+
+`xcopy` copies files and directory trees, preserving more attributes than the basic `copy` command.
+
+```
+xcopy C:\Source D:\Dest /s         Copy subdirectories (excluding empty ones)
+xcopy C:\Source D:\Dest /e         Copy all subdirectories, including empty ones
+xcopy C:\Source D:\Dest /h         Copy hidden and system files
+xcopy C:\Source D:\Dest /i         Assume destination is a directory
+xcopy C:\Source D:\Dest /c         Continue copying even if errors occur
+xcopy C:\Source D:\Dest /y         Suppress overwrite confirmation prompts
+xcopy C:\Source D:\Dest /d         Copy only files newer than the destination
+```
+
+### robocopy — Robust Copy
+
+`robocopy` (Robust File Copy) is the preferred tool for large or repeated file copy jobs. It handles network interruptions gracefully, supports mirroring, and produces detailed logs.
+
+```
+robocopy C:\Source D:\Dest              Basic copy
+robocopy C:\Source D:\Dest /E          Copy all subdirectories including empty ones
+robocopy C:\Source D:\Dest /MIR        Mirror — delete destination files not in source
+robocopy C:\Source D:\Dest /Z          Restartable mode (resumes after interruption)
+robocopy C:\Source D:\Dest /R:3 /W:5  Retry 3 times, wait 5 seconds between retries
+robocopy C:\Source D:\Dest /LOG:file.txt   Write log to file.txt
+robocopy C:\Source D:\Dest /XF *.tmp  Exclude files matching *.tmp
+robocopy C:\Source D:\Dest /MOVE      Move files (delete source after copy)
+robocopy C:\Source D:\Dest /MT:8      Use 8 threads for faster copying
+```
+
+<CompareCards
+  title="xcopy vs robocopy"
+  left={{ title: "xcopy", icon: "Package", color: "orange", points: ["Legacy command; available since DOS", "Good for simple directory copies", "No built-in retry on failure", "Does not handle network interruptions gracefully", "Being phased out; robocopy is preferred"] }}
+  right={{ title: "robocopy", icon: "Layers", color: "blue", points: ["Retries failed copies automatically", "Restartable mode (/Z) for large transfers", "Mirror mode (/MIR) for one-way sync", "Multi-threaded copying (/MT)", "Detailed logs and exit codes for scripting"] }}
+/>
+
+---
+
+## Command Prompt vs PowerShell
+
+<CompareCards
+  title="cmd.exe vs PowerShell"
+  left={{ title: "Command Prompt (cmd.exe)", icon: "Monitor", color: "orange", points: ["Legacy shell; available since Windows 1.0", "Runs .bat and .cmd scripts", "Commands return plain text strings", "Limited scripting constructs", "Still valid for the A+ exam; all commands above work here"] }}
+  right={{ title: "PowerShell", icon: "Zap", color: "blue", points: ["Modern shell built on .NET", "Commands (cmdlets) return objects, not text", "Verb-Noun syntax: Get-Process, Stop-Service", "Runs .ps1 scripts; full programming constructs", "Default shell in Windows 11; preferred for automation"] }}
+/>
+
+### Key PowerShell Equivalents
+
+| cmd.exe | PowerShell Cmdlet |
+|---------|------------------|
+| `ipconfig` | `Get-NetIPConfiguration` |
+| `netstat -an` | `Get-NetTCPConnection` |
+| `ping host` | `Test-NetConnection host` |
+| `tracert host` | `Test-NetConnection host -TraceRoute` |
+| `net user` | `Get-LocalUser` |
+| `sfc /scannow` | No direct equivalent (still use sfc) |
+
+<ConceptCallout type="info">
+  The A+ exam tests both `cmd.exe` commands and awareness that PowerShell is the modern alternative. You do not need to memorize PowerShell cmdlets in depth — focus on the classic commands in the table at the top of this page.
+</ConceptCallout>
+
+---
+
+## Running as Administrator
+
+Many system commands require elevated privileges. Methods to run as administrator:
+
+<ProcessSteps
+  title="How to Run a Command as Administrator"
+  color="purple"
+  steps={[
+    { title: "Search for cmd or PowerShell", description: "Type cmd or PowerShell in the Start menu search box." },
+    { title: "Right-click", description: "Right-click the result and choose 'Run as administrator'." },
+    { title: "UAC prompt", description: "A User Account Control dialog appears. If you are an administrator, click Yes. If not, enter an administrator password." },
+    { title: "Elevated prompt", description: "The title bar shows 'Administrator: Command Prompt' or 'Administrator: Windows PowerShell'. You can now run elevated commands." }
+  ]}
+/>
+
+<ConceptCallout type="tip">
+  **Keyboard shortcut:** Highlight cmd in Start search, then press **Ctrl+Shift+Enter** to launch it elevated immediately (skips right-click step, still shows UAC prompt).
+</ConceptCallout>
+
+---
+
+## Exam Summary — Commands to Know Cold
+
+<ConceptCallout type="tip">
+  **ipconfig:** `/all` shows MAC and DHCP info. `/flushdns` clears DNS cache. `169.254.x.x` = DHCP failure → `/release` + `/renew`.
+
+  **ping:** `-t` = continuous. Standard sequence: loopback → own IP → gateway → 8.8.8.8 → google.com.
+
+  **tracert:** `-d` skips DNS resolution (faster). Uses ICMP on Windows.
+
+  **sfc /scannow:** Requires admin. Repairs Windows system files from the component store. Run DISM first if sfc cannot fix files.
+
+  **chkdsk /f:** Requires admin and a reboot on the system drive. `/r` adds bad sector recovery (implies /f).
+
+  **netstat -ano:** All connections + numeric + PIDs. Use to find what is listening on a port.
+
+  **diskpart:** Interactive. `clean` destroys all data instantly. Must `select disk` before any destructive operation.
+
+  **robocopy:** Preferred over xcopy. `/MIR` mirrors, `/Z` restartable, `/E` includes empty dirs.
+</ConceptCallout>

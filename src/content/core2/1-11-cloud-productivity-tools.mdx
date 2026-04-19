@@ -1,0 +1,295 @@
+# Cloud-Based Productivity Tools
+
+Cloud productivity suites have replaced locally-installed office software in most organizations. The 220-1202 exam expects you to configure and support Microsoft 365, Google Workspace, and collaboration tools — including installation, account setup, sync behavior, and email protocol configuration.
+
+## Microsoft 365 (formerly Office 365)
+
+Microsoft 365 is a subscription-based cloud productivity suite that includes desktop applications, cloud services, and management tools in a single license.
+
+### Core Applications
+
+| Application | Purpose |
+|---|---|
+| Word | Word processing |
+| Excel | Spreadsheets |
+| PowerPoint | Presentations |
+| Outlook | Email, calendar, contacts |
+| Teams | Chat, video meetings, collaboration |
+| OneNote | Note-taking |
+| SharePoint | Intranet, document management, team sites |
+| OneDrive | Personal cloud file storage and sync |
+| Access | Desktop database (Windows only) |
+| Publisher | Desktop publishing (Windows only) |
+
+### Licensing Tiers
+
+| Plan | Users | Apps Included |
+|---|---|---|
+| Microsoft 365 Personal | 1 user | Full desktop apps + 1 TB OneDrive |
+| Microsoft 365 Family | Up to 6 users | Full desktop apps + 1 TB OneDrive per user |
+| Microsoft 365 Business Basic | Business | Web/mobile apps only (no desktop), Teams, SharePoint |
+| Microsoft 365 Business Standard | Business | Full desktop apps + Teams + SharePoint |
+| Microsoft 365 Business Premium | Business | Standard + Intune MDM + Defender |
+| Microsoft 365 E3/E5 | Enterprise | Full suite + advanced compliance and security |
+
+<ConceptCallout type="info">Microsoft 365 apps can be installed on up to 5 devices per licensed user (or more depending on plan). The license is tied to the user's Microsoft account or organizational account — deactivating the account deactivates all installations.</ConceptCallout>
+
+### Installation Process
+
+<ProcessSteps
+  title="Installing Microsoft 365 Apps"
+  color="blue"
+  steps={[
+    { title: "Sign in to office.com", description: "Go to office.com and sign in with the Microsoft account or organizational (work/school) account that has an active Microsoft 365 license." },
+    { title: "Click Install apps", description: "On the Office home page, click 'Install apps' in the top right, then select 'Microsoft 365 apps' to download the installer." },
+    { title: "Run the installer", description: "Run the downloaded OfficeSetup.exe. The installer downloads and installs all Office applications in the background. Requires internet connection." },
+    { title: "Sign in to activate", description: "Open any Office application (Word, Excel, etc.) and sign in with the same Microsoft account used to download. This activates the license." },
+    { title: "Verify activation", description: "File > Account in any Office app should show the user's name and 'Product Activated'. Subscription info and linked account are displayed here." }
+  ]}
+/>
+
+### OneDrive Integration
+
+OneDrive is Microsoft's cloud storage service, deeply integrated with Windows 10/11 and Microsoft 365.
+
+**Files On-Demand**: Files are visible in File Explorer but are not downloaded locally until opened. A cloud icon indicates the file is online-only; a green checkmark indicates it is synced locally; a blue sync icon indicates it is syncing.
+
+| Icon | Status | Meaning |
+|---|---|---|
+| Cloud outline | Online-only | File is in OneDrive but not downloaded |
+| Green checkmark | Synced | File is available offline |
+| Blue arrows | Syncing | File is currently uploading/downloading |
+| Red X | Sync error | File failed to sync — needs attention |
+
+**Selective Sync**: Right-click the OneDrive tray icon > Settings > Account > Choose folders. Select which folders to sync locally, leaving others cloud-only. Saves local disk space.
+
+### Exchange Online and Outlook
+
+Exchange Online is the cloud-hosted email/calendar/contacts service included in Microsoft 365 business plans.
+
+**Autodiscover**: When you add an Exchange account in Outlook by entering only the email address and password, Outlook uses the **Autodiscover** service to automatically find the server configuration. Autodiscover queries DNS for an autodiscover record pointing to the Exchange server settings. No manual server entry is needed in most cases.
+
+If Autodiscover fails, you can manually configure: Server = `outlook.office365.com`, encryption = SSL/TLS, port = 993 (IMAP) or 443 (Exchange ActiveSync).
+
+## Google Workspace (formerly G Suite)
+
+Google Workspace is Google's cloud-based productivity suite, designed to run primarily in the browser.
+
+### Core Applications
+
+| Application | Purpose | Microsoft Equivalent |
+|---|---|---|
+| Gmail | Email | Outlook |
+| Google Drive | File storage | OneDrive |
+| Google Docs | Word processing | Word |
+| Google Sheets | Spreadsheets | Excel |
+| Google Slides | Presentations | PowerPoint |
+| Google Meet | Video conferencing | Teams (meetings) |
+| Google Calendar | Calendar and scheduling | Outlook Calendar |
+| Google Chat | Messaging and spaces | Teams (chat) |
+| Google Forms | Surveys and forms | Microsoft Forms |
+| Google Sites | Simple intranet pages | SharePoint |
+
+### Key Characteristics
+
+- **Browser-based**: No installation required for core apps. Chrome browser provides the best experience, but all modern browsers work.
+- **Offline mode**: Google Docs, Sheets, and Slides can work offline via the Google Docs Offline Chrome extension. Changes sync when connectivity is restored.
+- **Google Drive storage**: 15 GB free shared across Gmail, Drive, and Google Photos. Business plans provide more or unlimited storage.
+- **Shared Drives**: Team-owned storage where files belong to the organization, not an individual. Files persist even if an employee leaves.
+- **Chrome browser integration**: Google Workspace links deeply with Chrome profiles, extensions, and the Chrome Web Store for business.
+
+<ConceptCallout type="tip">The key difference between Google Drive "My Drive" and "Shared Drives": files in My Drive are owned by the user and may become inaccessible when they leave. Files in Shared Drives are owned by the organization. IT should encourage teams to use Shared Drives for business-critical content.</ConceptCallout>
+
+## Collaboration Tools
+
+### Microsoft Teams
+
+Teams is Microsoft's unified communication and collaboration platform, included with Microsoft 365.
+
+**Core features:**
+- **Channels**: Organized topic-based threads within a Team. Files shared in channels are stored in the team's SharePoint site.
+- **Chat**: One-on-one and group direct messages.
+- **Meetings**: Scheduled and ad-hoc video/audio meetings with screen sharing, recording, and background blur.
+- **Apps and integrations**: Tabs, connectors, and bots integrate third-party tools (Trello, GitHub, ServiceNow) directly into channels.
+- **Files**: Files shared in channels are stored in SharePoint; files in chats are stored in OneDrive.
+- **Screen sharing and control**: Share entire screen, a window, or a presentation. Remote control can be granted to other participants.
+
+### Slack
+
+Slack is a standalone messaging and collaboration platform widely used by technology companies and startups.
+
+**Core features:**
+- **Workspaces**: Each organization or community has its own workspace (URL: organizationname.slack.com).
+- **Channels**: Public or private topic-based message threads. Channels prefixed with `#`.
+- **Direct Messages (DMs)**: Private one-on-one or small-group conversations.
+- **Threads**: Replies to specific messages to keep channels organized.
+- **App integrations**: Slack connects with hundreds of tools (GitHub, Jira, PagerDuty, Google Drive) via its app directory.
+
+<CompareCards
+  title="Microsoft Teams vs Slack"
+  left={{ title: "Microsoft Teams", icon: "Monitor", color: "blue", points: ["Included with Microsoft 365 subscription", "Deep integration with Office apps", "Files stored in SharePoint/OneDrive", "Built-in video conferencing", "Best for organizations on Microsoft 365", "Enterprise MDM/Intune management"] }}
+  right={{ title: "Slack", icon: "Globe", color: "orange", points: ["Standalone paid subscription", "Best-in-class third-party integrations", "Files stored in Slack or linked services", "Video calling added later (Huddles)", "Best for tech teams and startups", "Standalone management console"] }}
+/>
+
+### Zoom
+
+Zoom is a dedicated video conferencing platform known for ease of use and reliability.
+- **Meeting settings**: Host controls (mute participants, admit from waiting room, end for all), breakout rooms, polling.
+- **Recording**: Local recording (to PC) or cloud recording (paid plans). Generates video file + transcript.
+- **Screen sharing**: Share full screen, application window, or portion of screen.
+- **Zoom client installation**: Installs as a desktop app (Windows/macOS) or runs in a browser. Mobile apps for iOS/Android.
+- **Scheduling**: Integrates with Google Calendar and Outlook for one-click meeting scheduling.
+
+## Cloud Storage Comparison
+
+| Service | Free Storage | Ecosystem | Notable Feature |
+|---|---|---|---|
+| OneDrive | 5 GB (15 GB with M365 Personal/Family) | Windows / Microsoft 365 | Built into Windows 10/11; Files On-Demand |
+| Google Drive | 15 GB (shared with Gmail/Photos) | Chrome / Google Workspace | Shared Drives for teams |
+| Dropbox | 2 GB | Cross-platform | Best cross-platform sync; Paper collaboration |
+| iCloud Drive | 5 GB | Apple (macOS/iOS) | Seamless on Apple devices; Optimize Mac Storage |
+| Box | 10 GB | Enterprise-focused | Strong compliance and governance features |
+
+<ConceptCallout type="info">For the exam, know the free storage tier for each major service: OneDrive = 5 GB, Google Drive = 15 GB, Dropbox = 2 GB, iCloud = 5 GB. These numbers are tested in scenario questions about which service to recommend based on storage needs.</ConceptCallout>
+
+## Account Setup and Security Considerations
+
+### Single Sign-On (SSO)
+
+SSO allows users to authenticate once and access multiple applications without re-entering credentials. Common in enterprise environments:
+- **Microsoft Entra ID** (formerly Azure AD): SSO for Microsoft 365 and thousands of third-party apps.
+- **Google Workspace SSO**: Google identity used for Workspace apps and connected services.
+- **SAML / OAuth**: Protocols that enable SSO between identity providers and applications.
+
+### Multi-Factor Authentication (MFA)
+
+MFA requires a second verification factor in addition to the password. Critical for cloud accounts — passwords alone are insufficient given phishing attacks.
+
+Methods: Authenticator app (Microsoft Authenticator, Google Authenticator), SMS code, hardware token (YubiKey), email code.
+
+**Setup in Microsoft 365**: Admin Center > Users > Active users > User > Multi-factor authentication. Users configure their MFA method on first sign-in after enforcement.
+
+### MDM Enrollment for Managed Devices
+
+Managed devices are enrolled in Mobile Device Management before accessing cloud productivity tools. This allows IT to:
+- Require device compliance (PIN, encryption, OS version) before granting access
+- Apply conditional access policies
+- Remotely wipe corporate data
+- Push application configurations
+
+**Microsoft Intune** manages Windows, macOS, iOS, and Android devices for Microsoft 365 organizations.
+**Jamf** manages Apple devices (macOS and iOS) for organizations using Jamf.
+
+### Conditional Access
+
+Conditional access policies block or allow access to cloud apps based on conditions:
+- User identity and group membership
+- Device compliance status (is it enrolled in MDM? Is it encrypted?)
+- Location (IP address or country)
+- Application being accessed
+
+Example: Block access to SharePoint from non-compliant devices or from outside the US.
+
+### Account Provisioning and Deprovisioning
+
+| Event | Action Required |
+|---|---|
+| New employee | Create account, assign licenses, add to groups, enroll device |
+| Employee transfers | Update group memberships, adjust access permissions |
+| Employee leaves | Disable account immediately, revoke licenses, transfer data ownership, offboard device |
+
+<ConceptCallout type="warning">Deprovisioning must happen immediately when an employee leaves. A disabled account stops all cloud access. Do NOT delete the account immediately — preserve the mailbox and OneDrive data (typically 30 days) per company retention policy before permanent deletion.</ConceptCallout>
+
+## Synchronization
+
+### Selective Sync
+
+Most cloud storage clients allow choosing which folders sync to the local device. This saves disk space on machines with small SSDs.
+
+- **OneDrive**: Right-click tray icon > Settings > Account > Choose folders
+- **Google Drive**: Preferences > My Computer > folders to sync
+- **Dropbox**: Preferences > Sync > Selective Sync
+
+### Bandwidth Throttling
+
+Large uploads/downloads can saturate the network connection. Cloud clients can be configured to limit sync bandwidth:
+- **OneDrive**: Settings > Network tab. Set upload and download rate limits.
+- **Dropbox**: Preferences > Bandwidth. Set upload and download rate limits.
+
+### Pausing Sync
+
+During presentations, demonstrations, or to prioritize other network traffic, sync can be temporarily paused:
+- OneDrive: Right-click tray icon > Pause syncing > choose duration
+- Sync resumes automatically after the pause period or can be manually resumed.
+
+### Version History
+
+Cloud storage services maintain previous versions of files, enabling recovery from accidental edits or deletion:
+
+| Service | Version History |
+|---|---|
+| OneDrive | 93 days for Microsoft 365 subscribers |
+| SharePoint | 500 versions (configurable) |
+| Google Drive | 30 days (unlimited for Google-native files) |
+| Dropbox | 180 days (paid), 30 days (free) |
+
+## Email Configuration
+
+Understanding email protocols is essential for configuring email clients and troubleshooting mail problems.
+
+### Protocol Comparison
+
+<CompareCards
+  title="POP3 vs IMAP vs Exchange"
+  left={{ title: "POP3", icon: "Globe", color: "blue", points: ["Downloads mail to local device", "Deletes from server by default", "Works on one device at a time", "No folder sync", "Port 110 (plain) / 995 (SSL)", "Use when: one device, offline access priority"] }}
+  right={{ title: "IMAP", icon: "Cloud", color: "orange", points: ["Keeps mail on server", "Syncs across multiple devices", "Folder structure synced", "Read/unread status synced", "Port 143 (plain) / 993 (SSL)", "Use when: multiple devices, always up-to-date"] }}
+/>
+
+### Email Protocol Port Reference
+
+| Protocol | Port (Unencrypted) | Port (Encrypted) | Encryption Type |
+|---|---|---|---|
+| IMAP | 143 | 993 | SSL/TLS (IMAPS) |
+| POP3 | 110 | 995 | SSL/TLS (POP3S) |
+| SMTP (submission) | 587 | 587 | STARTTLS (upgrade to TLS) |
+| SMTP (legacy) | 25 | 465 | SSL/TLS (SMTPS) — legacy |
+| Exchange/ActiveSync | 443 | 443 | HTTPS |
+
+<ConceptCallout type="warning">Port 25 is SMTP but is used for server-to-server mail relay. It is typically blocked by ISPs to prevent spam. End-user email clients should use port 587 (SMTP with authentication) for sending outbound email. If a user can receive but not send email, check that port 587 is not blocked.</ConceptCallout>
+
+### Manual Email Configuration (if Autodiscover Fails)
+
+When adding an account manually in Outlook or another mail client:
+
+| Setting | IMAP Example | Exchange Example |
+|---|---|---|
+| Account type | IMAP | Exchange / Office 365 |
+| Incoming server | `mail.domain.com` | `outlook.office365.com` |
+| Incoming port | 993 | 443 |
+| Incoming encryption | SSL/TLS | HTTPS |
+| Outgoing server | `smtp.domain.com` | `smtp.office365.com` |
+| Outgoing port | 587 | 587 |
+| Outgoing encryption | STARTTLS | STARTTLS |
+| Authentication | Username (full email) + password | Microsoft account / Modern Auth |
+
+### Modern Authentication (OAuth)
+
+Legacy protocols use basic authentication (username + password sent with every request). Modern authentication uses OAuth 2.0 tokens — the user authenticates once, receives a token, and the client uses the token for subsequent requests. This enables MFA and conditional access to apply to email clients.
+
+Microsoft 365 now requires modern authentication. Legacy clients that only support basic auth will fail to connect.
+
+## Exam Scenario Quick Reference
+
+| Scenario | Answer |
+|---|---|
+| User needs Outlook on a new laptop with M365 license | Download from office.com, sign in to activate |
+| Files visible in OneDrive but not taking disk space | Files On-Demand — cloud-only until opened |
+| User leaves company — what to do first | Disable account immediately to revoke access |
+| Teams files need to persist after user leaves | Use Shared Drives / Team SharePoint, not personal OneDrive |
+| User can receive email but can't send | Check port 587 outbound is not blocked; verify SMTP auth |
+| IMAP port with SSL encryption | 993 |
+| POP3 port with SSL encryption | 995 |
+| SMTP port for authenticated submission | 587 |
+| Reduce OneDrive disk usage on small SSD | Enable Files On-Demand + Selective Sync |
+| Block access to M365 from unmanaged devices | Configure Conditional Access policy in Entra ID |
+| User forgets M365 password — self-service reset | SSPR (Self-Service Password Reset) in Microsoft Entra ID |

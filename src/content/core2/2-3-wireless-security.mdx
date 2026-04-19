@@ -1,0 +1,132 @@
+# Wireless Security Protocols and Authentication
+
+Wireless security has evolved significantly over the past two decades. The exam expects you to know the evolution from WEP through WPA3, understand the encryption technology behind each, and identify the right authentication method for different deployment scenarios.
+
+## Wireless Security Protocol Evolution
+
+| Protocol | Year | Encryption | Key Weakness | Use Today? |
+|---|---|---|---|---|
+| WEP | 1999 | RC4 (40-bit or 104-bit) | Static keys, broken IV implementation — crackable in minutes | Never |
+| WPA | 2003 | TKIP (RC4-based) | TKIP has known vulnerabilities, RC4 fundamentally weak | No (deprecated) |
+| WPA2 | 2004 | AES-CCMP (128-bit) | Vulnerable to KRACK attack (patched), offline dictionary attacks on PSK | Yes (still current) |
+| WPA3 | 2018 | SAE + AES-GCMP-256 | Requires WPA3-capable hardware | Yes (preferred) |
+
+---
+
+## WEP (Wired Equivalent Privacy)
+
+WEP was the original 802.11 wireless security standard, designed in 1999 to provide security equivalent to a wired network. It failed completely at this goal.
+
+<ConceptCallout type="warning">WEP is completely broken and has been since 2001. An attacker with a laptop and freely available tools can crack a WEP key in under 10 minutes by passively capturing enough traffic. There is no scenario where WEP should be used. If you encounter a device that only supports WEP, it needs to be replaced.</ConceptCallout>
+
+WEP problems:
+- Static, manually configured keys — never change unless an administrator manually updates every device
+- RC4 stream cipher with a flawed initialization vector (IV) implementation — IVs repeat frequently, allowing statistical cryptanalysis
+- No protection against replay attacks or injection attacks
+
+---
+
+## WPA (Wi-Fi Protected Access)
+
+WPA was introduced in 2003 as an emergency fix for WEP's failures, designed to run on existing WEP hardware via firmware updates. It introduced **TKIP (Temporal Key Integrity Protocol)** which wraps RC4 with:
+- Per-packet key mixing to prevent IV reuse
+- A message integrity check (MIC) called Michael to detect tampering
+- Automatic key rotation
+
+TKIP provided meaningful improvement over WEP but is still RC4-based. TKIP has known cryptographic weaknesses and is deprecated. WPA should not be used on new deployments.
+
+---
+
+## WPA2
+
+WPA2 replaced WPA's TKIP with **AES-CCMP** (Advanced Encryption Standard — Counter Mode with Cipher Block Chaining Message Authentication Code Protocol). AES is a block cipher that is dramatically more secure than RC4 and is the encryption standard used by the US government for classified information.
+
+WPA2 operates in two modes:
+
+<CompareCards
+  title="WPA2 Personal vs WPA2 Enterprise"
+  left={{ title: "WPA2 Personal (PSK)", icon: "Wifi", color: "blue", points: ["Pre-Shared Key — one passphrase for all users", "Passphrase entered directly on each device", "Simple to set up — no infrastructure needed", "Suitable for home and small business", "Risk: one compromised device exposes the key", "Vulnerable to offline dictionary attacks against the PSK"] }}
+  right={{ title: "WPA2 Enterprise (802.1X)", icon: "Server", color: "green", points: ["Each user authenticates with individual credentials", "Requires RADIUS server infrastructure", "Credentials verified centrally — revoke one user without changing everyone's key", "Used in corporate and education environments", "Supports certificate-based authentication", "Much stronger identity assurance than PSK"] }}
+/>
+
+---
+
+## WPA3
+
+WPA3 is the current generation standard, required on Wi-Fi CERTIFIED devices since 2020. It addresses the main weaknesses of WPA2.
+
+### WPA3-Personal
+
+WPA3-Personal replaces the PSK handshake with **SAE (Simultaneous Authentication of Equals)**, also called Dragonfly. SAE provides:
+
+- **Forward secrecy**: even if the passphrase is compromised later, past session traffic cannot be decrypted
+- **Resistance to offline dictionary attacks**: unlike WPA2-PSK, an attacker who captures the handshake cannot run it through a password cracker offline — SAE requires real-time interaction with the access point for each guess
+
+### WPA3-Enterprise
+
+WPA3-Enterprise uses **192-bit encryption** (GCMP-256) versus WPA2-Enterprise's 128-bit AES-CCMP, providing stronger cryptographic protection for high-security environments.
+
+### WPA3 Transition Mode
+
+Access points can operate in transition mode supporting both WPA2 and WPA3 clients simultaneously during migration periods.
+
+---
+
+## TKIP vs AES: Understanding the Difference
+
+<CompareCards
+  title="TKIP vs AES-CCMP"
+  left={{ title: "TKIP (WPA)", icon: "Lock", color: "red", points: ["RC4-based stream cipher", "Designed to patch WEP on old hardware", "Per-packet keys improve on WEP but RC4 is inherently weak", "Known vulnerabilities (TKIP MIC attack)", "Deprecated — do not use"] }}
+  right={{ title: "AES-CCMP (WPA2/WPA3)", icon: "Shield", color: "green", points: ["AES block cipher — military-grade encryption", "Used by US government for classified data", "Counter Mode provides confidentiality", "CBC-MAC provides integrity and authenticity", "No known practical attacks against the cipher itself"] }}
+/>
+
+<ConceptCallout type="tip">When a WPA2 exam question asks about encryption, the answer is AES (specifically AES-CCMP). When it asks about WPA (original), the answer is TKIP. These are the two encryption pairing you need to memorize cold.</ConceptCallout>
+
+---
+
+## Authentication Methods
+
+### 802.1X: Port-Based Network Access Control
+
+802.1X is a standard for network access control that requires authentication before network access is granted. In wireless:
+- The **supplicant** (client device) requests access
+- The **authenticator** (access point) blocks all traffic except authentication traffic
+- The **authentication server** (RADIUS) verifies credentials and tells the AP to allow or deny
+
+802.1X is the foundation of WPA2-Enterprise and WPA3-Enterprise. Without a valid authentication, the client cannot pass any traffic — not even to the DHCP server.
+
+### EAP (Extensible Authentication Protocol)
+
+EAP is a framework that defines how authentication messages are exchanged. Multiple EAP types exist, each with different security properties:
+
+| EAP Type | Authentication Method | Security Level | Notes |
+|---|---|---|---|
+| EAP-TLS | Client and server certificates (mutual) | Highest | Most secure; requires PKI infrastructure for client certs |
+| PEAP (Protected EAP) | Server certificate + username/password (MS-CHAPv2) | High | Most common in enterprise; uses server cert to protect the tunnel |
+| EAP-TTLS | Server certificate + various inner methods | High | Similar to PEAP, more flexible inner protocols |
+| LEAP | Username/password (Cisco proprietary) | Low — deprecated | Cisco-only, known vulnerabilities, do not use |
+
+<ConceptCallout type="info">EAP-TLS is the most secure EAP method because both the client and server authenticate with certificates — there is no shared secret that can be guessed or stolen. The tradeoff is the overhead of managing a PKI and deploying certificates to every client device.</ConceptCallout>
+
+### RADIUS (Remote Authentication Dial-In User Service)
+
+RADIUS is the standard AAA (Authentication, Authorization, and Accounting) protocol used as the authentication server in 802.1X deployments.
+
+- **Port 1812**: authentication and authorization
+- **Port 1813**: accounting (logging session start/stop)
+- Uses UDP transport
+- Common implementations: Windows NPS (Network Policy Server), FreeRADIUS, Cisco ISE
+
+### TACACS+ (Terminal Access Controller Access Control System Plus)
+
+TACACS+ is a Cisco-proprietary AAA protocol, primarily used for **network device administration** (authenticating admins logging into routers and switches) rather than client network access.
+
+| Feature | RADIUS | TACACS+ |
+|---|---|---|
+| Protocol | UDP | TCP (port 49) |
+| Encryption | Encrypts only the password | Encrypts the entire payload |
+| AAA | Combines authentication and authorization | Separates authentication, authorization, and accounting |
+| Primary use | Wireless/VPN network access | Network device administration |
+| Vendor | Open standard | Cisco proprietary |
+
+<ConceptCallout type="tip">The key exam distinction: RADIUS is used for end-user network access (Wi-Fi, VPN). TACACS+ is used for administrators managing network devices (SSH into a Cisco router). RADIUS uses UDP; TACACS+ uses TCP port 49.</ConceptCallout>

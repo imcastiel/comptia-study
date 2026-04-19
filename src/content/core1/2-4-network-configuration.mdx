@@ -1,0 +1,182 @@
+# Common Network Configuration Concepts
+
+IP addressing, subnetting, DNS, DHCP, VLANs, and VPNs are the core concepts every technician configures and troubleshoots daily. This objective is one of the heaviest on the exam.
+
+## IPv4 Addressing
+
+**IPv4 addresses** are 32-bit numbers written in dotted-decimal notation: four octets separated by dots, each 0–255.
+
+Example: `192.168.1.100`
+
+Every IP address has two parts:
+- **Network portion** — identifies which network the host is on
+- **Host portion** — identifies the specific device on that network
+
+The **subnet mask** defines the boundary between these two parts.
+
+### Address Classes (Legacy)
+
+| Class | First Octet Range | Default Subnet Mask | Usage |
+| --- | --- | --- | --- |
+| A | 1–126 | 255.0.0.0 (/8) | Large networks (millions of hosts) |
+| B | 128–191 | 255.255.0.0 (/16) | Medium networks (65,000 hosts) |
+| C | 192–223 | 255.255.255.0 (/24) | Small networks (254 hosts) |
+| D | 224–239 | N/A | Multicast |
+| E | 240–255 | N/A | Experimental |
+
+Note: `127.x.x.x` is reserved for **loopback** (127.0.0.1 = localhost).
+
+### Private IP Ranges (RFC 1918)
+
+These addresses are not routable on the public internet — used on internal networks:
+
+| Range | CIDR | Class | Common Use |
+| --- | --- | --- | --- |
+| 10.0.0.0 – 10.255.255.255 | 10.0.0.0/8 | A | Large enterprises |
+| 172.16.0.0 – 172.31.255.255 | 172.16.0.0/12 | B | Medium networks |
+| 192.168.0.0 – 192.168.255.255 | 192.168.0.0/16 | C | Home/small office |
+
+**APIPA range:** 169.254.0.0/16 — auto-assigned when DHCP fails; not internet-routable.
+
+<ConceptCallout type="tip">
+  If a device has a 169.254.x.x address, it couldn't reach a DHCP server. Check: Is the DHCP server running? Is the client on the correct VLAN? Is the network cable connected?
+</ConceptCallout>
+
+## Subnet Masks and CIDR
+
+The subnet mask tells the network stack which bits are network bits and which are host bits.
+
+**Written two ways:**
+- **Dotted decimal:** `255.255.255.0`
+- **CIDR notation (prefix length):** `/24` (means 24 network bits)
+
+Common subnet masks:
+
+| CIDR | Subnet Mask | Usable Hosts | Common Use |
+| --- | --- | --- | --- |
+| /8 | 255.0.0.0 | 16,777,214 | Large enterprise |
+| /16 | 255.255.0.0 | 65,534 | Campus/large office |
+| /24 | 255.255.255.0 | 254 | Standard office subnet |
+| /25 | 255.255.255.128 | 126 | Split /24 in half |
+| /26 | 255.255.255.192 | 62 | Small department |
+| /28 | 255.255.255.240 | 14 | Very small segment |
+| /30 | 255.255.255.252 | 2 | Point-to-point links |
+
+**Usable hosts formula:** 2^(host bits) − 2 (subtract network address and broadcast address).
+
+**Example:** A /26 subnet has 6 host bits → 2^6 = 64 addresses → 62 usable hosts.
+
+## Default Gateway
+
+The **default gateway** is the router interface on the local subnet. When a host needs to send traffic to a destination outside its own subnet, it sends it to the default gateway.
+
+Example: Host `192.168.1.100/24` sending to `8.8.8.8` — since `8.8.8.8` isn't in the 192.168.1.0 network, the packet goes to the default gateway (e.g., `192.168.1.1`), which routes it toward the internet.
+
+## NAT and PAT
+
+**NAT (Network Address Translation):** Translates private IP addresses to public IP addresses (and back). Allows many devices to share a single public IP.
+
+**PAT (Port Address Translation)** — also called **NAT Overload** or just "NAT" in common usage: Tracks each internal connection using unique source port numbers mapped to the public IP.
+
+| Internal Source | → | Public IP + Port |
+| --- | --- | --- |
+| 192.168.1.10:52341 | → | 203.0.113.5:10001 |
+| 192.168.1.11:52341 | → | 203.0.113.5:10002 |
+| 192.168.1.10:52342 | → | 203.0.113.5:10003 |
+
+PAT is how your home router lets 10+ devices share one public IP — it tracks return traffic by port number.
+
+## IPv6 Addressing
+
+IPv6 uses 128-bit addresses written as eight groups of four hex digits separated by colons:
+
+`2001:0db8:85a3:0000:0000:8a2e:0370:7334`
+
+**Shorthand rules:**
+- Leading zeros in a group can be dropped: `0db8` → `db8`
+- One sequence of consecutive all-zero groups can be replaced with `::`: `2001:db8::8a2e:370:7334`
+
+**IPv6 address types:**
+
+| Type | Range/Prefix | Purpose |
+| --- | --- | --- |
+| Global unicast | 2000::/3 | Internet-routable (like public IPv4) |
+| Link-local | fe80::/10 | Auto-configured per interface; local link only |
+| Loopback | ::1/128 | Same as 127.0.0.1 in IPv4 |
+| Unique local | fc00::/7 | Private addresses (like RFC 1918) |
+| Multicast | ff00::/8 | One-to-many delivery |
+
+**No broadcast in IPv6** — multicast replaces broadcast functions.
+
+**No NAT needed** — every device can have a globally unique address.
+
+## DNS Configuration
+
+Every device needs a DNS server configured to resolve hostnames. Common configurations:
+
+**Static DNS:** Manually enter IP of DNS server (e.g., 8.8.8.8 for Google, 1.1.1.1 for Cloudflare, or internal corporate DNS).
+
+**Via DHCP:** DHCP server provides DNS server IP along with IP address — standard for most networks.
+
+**DNS search suffix:** Domain appended to unqualified names. If suffix is `corp.local` and you type `fileserver`, DNS queries `fileserver.corp.local`.
+
+## DHCP Configuration
+
+DHCP server settings a technician configures:
+
+| Setting | Description |
+| --- | --- |
+| Scope | IP range to assign (e.g., 192.168.1.100–192.168.1.200) |
+| Exclusions | IPs within scope reserved for static assignment |
+| Lease time | How long the IP is valid before renewal required |
+| Default gateway option | Router IP sent to clients |
+| DNS server option | DNS IP sent to clients |
+| Reservations | MAC address → fixed IP mapping |
+
+## VLANs
+
+**VLAN (Virtual Local Area Network):** Logically segments a physical network into multiple isolated broadcast domains without requiring separate physical switches.
+
+**Why use VLANs:**
+- **Security** — guest traffic isolated from corporate network
+- **Performance** — reduces broadcast domain size
+- **Organization** — group devices by department regardless of physical location
+
+**VLAN tagging (802.1Q):** Switches add a 4-byte tag to Ethernet frames identifying which VLAN the frame belongs to. Untagged frames go to the switch's native/access VLAN.
+
+**Access port vs trunk port:**
+- **Access port** — carries traffic for one VLAN; connecting end devices (PCs, printers)
+- **Trunk port** — carries traffic for multiple VLANs tagged with 802.1Q; switch-to-switch or switch-to-router links
+
+**Inter-VLAN routing:** VLANs can't communicate directly — traffic must pass through a router (or Layer 3 switch). Common setups: router-on-a-stick (one physical uplink with sub-interfaces per VLAN) or Layer 3 switch with SVI (switched virtual interfaces).
+
+## VPN
+
+**VPN (Virtual Private Network):** Creates an encrypted tunnel over an untrusted network (usually the internet) so remote users can securely access internal network resources.
+
+**VPN types:**
+
+| Type | Use Case | Notes |
+| --- | --- | --- |
+| Remote access VPN | Individual user → corporate network | Client software on device; common for work-from-home |
+| Site-to-site VPN | Office ↔ Office | Connects two networks permanently; routers handle the tunnel |
+| Split tunnel | Remote access with selective routing | Only corporate traffic goes through VPN; internet traffic goes direct |
+| Full tunnel | All traffic through VPN | More secure but adds latency for internet traffic |
+
+**Common VPN protocols:**
+- **IPSec** — industry standard; used for site-to-site and some remote access
+- **SSL/TLS VPN** — browser-based or client app; uses HTTPS port 443 (firewall-friendly)
+- **WireGuard** — modern, fast, simple; increasingly popular
+
+## Network Address Assignment Methods
+
+| Method | Description | Use Case |
+| --- | --- | --- |
+| DHCP | Server assigns IP automatically | Most clients |
+| Static | Manually configured | Servers, printers, network equipment |
+| DHCP reservation | Fixed IP via DHCP by MAC address | Devices needing consistent IP, still centrally managed |
+| APIPA | Self-assigned 169.254.x.x on DHCP failure | Fallback only — limited functionality |
+
+<ConceptCallout type="tip">
+  **Troubleshooting IP issues:** Run `ipconfig` (Windows) or `ifconfig`/`ip addr` (Linux/macOS) to check assigned IP. If it's 169.254.x.x → DHCP failure. If it's wrong subnet → wrong VLAN or DHCP scope issue. If correct IP but no internet → check default gateway and DNS.
+</ConceptCallout>

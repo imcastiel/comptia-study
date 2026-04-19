@@ -1,0 +1,137 @@
+# Apply Change Management Procedures
+
+Change management is a formal process for controlling modifications to IT systems. Without it, a well-intentioned patch or configuration change can cause an outage, introduce a security vulnerability, or break a compliance requirement — with no documentation of what was done or how to reverse it. The A+ exam tests whether you understand the components of a change management process and can identify the correct step in a given scenario.
+
+## Why Change Management Exists
+
+Uncontrolled changes are one of the leading causes of IT outages. Studies consistently show that a significant percentage of incidents — often cited at 60-80% in enterprise environments — are caused by changes: a patch that introduced a regression, a configuration change that opened a security gap, a firewall rule that broke application connectivity.
+
+Change management reduces this risk by requiring that every significant change be:
+- Documented before it is made
+- Reviewed for risks and side effects
+- Tested in a non-production environment
+- Approved by the appropriate authority
+- Scheduled at a time that minimizes business impact
+- Accompanied by a rollback plan
+- Documented after completion
+
+## Change Request (RFC — Request for Change)
+
+A **Request for Change (RFC)** is the formal document that initiates the change management process. Every change starts here.
+
+A well-formed RFC includes:
+
+| Field | What to Document |
+|---|---|
+| Change description | What will be changed, specifically (system, component, configuration item) |
+| Reason / justification | Why the change is necessary (security patch, bug fix, capacity improvement) |
+| Scope and impact | What systems and users will be affected |
+| Implementation plan | Step-by-step procedure for making the change |
+| Rollback plan | Step-by-step procedure for reverting the change if it fails |
+| Risk assessment | What could go wrong, likelihood, business impact if it does |
+| Test plan | How the change will be tested before and after implementation |
+| Requested change window | Proposed date, time, and duration |
+| Requestor and approver | Who is requesting and who must approve |
+
+## The CAB — Change Advisory Board
+
+The **Change Advisory Board (CAB)** is a group that reviews and approves significant changes before they are implemented. Composition varies by organization but typically includes:
+- IT management
+- Representatives from affected business units
+- Security team
+- Operations / infrastructure leads
+- Application owners for systems being changed
+
+The CAB meets regularly (often weekly) to review queued RFCs. Their job is to challenge assumptions, identify risks the requestor may have missed, and ensure the change aligns with business priorities and compliance requirements. The CAB approves, rejects, or requests modifications to RFCs.
+
+For large organizations, there is often also an **Emergency CAB (eCAB)** for urgent changes that cannot wait for the regular meeting cycle.
+
+## Change Types
+
+Not all changes carry the same risk or require the same level of approval.
+
+| Change Type | Description | Approval Required | Examples |
+|---|---|---|---|
+| Standard | Pre-approved, routine, low risk, well-documented procedure | No individual CAB review needed | Monthly patch Tuesday, password resets, adding approved software |
+| Normal | Requires CAB review, risk assessment, and explicit approval | Full CAB review | Server configuration changes, network topology changes, major software upgrades |
+| Emergency | Urgent, cannot wait for standard CAB cycle — active outage or critical security patch | Expedited approval (available CAB members, IT management) — followed by post-implementation review | Zero-day security patch, emergency rollback of a failed change, restoring a down service |
+
+<ConceptCallout type="tip">Standard changes are pre-approved categories. You don't need CAB approval for every individual Patch Tuesday update — the category "monthly OS patching during the change window" is a pre-approved standard change. The specific patches are documented but don't require new approval each month.</ConceptCallout>
+
+## Risk Assessment
+
+Every RFC must include a risk assessment. The key questions:
+
+1. **What could go wrong?** — Identify specific failure modes (patch causes application incompatibility, firewall rule blocks legitimate traffic, configuration change causes authentication failure)
+2. **What is the business impact if it does?** — Revenue loss, user downtime, data loss, compliance violation
+3. **What is the likelihood?** — Has this type of change failed before? Is the change well-tested?
+4. **What mitigations exist?** — Testing, staged rollout, rollback plan, backups taken before the change
+
+Risk is categorized as low, medium, or high. High-risk changes typically require more thorough testing, a longer change window, and more senior sign-off.
+
+## Rollback Plan
+
+A rollback plan is the documented procedure for reversing a change if it fails or causes unintended consequences. A change without a rollback plan should not be approved.
+
+Rollback plans should be:
+- Written before the change is made (you don't have time to think it through during an outage)
+- Specific and actionable — not "revert the change" but "restore the previous configuration from the backup taken at 22:00, restart the service, verify connectivity to [specific endpoint]"
+- Tested where possible — if the rollback can be practiced in a test environment, do it
+- Assigned to a specific person responsible for executing it
+- Time-boxed — define the trigger for rollback: "If service is not restored by 02:00, initiate rollback"
+
+<ConceptCallout type="warning">Never make undocumented changes to production systems — even small ones. What seems like a trivial tweak may interact with other configurations in unexpected ways. If there's no change record, there's no rollback reference and no accountability.</ConceptCallout>
+
+## Change Window
+
+A **change window** is the pre-scheduled, approved time period during which changes can be made to production systems. Typically scheduled during periods of lowest business activity:
+- Nights (10 PM – 4 AM)
+- Weekends (Saturday night is common for major changes)
+- Announced maintenance windows communicated to users in advance
+
+Change windows exist to minimize user impact if something goes wrong. A patch applied at 2 AM affects fewer people than one applied at 2 PM, even if both go smoothly.
+
+**Freeze periods**: many organizations declare change freezes around critical business periods — fiscal year end, holiday shopping season, major product launches — during which only emergency changes are permitted.
+
+## Testing Before and After
+
+Changes must be tested before implementation in production:
+
+**Staging / pre-production environment**: an environment that mirrors production as closely as possible. All changes should be validated here first. Testing should include: does the change work as intended, and does it break anything that worked before?
+
+**UAT (User Acceptance Testing)**: for changes that affect end users (application upgrades, UI changes), actual users test in a staging environment before rollout and formally accept the result.
+
+**Post-implementation testing**: after the change is applied to production, verify it achieved its goal and didn't break adjacent functionality. This happens within the change window before closing the ticket.
+
+## Change Management Workflow
+
+<ProcessSteps title="Change Management Process" color="purple" steps={[
+  { title: "RFC submission", description: "Requestor documents the change: what, why, how, rollback plan, risk assessment, test plan, requested change window. Submits RFC to the change management system." },
+  { title: "Initial review", description: "Change manager does initial screening: Is the RFC complete? Does it have a rollback plan? Is the risk assessment done? Incomplete RFCs are returned to the requestor." },
+  { title: "CAB review and approval", description: "RFC is presented to the CAB at the weekly meeting (or expedited for emergency). CAB reviews risk, tests plan, and business impact. Approved, rejected, or modified." },
+  { title: "Test in pre-production", description: "Requestor performs the change in staging environment. Documents results. If testing fails, RFC may need to be revised before CAB re-approval." },
+  { title: "Communication", description: "Affected users and stakeholders are notified of the maintenance window, expected impact, and contact information for issues during and after the change." },
+  { title: "Implementation", description: "Change is performed during the approved change window by the designated technician following the documented implementation plan. Another technician is on standby." },
+  { title: "Post-implementation verification", description: "Verify the change worked as intended. Test all affected systems. Confirm no collateral damage. If verification fails, execute rollback plan immediately." },
+  { title: "Documentation update", description: "Update CMDB, network diagrams, configuration baselines, and runbooks to reflect the new state. Close the RFC with implementation notes and outcome." },
+  { title: "Post-implementation review", description: "For significant changes, hold a brief review: Did it succeed? Were there surprises? What was learned? Update the KB and future RFC templates." }
+]} />
+
+## Post-Implementation Review
+
+After a change is complete, significant changes should be reviewed — especially if anything went wrong. The review asks:
+- Did the change achieve its goal?
+- Were there unexpected effects?
+- Was the rollback plan used? If so, why, and how was the situation ultimately resolved?
+- Were the time estimates accurate?
+- What would be done differently next time?
+
+Lessons learned from post-implementation reviews improve future change quality and feed the knowledge base.
+
+## ITIL Context
+
+**ITIL (Information Technology Infrastructure Library)** is the most widely adopted framework for IT Service Management (ITSM). It provides a structured set of practices covering service strategy, service design, service transition (which includes change management), service operation, and continual service improvement.
+
+Change management in ITIL is part of **Service Transition** — the process of moving changes from development into production while minimizing risk to the live environment. The CAB, RFC, change types (standard/normal/emergency), and post-implementation review are all ITIL concepts that appear in the A+ exam and in real enterprise IT organizations.
+
+Other ITIL concepts relevant to the A+ exam: incident management (ticketing), problem management (root cause analysis of recurring incidents), service level management (SLAs), and the CMDB.

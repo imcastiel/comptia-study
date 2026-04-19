@@ -1,0 +1,392 @@
+# Configuring Windows Settings
+
+Windows provides two parallel interfaces for configuration: the classic **Control Panel** and the modern **Settings app**. You need to know what each one is good for, plus the details of the most important individual settings areas tested on the exam.
+
+---
+
+## Control Panel vs. Settings App
+
+<CompareCards
+  title="Control Panel vs. Settings App"
+  left={{ title: "Control Panel", icon: "Monitor", color: "orange", points: ["Legacy interface — available since Windows 3.1", "Access via: Start → type Control Panel, or Win+R → control", "More detailed and granular options", "Required for some advanced configurations not yet in Settings", "Organized by category or classic icon view", "Microsoft is slowly migrating options to Settings"] }}
+  right={{ title: "Settings App", icon: "Zap", color: "blue", points: ["Modern interface introduced in Windows 8, redesigned in Win 11", "Access via: Start → Settings (gear icon), or Win+I", "Touch-friendly; clean and searchable", "Used for most day-to-day configuration tasks", "Organized by topic: System, Accounts, Update, etc.", "Microsoft's intended long-term replacement for Control Panel"] }}
+/>
+
+<ConceptCallout type="info">
+  Both interfaces coexist in Windows 10 and 11. Some Settings links still open Control Panel pages, and some Control Panel applets redirect to Settings. The exam may ask about options in either interface — know both.
+</ConceptCallout>
+
+### Common Control Panel Applets and Their Commands
+
+| Applet | Run Command | Purpose |
+|--------|------------|---------|
+| System Properties | `sysdm.cpl` | Computer name, hardware, remote, system restore |
+| Display | `desk.cpl` | Screen resolution, refresh rate (legacy) |
+| Power Options | `powercfg.cpl` | Power plans, sleep, hibernate |
+| User Accounts | `netplwiz` or `control userpasswords2` | User account management |
+| Programs and Features | `appwiz.cpl` | Install/uninstall programs |
+| Device Manager | `devmgmt.msc` | Hardware drivers |
+| Network Connections | `ncpa.cpl` | Network adapter properties |
+| Windows Firewall | `firewall.cpl` | Basic firewall configuration |
+| Indexing Options | `control srchadmin.dll` | Search index configuration |
+| Administrative Tools | `control admintools` | Shortcuts to admin tools |
+
+---
+
+## System Properties
+
+**Open with:** `sysdm.cpl`, or right-click This PC → Properties → Advanced system settings (Win 10), or Settings → System → About → Advanced system settings.
+
+System Properties has five tabs that cover foundational system configuration:
+
+### Computer Name Tab
+
+- Set the computer's name (hostname) — used for network identification
+- Join or leave a domain or workgroup
+- Changes require a reboot to take effect
+- Domain join requires an account with domain-join rights
+
+### Hardware Tab
+
+- Links to Device Manager
+- Driver signing settings (which driver signatures Windows accepts)
+- Windows Update Driver Settings
+
+### Advanced Tab
+
+Three sections, each with a Settings button:
+
+| Section | Controls |
+|---------|---------|
+| Performance | Visual effects (animations, shadows, thumbnails); also Virtual memory (paging file) settings and Data Execution Prevention (DEP) |
+| User Profiles | Copy, delete, and change user profile type (Local vs. Roaming) |
+| Startup and Recovery | Default OS for multi-boot; automatic restart on BSOD; write debugging information (memory dump type) |
+
+<ConceptCallout type="tip">
+  The **paging file** (virtual memory) is configured under Advanced → Performance → Settings → Advanced → Virtual memory. Windows manages it automatically by default. Manual configuration is sometimes needed on systems with RAM limitations or specific performance requirements.
+</ConceptCallout>
+
+### System Protection Tab
+
+- Enable/disable **System Restore** per drive
+- Create a restore point manually
+- Configure how much disk space restore points use
+- System Restore rolls back system files and registry to an earlier point — it does not affect personal files
+
+<ConceptCallout type="tip">
+  Before installing a new driver or making a major system change, **create a manual restore point** from System Protection. If something breaks, you can roll back without reinstalling Windows.
+</ConceptCallout>
+
+### Remote Tab
+
+- **Remote Assistance** — allows someone to view or control your desktop when invited (must be enabled)
+- **Remote Desktop** — allows RDP connections from other computers
+  - "Allow connections only from computers running Remote Desktop with Network Level Authentication" is the more secure option (requires the client to authenticate before a session is created)
+  - Remote Desktop requires the firewall exception to be allowed; Windows prompts to enable it automatically when you turn on RDP here
+
+---
+
+## Display Settings
+
+**Open with:** Right-click desktop → Display settings, or Settings → System → Display.
+
+### Key Display Settings
+
+| Setting | Description |
+|---------|-------------|
+| Resolution | Number of pixels (e.g., 1920×1080). Set to "Recommended" for the native resolution of the monitor |
+| Refresh rate | How many frames per second the display updates (e.g., 60 Hz, 144 Hz). Higher = smoother motion |
+| Scale (DPI) | Percentage scaling for UI elements (100%, 125%, 150%). Used for high-DPI/4K displays |
+| Orientation | Landscape, Portrait, Landscape (flipped), Portrait (flipped) |
+| Night Light | Reduces blue light after sunset; reduces eye strain |
+| HDR | High Dynamic Range — requires compatible display and content |
+| Multiple Displays | Extend, Duplicate, Show only on 1/2 |
+
+### Multiple Monitor Arrangement
+
+In Display settings, drag and drop the monitor icons to match the physical layout of screens. This determines which direction windows move when dragged across monitor borders. Click **Identify** to briefly show a number on each display.
+
+**Display modes:**
+
+| Mode | Description |
+|------|-------------|
+| Extend these displays | Each monitor shows different content — recommended for productivity |
+| Duplicate these displays | Same image on all monitors (useful for presentations) |
+| Show only on 1 | Single monitor — others go dark |
+| Show only on 2 | Second monitor only |
+
+**Keyboard shortcut:** `Win + P` opens the projection panel to quickly switch modes.
+
+### Advanced Display Settings
+
+- Color calibration (`dccw` — Display Color Calibration Wizard)
+- ClearType text tuning
+- Exact refresh rate and resolution per monitor
+
+---
+
+## Power Plans
+
+**Open with:** Settings → System → Power & sleep, or Control Panel → Power Options (`powercfg.cpl`).
+
+Power plans balance performance against energy consumption.
+
+### Built-In Power Plans
+
+| Plan | Description | Best For |
+|------|-------------|---------|
+| Balanced | Scales CPU speed with demand; default for most systems | General desktop and laptop use |
+| Power saver | Reduces performance to save maximum battery/energy | Extended battery life on laptops |
+| High performance | Prevents CPU throttling; keeps hardware fully powered | Performance-critical workstations |
+| Ultimate Performance | No throttling at all; disables sleep | High-end workstations (not shown by default) |
+
+<ConceptCallout type="info">
+  In Windows 11, power plans moved largely to **Settings → System → Power & sleep**. The classic power plan interface (with Balanced/Power saver/High performance) is still accessible via Control Panel or by clicking "Additional power settings" in Settings.
+</ConceptCallout>
+
+### Sleep States
+
+| State | Description | Resume Speed |
+|-------|-------------|-------------|
+| Sleep (S3) | RAM stays powered; disk and most components off | 1–2 seconds |
+| Hibernate (S4) | RAM contents written to disk (hiberfil.sys); all power off | 10–30 seconds (reads from disk) |
+| Hybrid Sleep | Saves to RAM AND disk simultaneously; powers down like hibernate | Fast if powered; disk backup if power lost |
+| Fast Startup | Shutdown that saves kernel session to hiberfil.sys; resumes like hibernate on next boot | Faster cold boots |
+
+<ConceptCallout type="tip">
+  **Fast Startup** can cause issues with dual-boot systems and some hardware (the disk is "not cleanly unmounted" because it hibernates). It can be disabled in Power Options → Choose what the power buttons do → uncheck "Turn on fast startup."
+</ConceptCallout>
+
+### Power Plan Configuration
+
+Each plan lets you set separate values for "On battery" and "Plugged in":
+
+- **Turn off the display after** — how long before the monitor goes dark
+- **Put the computer to sleep after** — how long before sleep state
+- **Adjust plan brightness** — screen brightness per plan
+
+Advanced power settings include USB selective suspend, PCIe power management, processor power state (min/max %), and Wi-Fi adapter power saving mode.
+
+### powercfg Command Line
+
+```
+powercfg /list                    List all power plans
+powercfg /query                   Show current plan details
+powercfg /setactive <GUID>        Activate a specific plan
+powercfg /energy                  Run 60-second energy efficiency report (HTML output)
+powercfg /batteryreport           Generate a battery health report
+powercfg /sleepstudy              Report on sleep/wake history
+powercfg /hibernate on            Enable hibernate
+powercfg /hibernate off           Disable hibernate (also removes hiberfil.sys)
+```
+
+---
+
+## User Accounts
+
+**Open with:** Settings → Accounts, or Control Panel → User Accounts, or `netplwiz`.
+
+### Local Accounts vs. Microsoft Accounts
+
+| Type | Description |
+|------|-------------|
+| Local account | Traditional username + password stored on this PC only. No cloud sync. |
+| Microsoft account | Links to a Microsoft/Outlook.com email. Settings, OneDrive, and app purchases sync across devices. Required for the Microsoft Store. |
+
+Windows 11 Home requires a Microsoft account during setup (workaround: disconnect from internet before first boot, or use `OOBE\BYPASSNRO` in the installer).
+
+### Account Types
+
+| Type | Capabilities |
+|------|-------------|
+| Administrator | Full system control: install software, change settings, manage other accounts, run elevated processes |
+| Standard User | Use applications, change personal settings, cannot install software system-wide or change protected settings |
+| Guest | Very limited; disabled by default; no password; cannot install anything |
+
+<ConceptCallout type="warning">
+  The exam may ask what happens when a Standard User tries to install software or change a system setting. Windows shows a **UAC (User Account Control) prompt** asking for an administrator username and password. If the user is already an administrator, UAC asks for confirmation only.
+</ConceptCallout>
+
+### UAC (User Account Control)
+
+UAC prevents unauthorized changes by requiring confirmation or credentials for elevated actions. UAC levels (Control Panel → User Accounts → Change User Account Control settings):
+
+| Level | Behavior |
+|-------|---------|
+| Always notify | Prompt for every change to Windows settings or software installs |
+| Notify only for app changes (default) | Prompt when apps try to make changes; no prompt for Windows settings changes |
+| Notify only for app changes (no dimming) | Same but desktop does not dim (less secure — easier to spoof) |
+| Never notify | UAC disabled — not recommended |
+
+### Family Safety / Parental Controls
+
+Settings → Accounts → Family & other users → Add a family member. Requires Microsoft accounts. Features:
+
+- Screen time limits per device
+- Content filters for apps, games, and websites
+- Activity reports
+- Spending limits for Microsoft Store
+
+---
+
+## Windows Update
+
+**Open with:** Settings → Windows Update (Win 10/11), or Control Panel → Windows Update (Win 7/8).
+
+<ProcessSteps
+  title="How Windows Update Works"
+  color="green"
+  steps={[
+    { title: "Check for updates", description: "Windows contacts Microsoft Update servers (or a local WSUS server in enterprise environments) to download a manifest of available updates." },
+    { title: "Download updates", description: "Applicable updates are downloaded in the background using BITS (Background Intelligent Transfer Service), which throttles to avoid affecting network performance." },
+    { title: "Stage updates", description: "Downloaded updates are unpacked and verified. They are ready to install but not yet applied." },
+    { title: "Install and reboot", description: "Updates are applied, often requiring a restart. Windows may show 'Configuring updates: X% complete' during the next boot sequence." },
+    { title: "Post-install verification", description: "After reboot, Windows verifies the update applied correctly. If it fails, it rolls back automatically." }
+  ]}
+/>
+
+### Update Types
+
+| Type | Description |
+|------|-------------|
+| Quality updates | Security patches, bug fixes, reliability improvements. Released on **Patch Tuesday** (second Tuesday of every month) |
+| Feature updates | Major OS version updates (e.g., 22H2 → 23H2). Released ~once or twice a year. Can be paused. |
+| Driver updates | Optional hardware driver updates through Windows Update |
+| Definition updates | Antivirus/Defender signature updates — installed frequently, often silently |
+
+### Key Windows Update Settings
+
+| Setting | Purpose |
+|---------|---------|
+| Pause updates | Delay all updates for up to 5 weeks (up to 35 days on Home; more on Pro/Enterprise) |
+| View update history | See all installed, failed, and pending updates |
+| Advanced options | Active hours (prevent reboots during work hours), delivery optimization, notify for restart |
+| Optional updates | Driver updates and non-security updates available on demand |
+| Windows Update for Business | Group Policy settings for enterprise-managed update rings and deployment delays |
+
+<ConceptCallout type="tip">
+  **Windows Update Standalone Installer** (`wusa.exe`) installs `.msu` update packages manually. Usage: `wusa update.msu /quiet /norestart`. Used when updating offline systems or deploying a specific patch without Windows Update.
+</ConceptCallout>
+
+### Delivery Optimization
+
+Windows can download updates from other PCs on the local network or from the internet (peer-to-peer). Configured under Advanced options → Delivery Optimization. In enterprise environments, this reduces bandwidth to Microsoft's servers.
+
+---
+
+## Windows Defender and Security Center
+
+**Open with:** Settings → Privacy & Security → Windows Security, or search "Windows Security."
+
+Windows Security is the unified dashboard for all built-in security features:
+
+### Protection Areas
+
+| Area | Purpose |
+|------|---------|
+| Virus & threat protection | Antivirus scanning, real-time protection, scan history, exclusions |
+| Account protection | Sign-in options, Windows Hello, dynamic lock |
+| Firewall & network protection | Windows Defender Firewall for domain, private, and public profiles |
+| App & browser control | SmartScreen settings for apps, files, and Edge; Exploit protection settings |
+| Device security | Secure Boot, TPM status, Core Isolation (memory integrity/HVCI) |
+| Device performance & health | Storage health, battery life, apps and software, Windows Time service |
+| Family options | Links to family safety features |
+
+### Virus & Threat Protection — Key Settings
+
+| Setting | Description |
+|---------|-------------|
+| Real-time protection | Continuously monitors files as they are opened/written. Turning this off leaves the system unprotected. |
+| Cloud-delivered protection | Sends suspicious file info to Microsoft for faster threat analysis |
+| Automatic sample submission | Sends suspect files to Microsoft automatically |
+| Exclusions | Files, folders, file types, or processes that Defender skips. Use carefully — malware can exploit exclusions. |
+| Controlled folder access | Protects designated folders from unauthorized writes (ransomware protection) |
+
+<ConceptCallout type="warning">
+  If a user disables real-time protection, Windows Security will show a red shield in the system tray and the Security Center will show warnings. The exam may describe this scenario and ask what the red indicator means.
+</ConceptCallout>
+
+### Windows Defender Firewall
+
+Three network profiles — each can have different rules:
+
+| Profile | Used When |
+|---------|----------|
+| Domain | Computer is joined to a domain and connected to the corporate network |
+| Private | Computer is on a trusted home or work network |
+| Public | Computer is on an untrusted public network (coffee shop, airport) |
+
+Inbound rules block connections coming in from the network. Outbound rules control connections leaving the machine. Allow/block can be set per application, port, or protocol.
+
+---
+
+## Indexing Options
+
+**Open with:** Control Panel → Indexing Options, or search "Indexing Options" in Start.
+
+Windows Search indexes file content and metadata so searches return results instantly instead of scanning the disk each time.
+
+### Key Settings
+
+- **Indexed locations** — add or remove folders from the index. By default, libraries, the desktop, and user profile folders are indexed. Large data drives are typically excluded.
+- **Advanced options** — rebuild the index (fixes corrupted search results), change the index file location, file types to include, and whether to index encrypted files.
+- **Pause indexing** — Windows automatically pauses indexing when the system is on battery or under heavy CPU load.
+
+<ConceptCallout type="info">
+  If Windows Search is returning stale or missing results, **rebuild the index** from Advanced options in Indexing Options. The rebuild can take minutes to hours depending on the number of files. Search results may be incomplete until the rebuild finishes.
+</ConceptCallout>
+
+---
+
+## Programs and Features
+
+**Open with:** `appwiz.cpl`, or Control Panel → Programs → Programs and Features, or Settings → Apps → Installed apps (Win 11) / Apps & features (Win 10).
+
+### Uninstall or Change a Program
+
+- Select a program → Uninstall (or Change/Repair if the installer supports it)
+- Some programs require a restart after uninstall
+- If the uninstaller is broken or missing, use a third-party uninstaller or manually remove registry keys and files
+
+### Turn Windows Features On or Off
+
+Click "Turn Windows features on or off" in the left panel to enable or disable optional Windows components:
+
+| Feature | Purpose |
+|---------|---------|
+| Hyper-V | Native hypervisor for running VMs on Windows Pro/Enterprise |
+| Windows Subsystem for Linux (WSL) | Run a Linux environment natively on Windows |
+| Telnet Client | Legacy command-line Telnet tool (not installed by default) |
+| TFTP Client | Trivial FTP client |
+| Internet Information Services (IIS) | Web server built into Windows |
+| .NET Framework | Required by many applications |
+| Windows Sandbox | Isolated temporary desktop environment for running untrusted software |
+| Remote Differential Compression | Used by Remote Desktop and DFS replication |
+
+<ConceptCallout type="tip">
+  **Telnet Client** is disabled by default in modern Windows — this is a common exam scenario. A technician who needs `telnet` for port-testing must enable it here first. After enabling, `telnet hostname port` can test if a specific TCP port is open.
+</ConceptCallout>
+
+---
+
+## Exam Summary — Settings to Know Cold
+
+<ConceptCallout type="tip">
+  **Control Panel vs Settings:** Control Panel = legacy, more detailed. Settings = modern, Win 10/11 preferred. Both still used; Microsoft migrating to Settings.
+
+  **System Properties (sysdm.cpl):** Computer name, domain join, performance/paging file, restore points, Remote Desktop toggle.
+
+  **Display:** Resolution, scale (DPI), refresh rate, multiple monitor modes. Win+P to switch projection mode.
+
+  **Power plans:** Balanced (default), Power saver, High performance. Sleep = RAM stays on. Hibernate = saves to disk. Fast Startup = hybrid of shutdown + hibernate. `powercfg /batteryreport` for battery health.
+
+  **User Accounts:** Administrator vs Standard User. UAC prompts for elevation. Local account vs Microsoft account. Family safety needs Microsoft accounts.
+
+  **Windows Update:** Quality updates = security patches (Patch Tuesday). Feature updates = major OS releases. `wusa.exe` installs .msu packages manually.
+
+  **Windows Security:** Real-time protection, exclusions, controlled folder access. Three firewall profiles: Domain, Private, Public. Red shield = protection is off.
+
+  **Indexing Options:** Rebuild the index when search returns wrong results.
+
+  **Programs and Features:** Turn Windows features on/off — Hyper-V, WSL, Telnet Client, IIS, Windows Sandbox all live here.
+</ConceptCallout>

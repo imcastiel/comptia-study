@@ -1,0 +1,134 @@
+# Wireless Networking Technologies
+
+Wireless networking is a major A+ topic. You need to know the 802.11 standards, their speeds and frequencies, encryption protocols, and how Bluetooth fits in.
+
+## 802.11 Wi-Fi Standards
+
+The IEEE 802.11 family defines Wi-Fi. Each generation adds speed, better frequency use, or both.
+
+| Standard | Common Name | Frequency | Max Speed | Notes |
+| --- | --- | --- | --- | --- |
+| 802.11a | Wi-Fi 1 | 5 GHz | 54 Mbps | First 5 GHz standard; rarely seen now |
+| 802.11b | Wi-Fi 2 | 2.4 GHz | 11 Mbps | Very old; susceptible to interference |
+| 802.11g | Wi-Fi 3 | 2.4 GHz | 54 Mbps | Backward-compatible with b |
+| 802.11n | Wi-Fi 4 | 2.4 GHz or 5 GHz | 600 Mbps | First dual-band standard; MIMO |
+| 802.11ac | Wi-Fi 5 | 5 GHz only | 3.5+ Gbps | MU-MIMO, channel bonding up to 160 MHz |
+| 802.11ax | Wi-Fi 6/6E | 2.4 GHz, 5 GHz, 6 GHz | 9.6 Gbps | OFDMA, better in dense environments |
+
+<ConceptCallout type="tip">
+  **Exam memory trick:** b/g/n = 2.4 GHz (also n can be 5 GHz). a/ac = 5 GHz only. ax = all bands including new 6 GHz.
+</ConceptCallout>
+
+## 2.4 GHz vs 5 GHz vs 6 GHz
+
+| Band | Range | Speed | Interference | Non-Overlapping Channels |
+| --- | --- | --- | --- | --- |
+| 2.4 GHz | Longer | Lower | High (microwaves, baby monitors, Bluetooth) | 3 (channels 1, 6, 11) |
+| 5 GHz | Shorter | Higher | Low | 24+ |
+| 6 GHz | Shortest | Highest | Very low (new band) | 59 |
+
+**2.4 GHz channel plan:** Only channels 1, 6, and 11 don't overlap with each other. Using other channels causes co-channel interference between neighboring networks.
+
+**5 GHz** has many more non-overlapping channels and less congestion — better for performance-sensitive applications despite shorter range.
+
+**6 GHz** (Wi-Fi 6E only) is new spectrum — virtually no legacy devices, extremely low interference.
+
+## MIMO and MU-MIMO
+
+**MIMO (Multiple Input Multiple Output):** Uses multiple antennas on both transmitter and receiver simultaneously to increase throughput. Introduced in 802.11n.
+
+**MU-MIMO (Multi-User MIMO):** Allows the access point to communicate with multiple clients simultaneously rather than sequentially. 802.11ac introduced downlink MU-MIMO; 802.11ax added uplink MU-MIMO.
+
+**OFDMA (Orthogonal Frequency Division Multiple Access):** Introduced in 802.11ax. Divides a channel into sub-channels, allowing simultaneous data delivery to multiple clients. Significantly improves efficiency in dense environments (offices, stadiums).
+
+## Wireless Encryption
+
+Encryption protects data transmitted over Wi-Fi from eavesdropping.
+
+| Protocol | Security Level | Notes |
+| --- | --- | --- |
+| WEP (Wired Equivalent Privacy) | Broken — do not use | RC4 cipher, crackable in minutes; deprecated |
+| WPA (Wi-Fi Protected Access) | Weak | TKIP cipher; better than WEP but still vulnerable |
+| WPA2 | Strong (current minimum) | AES-CCMP encryption; most common today |
+| WPA3 | Strongest | SAE replaces PSK handshake; protects against offline dictionary attacks |
+
+**WPA2 modes:**
+- **Personal (PSK)** — pre-shared key, everyone uses the same password. For homes and small offices.
+- **Enterprise (802.1X)** — each user authenticates individually via RADIUS server. Used in corporate environments.
+
+**WPA3 improvements over WPA2:**
+- **SAE (Simultaneous Authentication of Equals)** — replaces the 4-way handshake; resistant to offline dictionary attacks even if someone captures the handshake
+- **Forward secrecy** — past sessions can't be decrypted even if the password is later compromised
+- **192-bit encryption mode** (WPA3-Enterprise) for high-security environments
+
+<ConceptCallout type="warning">
+  WEP is **completely broken** and provides no real security. Any network still using WEP should be upgraded immediately. The A+ exam expects you to know WEP is deprecated and insecure.
+</ConceptCallout>
+
+## Wireless Network Modes
+
+**Infrastructure mode:** Clients connect to an Access Point (AP). The AP connects to the wired network. This is the standard enterprise and home Wi-Fi setup.
+
+**Ad hoc (IBSS) mode:** Devices connect directly to each other without an AP. Limited use cases; rarely deployed.
+
+**Wi-Fi Direct:** Modern peer-to-peer Wi-Fi that doesn't require an AP. Used for printing, screen mirroring (Miracast), and file sharing between devices.
+
+## SSID Configuration
+
+**SSID (Service Set Identifier):** The network name that clients see when scanning for Wi-Fi.
+
+- **Broadcasting SSID:** AP announces its name in beacon frames. Clients can see and connect easily.
+- **Hidden SSID:** AP doesn't broadcast its name. Clients must know the SSID and enter it manually. *Not a security measure* — SSIDs are visible in probe requests from connecting clients.
+
+**BSS vs ESS:**
+- **BSS (Basic Service Set)** — a single AP with its associated clients
+- **ESS (Extended Service Set)** — multiple APs sharing the same SSID, allowing roaming across a building
+
+## Channel Bonding
+
+Wider channels = higher throughput but more spectrum used:
+- Standard: 20 MHz channel
+- 802.11n: can bond to 40 MHz
+- 802.11ac: can bond up to 160 MHz
+- Trade-off: wider channels leave less room for neighboring networks on 2.4 GHz
+
+## Bluetooth
+
+Bluetooth is a short-range wireless technology for personal area networks (PANs).
+
+| Class | Max Power | Range |
+| --- | --- | --- |
+| Class 1 | 100 mW | ~100 meters |
+| Class 2 | 2.5 mW | ~10 meters (most devices) |
+| Class 3 | 1 mW | ~1 meter |
+
+**Frequency:** 2.4 GHz ISM band (same as 802.11b/g) — uses frequency hopping spread spectrum (FHSS) to reduce interference.
+
+**Pairing process:** Devices discover each other, exchange a PIN (or use Secure Simple Pairing), and create a bonded pair.
+
+**Bluetooth versions relevant to A+:**
+- **Bluetooth 4.0 / BLE (Bluetooth Low Energy)** — for IoT, fitness trackers, beacons; very low power
+- **Bluetooth 5.x** — doubled range and speed vs 4.x; common in modern phones and peripherals
+
+**Common uses:** Wireless keyboards/mice, headphones/earbuds, speakers, phones (hands-free), medical devices, IoT sensors.
+
+## Near Field Communication (NFC)
+
+NFC enables communication between devices within ~4 cm. Uses:
+- **Mobile payments** (Apple Pay, Google Pay)
+- **Access control** (NFC ID badges)
+- **Quick Bluetooth pairing** (tap to pair)
+
+Not a full network technology — just short-range data exchange.
+
+## Cellular Networks
+
+Cellular provides wide-area wireless internet via carrier infrastructure:
+
+| Generation | Speed | Notes |
+| --- | --- | --- |
+| 3G | ~1–10 Mbps | Legacy; being decommissioned |
+| 4G LTE | 10–100 Mbps | Current baseline mobile data |
+| 5G | 100 Mbps – 10 Gbps | Sub-6 GHz (broad coverage) and mmWave (ultra-fast, short range) |
+
+**Hotspot/tethering:** A phone shares its cellular connection over Wi-Fi, USB, or Bluetooth to other devices.

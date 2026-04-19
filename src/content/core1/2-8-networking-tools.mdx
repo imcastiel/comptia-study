@@ -1,0 +1,218 @@
+# Networking Tools and Their Purposes
+
+Technicians use a combination of hardware tools (for physical cable work) and software/command-line tools (for diagnosing connectivity). Knowing what each tool does and when to use it is directly tested.
+
+## Physical / Hardware Tools
+
+### Cable Tester
+
+A cable tester verifies that an Ethernet cable is correctly wired end-to-end. It sends test signals through each pin pair and confirms:
+- All 8 conductors are connected
+- No wires are crossed (except intentional crossover cables)
+- No opens (broken wires), shorts (wires touching), or split pairs
+
+**Basic cable tester:** Shows pass/fail and which pairs have problems. Inexpensive ($20–50).
+
+**Advanced cable certifier (e.g., Fluke DTX):** Measures cable performance to certify it meets Cat 5e/Cat 6/Cat 6a standards. Used by professional installers to certify new cable runs. Very expensive ($5,000+).
+
+**When to use:** After pulling new cable, when troubleshooting connectivity to a specific jack, when a link won't negotiate at expected speed.
+
+### Punchdown Tool
+
+A **punchdown tool** (also called an impact tool or Krone tool) terminates wires into **IDC (Insulation Displacement Connector)** terminations on:
+- **Patch panels** — where horizontal cable runs terminate in the wiring closet
+- **Keystone jacks** — the RJ-45 jack that snaps into wall plates
+
+**How it works:** You lay the wire into the slot and press down with the punchdown tool. The blade cuts the insulation and seats the conductor into the metal contacts simultaneously. The tool has a cut side (trims excess wire) — always orient it correctly.
+
+**110 vs 66 blocks:** 110 blocks are used for Ethernet (data); 66 blocks are older and used for telephone systems.
+
+### Toner Probe (Fox and Hound)
+
+A toner probe kit consists of two components:
+- **Tone generator** — connects to one end of a cable pair and sends a distinctive audio tone
+- **Inductive amplifier (probe)** — detects the tone through insulation or walls by induction, without direct contact
+
+**Used for:**
+- Identifying which cable in a bundle goes to a specific location (tracing cables)
+- Finding where a cable terminates in a patch panel when it's not labeled
+- Tracing cables through walls and ceilings without damaging them
+
+**How to use:** Connect the tone generator to the cable at one end (e.g., the wall jack). Use the probe near cables, patch panels, or punchdowns to find which one carries the tone.
+
+### Cable Stripper and Crimper
+
+**Cable stripper:** Removes the outer jacket of Ethernet cable without nicking the inner conductors. Some models also strip individual wire insulation.
+
+**Crimping tool:** Attaches RJ-45 connectors to cable. The crimper presses metal contacts through the insulation into each conductor and locks the connector onto the jacket.
+
+Used when making custom-length patch cables or re-terminating damaged ends.
+
+### Loopback Plug
+
+A loopback plug connects a port's transmit (TX) pins directly to its receive (RX) pins. When a test signal is sent, it comes right back — if the port receives it, the port hardware is functional.
+
+**Uses:**
+- Testing NIC hardware (is the NIC physically functional?)
+- Testing switch port hardware
+- Diagnosing whether a connectivity problem is in the cable/remote device vs. the local port
+
+**Types:** RJ-45 loopback (Ethernet), RJ-11 loopback (telephone), fiber loopback.
+
+### Network Tap
+
+A **network tap** (Test Access Point) is a passive hardware device inserted inline in a cable that creates a copy of all traffic flowing through it, forwarded to a monitoring port.
+
+**Unlike a switch SPAN port:** A tap is completely passive and hardware-based — it can't drop packets or be affected by switch load. True passive taps have no power requirement and forward all traffic.
+
+**Uses:** Packet capture for security monitoring, network analysis, intrusion detection, compliance recording.
+
+### Wi-Fi Analyzer
+
+A Wi-Fi analyzer (hardware or software) scans the wireless environment and displays:
+- All visible SSIDs (networks)
+- Signal strength (RSSI in dBm) per network
+- Channel each network uses
+- Security type (WPA2, WPA3, open)
+- Band (2.4 GHz or 5 GHz)
+
+**Uses:**
+- Select least-congested channel for a new AP
+- Identify coverage dead zones
+- Detect rogue APs (unauthorized access points)
+- Troubleshoot interference issues
+- Verify expected signal coverage
+
+**Software examples:** inSSIDer, NetSpot, Kismet, built-in tools in iOS/Android.
+
+## Command-Line Network Tools
+
+### ping
+
+Tests basic IP connectivity by sending ICMP Echo Request packets and waiting for Echo Replies.
+
+```
+ping 8.8.8.8
+ping google.com
+```
+
+**Interprets:**
+- **Reply received** — IP connectivity exists, and DNS resolved (if hostname used)
+- **Request timed out** — host not responding (could be unreachable OR firewall blocking ICMP)
+- **Destination host unreachable** — routing failure (no path to host)
+- **TTL expired** — packet looped or exceeded hop count
+
+**Options:**
+- `-t` (Windows) — ping continuously until stopped (Ctrl+C)
+- `-n 10` (Windows) — send 10 packets
+- `-c 10` (Linux/macOS) — send 10 packets
+
+### tracert / traceroute
+
+Traces the path packets take through the network, showing each router hop and the latency to each hop.
+
+```
+tracert google.com        (Windows)
+traceroute google.com     (Linux/macOS)
+```
+
+**How it works:** Sends packets with incrementing TTL values (1, 2, 3...). Each router decrements TTL by 1 and sends back "TTL Exceeded" when it hits 0 — revealing that router's IP and latency.
+
+**Interprets:**
+- High latency at a specific hop → congestion or slow link at that point
+- `* * *` at a hop → router doesn't respond to TTL exceeded (firewall drops them); doesn't necessarily mean a problem
+- Path changes between attempts → routing instability or load balancing
+
+<ConceptCallout type="tip">
+  **ping vs tracert:** ping confirms IF a destination is reachable. tracert shows WHERE in the path connectivity fails or slows down.
+</ConceptCallout>
+
+### ipconfig (Windows) / ifconfig / ip addr
+
+**ipconfig** (Windows) displays and manages IP configuration:
+
+```
+ipconfig            – show all adapters (IP, subnet, gateway)
+ipconfig /all       – show full details including MAC, DHCP server, lease times
+ipconfig /release   – release current DHCP lease
+ipconfig /renew     – request new DHCP lease
+ipconfig /flushdns  – clear the local DNS resolver cache
+```
+
+**Common troubleshooting use:**
+- Check assigned IP — if 169.254.x.x → DHCP failure
+- Check default gateway — if wrong or blank → can't reach internet
+- Check DNS server — if blank or wrong → hostname resolution fails
+- `/release` + `/renew` — force DHCP renewal after fixing DHCP issue
+- `/flushdns` — fix stale DNS cache causing wrong IP resolution
+
+### nslookup
+
+Tests DNS resolution:
+
+```
+nslookup google.com               – resolve hostname to IP
+nslookup 8.8.8.8                  – reverse lookup IP to hostname
+nslookup google.com 1.1.1.1       – query a specific DNS server
+```
+
+**When to use:**
+- Website not loading — check if DNS is resolving correctly
+- Verify internal DNS records
+- Compare results from different DNS servers to isolate DNS vs. network issues
+
+### netstat
+
+Displays active network connections, listening ports, and protocol statistics:
+
+```
+netstat -a      – all connections and listening ports
+netstat -n      – show numerical IPs (don't resolve to hostnames — faster)
+netstat -b      – show which program owns each connection (Windows, needs admin)
+netstat -r      – show routing table (same as route print)
+```
+
+**Troubleshooting uses:**
+- Identify which ports a suspicious process has open
+- Confirm a service is listening on its expected port
+- Check for unexpected outbound connections
+
+### net (Windows)
+
+The `net` command manages Windows network resources:
+
+```
+net use Z: \\server\share    – map a network drive
+net use Z: /delete           – disconnect a mapped drive
+net view \\server            – list shares on a server
+net user                     – list local user accounts
+```
+
+## Tool Selection Guide
+
+| Symptom | Start With |
+| --- | --- |
+| No network connectivity | ipconfig → ping gateway → ping DNS → tracert |
+| DNS resolution failing | nslookup → ipconfig /flushdns |
+| Can't reach specific website | ping → tracert → nslookup |
+| Slow Wi-Fi | Wi-Fi analyzer (channel congestion, signal strength) |
+| Cable won't link | Cable tester |
+| Can't find which cable goes where | Toner probe |
+| NIC seems dead | Loopback plug |
+| Capturing traffic for analysis | Network tap or switch SPAN port + Wireshark |
+
+## Wireshark
+
+Wireshark is a **packet analyzer** (protocol analyzer) — it captures and displays the complete contents of every packet on a network interface.
+
+**What it shows:** Every packet, broken down by protocol layer — Ethernet frames, IP headers, TCP/UDP headers, and full application-layer payloads for unencrypted protocols.
+
+**Uses:**
+- Diagnose intermittent connectivity issues
+- Verify protocol behavior
+- Capture and analyze malicious traffic
+- Troubleshoot DHCP, DNS, and authentication issues
+
+**Capture filters** limit what's captured (reduce volume). **Display filters** narrow what's shown after capture.
+
+Example display filter: `tcp.port == 80` shows only HTTP traffic.

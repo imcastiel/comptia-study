@@ -1,0 +1,241 @@
+# TCP and UDP Ports, Protocols, and Their Functions
+
+Understanding which protocols run on which ports — and whether they use TCP or UDP — is one of the most heavily tested topics on the A+ exam. You need to memorize the common port numbers cold.
+
+## TCP vs UDP
+
+Both TCP and UDP are **transport-layer protocols** that carry application data across a network, but they make fundamentally different trade-offs between reliability and speed.
+
+<CompareCards
+  left={{
+    title: "TCP",
+    icon: "Shield",
+    color: "blue",
+    points: [
+      "Connection-oriented — three-way handshake before any data flows",
+      "Reliable — every packet acknowledged; missing ones retransmitted",
+      "Ordered — data always arrives in the correct sequence",
+      "Used by: HTTP, HTTPS, SSH, FTP, SMTP, RDP"
+    ]
+  }}
+  right={{
+    title: "UDP",
+    icon: "Zap",
+    color: "orange",
+    points: [
+      "Connectionless — fire-and-forget, no setup required",
+      "No guaranteed delivery — packets may be lost silently",
+      "Unordered — packets can arrive out of sequence",
+      "Used by: DNS queries, VoIP, video streaming, gaming, DHCP"
+    ]
+  }}
+  title="Transport Protocol Comparison"
+/>
+
+<ConceptCallout type="tip">
+  **Memory trick:** TCP = phone call (dial, wait for answer, then talk reliably). UDP = postcard (just send it — no guarantee it arrives).
+</ConceptCallout>
+
+### The TCP Three-Way Handshake
+
+Before any TCP data flows, the two endpoints establish a session:
+
+<ProcessSteps
+  steps={[
+    { title: "SYN", description: "Client sends a SYN (synchronize) segment to the server, requesting a connection and sharing its initial sequence number." },
+    { title: "SYN-ACK", description: "Server replies with SYN-ACK — acknowledging the client's SYN and sending its own SYN with a sequence number." },
+    { title: "ACK", description: "Client acknowledges the server's SYN. The connection is now established and data can flow in both directions." }
+  ]}
+  color="blue"
+  title="TCP Three-Way Handshake"
+/>
+
+## Common Ports — Must Memorize
+
+<PortReference
+  title="Critical Ports — Memorize These Cold"
+  ports={[
+    { port: 20, name: "FTP Data", proto: "TCP" },
+    { port: 21, name: "FTP Control", proto: "TCP" },
+    { port: 22, name: "SSH", proto: "TCP", color: "#34C759" },
+    { port: 23, name: "Telnet", proto: "TCP", color: "#FF3B30" },
+    { port: 25, name: "SMTP", proto: "TCP" },
+    { port: 53, name: "DNS", proto: "TCP/UDP" },
+    { port: 67, name: "DHCP Server", proto: "UDP", color: "#FF9F0A" },
+    { port: 68, name: "DHCP Client", proto: "UDP", color: "#FF9F0A" },
+    { port: 80, name: "HTTP", proto: "TCP" },
+    { port: 110, name: "POP3", proto: "TCP" },
+    { port: 143, name: "IMAP", proto: "TCP" },
+    { port: 443, name: "HTTPS", proto: "TCP", color: "#34C759" },
+    { port: 445, name: "SMB", proto: "TCP" },
+    { port: 3389, name: "RDP", proto: "TCP", color: "#AF52DE" }
+  ]}
+/>
+
+Full table for reference:
+
+| Port | Protocol | Transport | Description |
+| --- | --- | --- | --- |
+| 20 | FTP (data) | TCP | File Transfer Protocol — active data channel |
+| 21 | FTP (control) | TCP | File Transfer Protocol — commands and control |
+| 22 | SSH | TCP | Secure Shell — encrypted remote terminal access |
+| 23 | Telnet | TCP | Remote terminal (unencrypted — legacy, insecure) |
+| 25 | SMTP | TCP | Simple Mail Transfer Protocol — sending email |
+| 53 | DNS | TCP/UDP | Domain Name System — name resolution (UDP typical, TCP for zone transfers) |
+| 67 | DHCP (server) | UDP | Dynamic Host Configuration Protocol — server port |
+| 68 | DHCP (client) | UDP | DHCP — client port |
+| 80 | HTTP | TCP | Hypertext Transfer Protocol — unencrypted web |
+| 110 | POP3 | TCP | Post Office Protocol v3 — downloading email |
+| 143 | IMAP | TCP | Internet Message Access Protocol — email with server sync |
+| 161 | SNMP | UDP | Simple Network Management Protocol — network device monitoring |
+| 162 | SNMP Trap | UDP | SNMP — unsolicited alerts from devices |
+| 389 | LDAP | TCP/UDP | Lightweight Directory Access Protocol |
+| 443 | HTTPS | TCP | HTTP Secure (HTTP over TLS) — encrypted web |
+| 445 | SMB | TCP | Server Message Block — Windows file/printer sharing |
+| 3389 | RDP | TCP | Remote Desktop Protocol — Windows remote GUI |
+
+<ConceptCallout type="tip">
+  **Exam focus ports:** 21 (FTP), 22 (SSH), 23 (Telnet), 25 (SMTP), 53 (DNS), 67/68 (DHCP), 80 (HTTP), 110 (POP3), 143 (IMAP), 443 (HTTPS), 3389 (RDP). These appear constantly.
+</ConceptCallout>
+
+## Protocol Deep Dive
+
+### FTP (Ports 20 & 21)
+
+FTP uses **two ports**: port 21 for the control connection (commands like LIST, RETR, STOR) and port 20 for the data connection in active mode. This dual-port design is a known exam topic.
+
+**FTP modes:**
+- **Active mode** — client opens a random high port and tells the server to connect back to it on port 20. Can fail through firewalls/NAT (server initiates data connection back).
+- **Passive mode (PASV)** — server opens a random high port and tells the client to connect. Firewall-friendly (client initiates both connections).
+
+**SFTP vs FTPS:**
+- **SFTP** (SSH File Transfer Protocol) — runs entirely over SSH on port 22. Not related to FTP at all — different protocol.
+- **FTPS** (FTP Secure) — standard FTP with TLS encryption added. Still uses ports 20/21.
+
+### SSH (Port 22)
+
+SSH provides encrypted terminal access, replacing Telnet. Also tunnels other protocols securely. Key features:
+- Encrypts the entire session
+- Supports key-based authentication (more secure than passwords)
+- Used for remote server management, SCP/SFTP file transfers
+
+### Telnet (Port 23)
+
+Legacy remote terminal protocol — **sends everything in plaintext including passwords**. Should never be used on untrusted networks. Still tested on A+ as an example of insecure legacy protocol.
+
+### SMTP, POP3, IMAP — Email Protocols
+
+| Protocol | Port | Direction | Key Behavior |
+| --- | --- | --- | --- |
+| SMTP | 25 (or 587 with auth) | Sending outbound | Transfers mail between servers, and from client to server |
+| POP3 | 110 | Receiving | Downloads mail to local device, typically deletes from server |
+| IMAP | 143 | Receiving | Syncs mail — keeps messages on server, accessible from multiple devices |
+
+**Secure variants:** SMTPS (465/587), POP3S (995), IMAPS (993) — add TLS encryption.
+
+<CompareCards
+  left={{
+    title: "POP3 — Port 110",
+    icon: "Package",
+    color: "orange",
+    points: [
+      "Downloads email to one device",
+      "Typically removes messages from server after download",
+      "No sync — only works well on a single device",
+      "Simple; works offline once downloaded"
+    ]
+  }}
+  right={{
+    title: "IMAP — Port 143",
+    icon: "Layers",
+    color: "blue",
+    points: [
+      "Keeps email on the server",
+      "Syncs across all devices (phone, laptop, webmail)",
+      "Read/unread status shared everywhere",
+      "Requires internet to access most messages"
+    ]
+  }}
+  title="Email Retrieval: POP3 vs IMAP"
+/>
+
+### DNS (Port 53)
+
+DNS resolves hostnames to IP addresses. Uses **UDP port 53** for normal queries (fast, single packet). Uses **TCP port 53** for:
+- Zone transfers (replicating entire DNS database between servers)
+- Responses larger than 512 bytes
+
+**DNS record types you should know:**
+
+| Record | Purpose | Example |
+| --- | --- | --- |
+| A | Maps hostname → IPv4 address | comptia.org → 198.51.100.10 |
+| AAAA | Maps hostname → IPv6 address | comptia.org → 2001:db8::1 |
+| MX | Mail server for a domain | comptia.org → mail.comptia.org |
+| CNAME | Alias — points to another hostname | www.comptia.org → comptia.org |
+| PTR | Reverse lookup — IP → hostname | 198.51.100.10 → comptia.org |
+| SOA | Start of Authority — zone metadata | Serial number, TTL defaults |
+| NS | Name servers for a domain | comptia.org → ns1.comptia.org |
+
+### DHCP (Ports 67 & 68) — The DORA Process
+
+DHCP automatically assigns IP addresses, subnet masks, default gateways, and DNS servers to clients via the **DORA** four-step process:
+
+<ProcessSteps
+  steps={[
+    { title: "D — Discover", description: "Client broadcasts to 255.255.255.255 looking for a DHCP server. Uses UDP source port 68, destination port 67." },
+    { title: "O — Offer", description: "DHCP server responds with an available IP address offer, along with subnet mask, gateway, and lease duration." },
+    { title: "R — Request", description: "Client broadcasts its acceptance of the offered IP. This lets other DHCP servers know the offer was accepted." },
+    { title: "A — Acknowledge", description: "Server confirms the lease. The client now has a valid IP configuration for the lease duration." }
+  ]}
+  color="green"
+  title="DHCP DORA Process"
+/>
+
+**DHCP lease**: the assigned IP is valid for a configured lease time. Client renews at 50% of lease time.
+
+**APIPA (Automatic Private IP Addressing)**: If a client can't reach a DHCP server, it self-assigns a **169.254.x.x** address. Seeing 169.254.x.x means DHCP failure.
+
+### HTTP and HTTPS (Ports 80 & 443)
+
+HTTP transfers web content (HTML, images, scripts) in plaintext. HTTPS adds TLS encryption:
+- All data between browser and server is encrypted
+- Server presents a digital certificate proving its identity
+- Protects against eavesdropping and man-in-the-middle attacks
+
+Modern browsers show a padlock icon for HTTPS and warn on HTTP-only sites.
+
+### SMB (Port 445)
+
+SMB is the Windows native file and printer sharing protocol. Used by Windows File Explorer network browsing, shared folders (\\server\share), and shared printers. Also used by:
+- Samba (Linux SMB implementation for cross-platform sharing)
+- Active Directory
+
+SMB vulnerabilities (EternalBlue/WannaCry) made port 445 a key security concern — block at firewall on untrusted networks.
+
+### RDP (Port 3389)
+
+Remote Desktop Protocol enables full graphical remote control of Windows systems. RDP sessions are encrypted. Common use cases:
+- IT remote support
+- Remote work access to office desktops
+- Server management
+
+**Security:** RDP exposed directly to the internet is a major attack vector (brute-force, credential stuffing). Best practice: place RDP behind VPN.
+
+## SNMP (Port 161/162)
+
+Simple Network Management Protocol monitors and manages network devices (switches, routers, UPS units, servers):
+- **Port 161** — SNMP queries (manager → agent)
+- **Port 162** — SNMP traps (agent → manager, unsolicited alerts)
+- **MIB (Management Information Base)** — database of variables a device can report
+- **Community strings** — simple password-like authentication (SNMPv1/v2c). SNMPv3 adds proper encryption.
+
+## Port Ranges
+
+| Range | Name | Usage |
+| --- | --- | --- |
+| 0–1023 | Well-known ports | Assigned by IANA to standard services |
+| 1024–49151 | Registered ports | Vendor-registered applications |
+| 49152–65535 | Dynamic / ephemeral | Client-side source ports for outbound connections |
+
+When a browser connects to a web server on port 80, the client uses a random ephemeral source port (e.g., 52341). The server's reply goes back to that ephemeral port.

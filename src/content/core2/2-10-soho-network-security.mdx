@@ -1,0 +1,176 @@
+# SOHO Wireless and Wired Network Security
+
+Small Office/Home Office (SOHO) routers are among the most widely deployed and most poorly secured devices in existence. They ship with known default credentials, outdated firmware, and insecure features enabled by default. Hardening a SOHO router is one of the most impactful things you can do for network security.
+
+---
+
+## Change Default Credentials
+
+<ConceptCallout type="warning">The single most important step when deploying any network device is changing the default administrator credentials. Default usernames and passwords (admin/admin, admin/password, admin/1234) are publicly documented for every device model and immediately exploited by automated scanners.</ConceptCallout>
+
+- Router administration interfaces are accessible via a web browser (typically 192.168.1.1 or 192.168.0.1)
+- Use a strong, unique password for the admin account — not the same as the Wi-Fi passphrase
+- If the router supports it, change the default admin username as well
+- Disable remote management from the WAN (internet) side — admin access should only be available from the local network
+
+---
+
+## Wireless Encryption Standards
+
+The encryption protocol protects data transmitted over the wireless network from eavesdropping.
+
+| Standard | Status | Notes |
+|---|---|---|
+| WEP (Wired Equivalent Privacy) | Broken — never use | RC4 cipher with fatal flaws; cracked in minutes; deprecated 2004 |
+| WPA (Wi-Fi Protected Access) | Obsolete | TKIP cipher; superseded |
+| WPA2-TKIP | Avoid | TKIP has known vulnerabilities; use AES instead |
+| WPA2-AES (CCMP) | Acceptable | AES-based encryption; still strong; most common in deployments |
+| WPA3 | Best — use when available | SAE (Simultaneous Authentication of Equals); resistant to offline dictionary attacks; forward secrecy |
+
+**Always select AES (CCMP) over TKIP when configuring WPA2.** TKIP was a transitional cipher with known weaknesses. On any modern router, AES is the correct choice.
+
+<ConceptCallout type="tip">WPA3 introduces Simultaneous Authentication of Equals (SAE), which replaces the Pre-Shared Key (PSK) handshake. SAE prevents offline brute-force attacks — an attacker who captures the handshake cannot crack the passphrase offline. This is a significant improvement over WPA2.</ConceptCallout>
+
+---
+
+## Wireless Password Strength
+
+A strong encryption protocol is undermined by a weak passphrase.
+
+- **Minimum**: 12 characters; 20+ is recommended for WPA2
+- **Character set**: mix of uppercase, lowercase, numbers, and symbols
+- **Avoid**: dictionary words, names, addresses, phone numbers, SSIDs
+- **Example of weak**: `HomeNetwork1` — dictionary words + predictable capitalization + sequential digit
+- **Example of strong**: `7$mPkw#9QnRz!vL4` — random, long, mixed character types
+
+---
+
+## SSID Configuration
+
+The SSID (Service Set Identifier) is the visible name of the wireless network.
+
+- **Change the default SSID**: default SSIDs reveal the router brand and model (e.g., "NETGEAR47", "linksys", "Xfinity1234"). This tells an attacker exactly what device they are targeting and which default credentials or known vulnerabilities apply.
+- **Do not embed personal information**: SSIDs like "Johnson_Family_5G" or "123MainSt" reveal personally identifiable information.
+- **SSID hiding (broadcast disable)**: hiding the SSID is a common misconception of security. Hidden SSIDs are still discoverable using passive Wi-Fi scanning tools that detect probe requests. This is security through obscurity — it adds a minor inconvenience, not real protection.
+- **Best approach**: keep SSID broadcast enabled (for legitimate device convenience) and rely on WPA3 + strong passphrase for actual security.
+
+---
+
+## Disable WPS
+
+<ConceptCallout type="warning">Disable WPS on every router. WPS (Wi-Fi Protected Setup) contains a fundamental design flaw: its 8-digit PIN can be brute-forced in under 24 hours using tools like Reaver. WPS is a well-known vulnerability with no patch — the only fix is to disable it entirely.</ConceptCallout>
+
+WPS was designed for easy device pairing — push a button or enter a PIN to connect. The security flaw:
+- The 8-digit PIN is validated in two halves (4 + 4 digits), reducing combinations from 100,000,000 to just 11,000
+- Tools like Reaver can brute-force the PIN, then retrieve the WPA2 passphrase automatically
+- Even if you have a strong WPA2 passphrase, WPS bypasses it entirely
+- Some router manufacturers disable WPS in recent firmware but leave it accessible in settings — verify it is actually disabled
+
+---
+
+## MAC Address Filtering
+
+MAC filtering creates an allowlist of hardware addresses permitted to connect to the wireless network.
+
+- **How it works**: router checks the MAC address of connecting devices against the allowlist; unknown addresses are rejected
+- **Limitation**: MAC addresses can be spoofed trivially on any operating system. An attacker monitors the network, sees a legitimate MAC address, clones it, and connects.
+- **Assessment**: adds a small layer of friction; not a substitute for strong encryption. On a well-secured network with WPA3 and a strong passphrase, MAC filtering adds little practical value.
+- **Use case**: appropriate in very low-risk environments where convenience is a priority and the admin wants to prevent accidental connections from neighboring devices
+
+---
+
+## Guest Network
+
+A guest network is a separate SSID that provides internet access while being isolated from the main internal network.
+
+- **VLAN isolation**: the guest SSID runs on a separate VLAN, preventing guest devices from communicating with internal devices (printers, NAS, servers, smart home devices)
+- **Use cases**: visitors, contractors, personal devices in a corporate SOHO environment, IoT devices
+- **IoT segmentation**: smart TVs, thermostats, cameras, and other IoT devices should be on the guest network. IoT security is notoriously poor — isolating them prevents a compromised smart bulb from reaching business data.
+- **Bandwidth throttling**: most consumer routers allow limiting bandwidth on the guest SSID so guests cannot saturate the connection
+- **No internal resource access**: guests cannot reach file shares, admin interfaces, or printers on the main network
+
+<ConceptCallout type="info">Placing IoT devices on the guest network is a best practice. IoT devices often run unpatched firmware, have hardcoded credentials, and are frequent botnet targets. Isolating them limits the blast radius of any compromise.</ConceptCallout>
+
+---
+
+## Firewall Configuration
+
+Consumer routers include a built-in SPI (Stateful Packet Inspection) firewall.
+
+- **SPI firewall**: tracks the state of active connections. Inbound packets are only allowed if they belong to an established outbound connection. Unsolicited inbound traffic is blocked.
+- **Default behavior**: block all unsolicited inbound, allow all outbound — this is the correct default.
+- **Disable remote management from WAN**: do not allow access to the router admin interface from the internet. If remote management is required, use VPN first.
+- **Disable UPnP (Universal Plug and Play)**: UPnP allows devices to open port forwarding rules automatically. Malware can abuse UPnP to open inbound ports to the attacker. Disable unless a specific application requires it.
+
+---
+
+## Port Forwarding vs Port Triggering
+
+Both methods allow inbound connections to internal devices, but they work differently.
+
+| Feature | Port Forwarding | Port Triggering |
+|---|---|---|
+| How it works | Static rule: external port X always forwards to internal IP:port | Opens external port temporarily when outbound trigger traffic is detected |
+| Always open | Yes — rule is permanent | No — port opens only when triggered, closes after timeout |
+| Security | Lower — port is always open | Higher — port is only open when in use |
+| Use case | Web servers, security cameras, permanent services | Gaming, applications that need a temporary inbound connection |
+| Multiple devices | No — forwards to one specific internal IP | Yes — multiple devices can trigger the same port sequentially |
+
+---
+
+## DMZ (Demilitarized Zone)
+
+A DMZ places a single device outside the router's firewall — all ports and protocols are forwarded to it.
+
+- **Use case**: game consoles (to avoid NAT issues), web/mail servers that must receive unrestricted inbound connections
+- **Risk**: a device in the DMZ is fully exposed to internet traffic — if it is compromised, the attacker is inside your network
+- **Best practice**: only place devices in the DMZ when absolutely necessary. A game console in the DMZ is lower risk than a computer with personal data.
+- **Alternative**: create specific port forwarding rules for only the required ports instead of full DMZ exposure
+
+---
+
+<ProcessSteps
+  title="SOHO Router Hardening Checklist"
+  color="blue"
+  steps={[
+    { title: "Change Default Admin Credentials", description: "Log into the router admin interface. Change the default username and password to something strong and unique. Disable remote management from the WAN side." },
+    { title: "Update Router Firmware", description: "Check the manufacturer website or the router admin panel for firmware updates. Apply all available updates before putting the device into service and periodically thereafter." },
+    { title: "Configure WPA3 or WPA2-AES Encryption", description: "Set wireless security to WPA3 (preferred) or WPA2-AES. Never use WEP, WPA, or WPA2-TKIP. Set a passphrase of 12+ characters with mixed character types." },
+    { title: "Change Default SSID", description: "Replace the default SSID that reveals the router brand. Do not include personal information in the SSID name." },
+    { title: "Disable WPS", description: "Find the WPS setting in the router admin panel and disable it completely. Verify it is actually disabled — some routers require a reboot for this to take effect." },
+    { title: "Enable Guest Network for IoT and Visitors", description: "Create a separate guest SSID with network isolation enabled. Assign all IoT devices and guest users to this network." },
+    { title: "Disable UPnP", description: "Disable Universal Plug and Play in the router settings unless a specific application requires it." },
+    { title: "Review Port Forwarding Rules", description: "Audit any existing port forwarding rules. Remove rules that are no longer needed. Minimize the number of open ports." },
+    { title: "Change Default IP Address Range", description: "Change the LAN subnet from the default (192.168.1.x or 192.168.0.x) to reduce automated attack effectiveness. Use DHCP reservations for servers and printers." },
+    { title: "Verify Firewall Is Enabled", description: "Confirm the SPI firewall is active. Confirm no rules exist that allow unrestricted inbound traffic except intentional port forwards." }
+  ]}
+/>
+
+---
+
+## DHCP and Network Addressing
+
+- **Change default subnet**: default ranges (192.168.1.x, 192.168.0.x) are the first targeted by automated scanners. Using a less common range (172.16.x.x, 10.x.x.x) provides minimal but non-zero security through obscurity.
+- **DHCP reservations**: assign fixed IP addresses to servers, printers, and infrastructure devices by MAC address. This simplifies firewall rules and troubleshooting.
+- **DHCP lease monitoring**: check the DHCP client table for unexpected devices. An unrecognized device on your network warrants investigation.
+
+---
+
+## Firmware Updates
+
+Router firmware updates patch security vulnerabilities, fix bugs, and sometimes add features.
+
+- **Check regularly**: most SOHO routers do not auto-update firmware by default. Check the manufacturer website monthly.
+- **Enable auto-updates**: if the router supports automatic firmware updates, enable this feature.
+- **End-of-life routers**: routers that no longer receive firmware updates from the manufacturer are a security liability. Replace EOL devices.
+- **After update**: verify all settings are intact after a firmware update — some updates reset configuration to defaults.
+
+---
+
+## Physical Security
+
+Network equipment placement matters:
+- Routers and switches in a locked closet or cabinet prevent physical tampering
+- An attacker with physical access to the router can reset it to factory defaults, bypassing all configured security
+- Place access points at a height and location that maximizes coverage within your space while minimizing signal leakage to public areas
+- Label all cables in any patch panel or distribution area for easy management

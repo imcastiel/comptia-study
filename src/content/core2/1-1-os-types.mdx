@@ -1,0 +1,149 @@
+# Common OS Types and Their Purposes
+
+Operating systems are the foundation of every computing environment you'll support as an A+ technician. The 220-1202 exam expects you to identify which OS is appropriate for a given scenario, understand the tradeoffs between platforms, and recognize the characteristics that define each category.
+
+<StatCallout value="28%" label="of A+ Core 2 exam" sublabel="Operating Systems is the largest domain — master it first" color="blue" />
+
+## OS Categories Overview
+
+Every OS belongs to one of four functional categories based on what hardware it runs on and what workloads it serves.
+
+| Category | Primary Use | Examples | Key Traits |
+|---|---|---|---|
+| Workstation | End-user productivity, development | Windows 10/11, macOS, Ubuntu Desktop | GUI-focused, single user |
+| Server | Centralized services, multi-user access | Windows Server, RHEL, Ubuntu Server | Always-on, headless-capable, multi-user |
+| Mobile | Portable devices, touch-first UI | iOS, Android | ARM processors, battery-optimized, sandboxed apps |
+| Embedded / IoT | Purpose-built hardware, real-time tasks | RTOS, VxWorks, embedded Linux | No general-purpose UI, minimal footprint |
+
+## Workstation Operating Systems
+
+Workstation OSes are designed for a single interactive user doing productivity work, creative tasks, or software development. They prioritize responsiveness, application compatibility, and user experience.
+
+### Windows
+
+Windows dominates the enterprise workstation market. The exam focuses on Windows 10 and Windows 11.
+
+**Windows 10** remains widely deployed and is supported through October 2025. It runs on hardware as old as a 1 GHz processor with 1 GB RAM (32-bit) or 2 GB RAM (64-bit).
+
+**Windows 11** requires significantly newer hardware: a 64-bit processor at 1 GHz or faster with 2 or more cores, 4 GB RAM, 64 GB storage, TPM 2.0, Secure Boot capability, and a DirectX 12-compatible GPU with WDDM 2.0 driver. The Start menu moved to the center, and Android app support (via the Amazon Appstore) was added.
+
+<ConceptCallout type="warning">Windows 11 will NOT install on hardware without TPM 2.0. If a customer wants to upgrade and it fails the compatibility check, TPM is usually the culprit. Check UEFI/BIOS settings — TPM may be present but disabled.</ConceptCallout>
+
+### macOS
+
+macOS runs exclusively on Apple hardware (Mac desktops and laptops). It is built on a Unix/BSD foundation, which means it ships with a full terminal, POSIX compliance, and native support for developer tools like SSH and scripting. macOS integrates tightly with the Apple ecosystem: iCloud, iPhone mirroring, AirDrop, Handoff, and Universal Clipboard work seamlessly across Apple devices. It is the dominant platform in creative industries (graphic design, video editing, music production) and popular with software developers. macOS uses APFS as its default file system and does not natively support NTFS write access without third-party tools.
+
+### Linux (Desktop)
+
+Linux desktop distributions offer a free, open-source alternative to Windows and macOS. Common desktop distros include Ubuntu (beginner-friendly, massive community), Fedora (cutting-edge packages, RedHat-sponsored), Debian (stable, conservative release cycle), and Linux Mint (Windows-like UI, good for migrations). Linux supports virtually any hardware and is highly customizable but has narrower commercial software support — many Windows applications require compatibility layers (Wine) or do not run at all.
+
+## Server Operating Systems
+
+Server OSes prioritize uptime, multi-user access, remote management, and resource efficiency over graphical user experience.
+
+**Windows Server** (2019, 2022) provides Active Directory, DNS, DHCP, IIS, Hyper-V, and other enterprise services in a familiar Microsoft environment. Widely deployed in organizations already using Windows workstations.
+
+**Linux server distributions** dominate web servers globally. Key distros:
+
+| Distro | Backing | Use Case |
+|---|---|---|
+| Ubuntu Server | Canonical | Cloud, containers, general purpose |
+| RHEL (Red Hat Enterprise Linux) | Red Hat / IBM | Enterprise, paid support, long lifecycle |
+| CentOS / AlmaLinux / Rocky Linux | Community | Free RHEL alternatives |
+| Debian | Community | Stable, secure, widely used |
+
+<ConceptCallout type="info">Linux powers over 96% of the world's top web servers and nearly all cloud infrastructure. Understanding Linux is essential even in Windows-centric environments.</ConceptCallout>
+
+## Mobile Operating Systems
+
+Mobile OSes are purpose-built for smartphones and tablets. They use touch-first interfaces, optimize aggressively for battery life, and run on ARM-based processors.
+
+<CompareCards
+  title="Mobile OS Comparison"
+  left={{ title: "iOS / iPadOS", icon: "Lock", color: "blue", points: ["Apple devices only (iPhone, iPad)", "Curated App Store — apps reviewed by Apple", "Tight hardware/software integration", "Strong privacy controls", "MDM via Apple Business Manager", "No sideloading by default"] }}
+  right={{ title: "Android", icon: "Globe", color: "orange", points: ["Many manufacturers (Samsung, Google, etc.)", "Google Play Store + sideloading allowed", "More hardware variety and price points", "Highly customizable UI and defaults", "MDM via Google Workspace / third-party EMM", "Open source base (AOSP)"] }}
+/>
+
+Both platforms support Mobile Device Management (MDM), which lets IT administrators enforce policies, push configurations, remotely wipe devices, and manage app deployment across a fleet of mobile devices. This is critical for BYOD (Bring Your Own Device) and corporate-liable deployments.
+
+<ConceptCallout type="tip">Exam scenario: A company wants to remotely wipe lost employee phones and enforce screen lock PINs. The answer involves MDM — not a specific OS feature. Both iOS and Android support MDM enrollment.</ConceptCallout>
+
+## Embedded and IoT Operating Systems
+
+Embedded OSes run on purpose-built hardware with no general-purpose user interface. They are optimized for a single function and must be extremely reliable.
+
+**Real-Time Operating Systems (RTOS)** are designed to process inputs and produce outputs within strict, predictable time constraints. They are used in industrial controllers, medical devices, automotive systems, and avionics. Examples include VxWorks, FreeRTOS, and QNX.
+
+**Examples of embedded OS deployments:**
+
+| Device | OS Type | Purpose |
+|---|---|---|
+| ATM machine | Embedded Windows / Linux | Financial transactions |
+| Network router / switch | Embedded Linux / proprietary | Packet routing |
+| Laser printer | Embedded OS | Print job processing |
+| Smart thermostat | RTOS or embedded Linux | Temperature control |
+| Medical infusion pump | RTOS | Drug delivery timing |
+| Point-of-sale terminal | Embedded Windows / Linux | Payment processing |
+
+<ConceptCallout type="warning">Embedded and IoT devices often run outdated OS versions that cannot be updated. This is a significant security concern — they cannot receive patches and may be vulnerable indefinitely. Segment them on isolated VLANs when possible.</ConceptCallout>
+
+## ChromeOS
+
+ChromeOS is Google's OS built around the Chrome browser. It runs on Chromebooks — low-cost laptops designed for web-centric workflows.
+
+- Boots in seconds from a read-only OS partition
+- All applications run in the browser (Google Docs, Gmail, web apps)
+- Supports Android apps via the Google Play Store
+- Supports Linux apps via a containerized environment (Crostini)
+- Managed through Google Admin console (excellent for K-12 schools)
+- Automatic updates, difficult to infect with traditional malware
+
+<ConceptCallout type="tip">ChromeOS is ideal for organizations where users only need web apps and cloud storage. Total cost of ownership is low — hardware is cheap, management is centralized, and support burden is minimal.</ConceptCallout>
+
+## Windows vs Linux vs macOS: Head-to-Head
+
+<CompareCards
+  title="Workstation OS Comparison"
+  left={{ title: "Windows", icon: "Monitor", color: "blue", points: ["Dominant enterprise market share", "Broadest application compatibility", "Active Directory domain integration", "Requires licensing fees", "Most targeted by malware", "Best for enterprise software (ERP, LOB apps)"] }}
+  right={{ title: "Linux", icon: "Server", color: "orange", points: ["Free and open source", "Server market leader", "Excellent security and stability", "Steep learning curve for end users", "Limited commercial software support", "Best for servers, DevOps, scripting"] }}
+/>
+
+<CompareCards
+  title="macOS vs ChromeOS"
+  left={{ title: "macOS", icon: "Laptop", color: "blue", points: ["Unix foundation, terminal built-in", "Apple hardware only (premium cost)", "Best for creative professionals", "Excellent developer experience", "Tight Apple ecosystem integration", "APFS file system, Time Machine backup"] }}
+  right={{ title: "ChromeOS", icon: "Cloud", color: "orange", points: ["Extremely lightweight, fast boot", "Web and Android apps only", "Low-cost hardware (Chromebooks)", "Managed easily at scale via Google Admin", "Ideal for K-12 and web-centric work", "Limited offline capability"] }}
+/>
+
+## 32-Bit vs 64-Bit Operating Systems
+
+The difference between 32-bit and 64-bit matters for both hardware compatibility and application support.
+
+| Characteristic | 32-Bit (x86) | 64-Bit (x64) |
+|---|---|---|
+| Max RAM addressable | 4 GB | 18.4 exabytes (theoretical) |
+| Practical RAM limit | ~3.2 GB usable | Limited by hardware/chipset |
+| App compatibility | Runs 32-bit apps only | Runs both 32-bit and 64-bit apps |
+| Security features | Limited | NX bit, ASLR fully supported |
+| Performance | Lower ceiling | Handles large datasets, VMs better |
+| Windows install location | `C:\Windows\System32` only | `System32` (64-bit) + `SysWOW64` (32-bit apps) |
+
+<ConceptCallout type="info">On a 64-bit Windows system, `System32` holds 64-bit DLLs and `SysWOW64` holds 32-bit DLLs. The naming is counterintuitive but historical — "WOW64" stands for Windows 32-bit on Windows 64-bit.</ConceptCallout>
+
+A 64-bit OS can run 32-bit applications through compatibility layers. A 32-bit OS **cannot** run 64-bit applications. When a customer complains that a legacy 32-bit app won't install on a new machine, check if the OS is 64-bit (it will work) — the more common issue is that 16-bit applications from the Windows 95/98 era won't run on 64-bit Windows at all.
+
+## Exam Scenario Guide
+
+Use this table to quickly identify the right OS for a given scenario on the exam:
+
+| Scenario | Best OS |
+|---|---|
+| Small business needs centralized file sharing and user accounts | Windows Server with Active Directory |
+| Developer needs Unix tools on Apple hardware | macOS |
+| School district wants cheap, easy-to-manage laptops | ChromeOS (Chromebooks) |
+| Industrial robot needs microsecond response times | RTOS (e.g., VxWorks, FreeRTOS) |
+| Web hosting company needs stable, free server OS | Linux (Ubuntu Server, RHEL) |
+| Employee needs to run specialized Windows accounting software | Windows 10/11 |
+| Company needs mobile device fleet management | iOS or Android with MDM |
+| Network administrator managing switches and routers | Embedded/proprietary OS on network gear |
+
+<ConceptCallout type="tip">When the exam asks "which OS is best for...?", eliminate options by use case first. Servers serve many users. Workstations serve one interactive user. Mobile means ARM + touch. Embedded means single-purpose with no traditional UI.</ConceptCallout>

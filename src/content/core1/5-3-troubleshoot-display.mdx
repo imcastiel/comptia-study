@@ -1,0 +1,295 @@
+# Troubleshooting Video and Display Issues
+
+## No Image — Systematic Approach
+
+When a display shows no image, work through this checklist before assuming the GPU or monitor is dead:
+
+1. **Verify the monitor is powered on** — check power LED (orange/amber = standby, green = active with signal)
+2. **Check the input source** — press the monitor's input/source button to cycle through HDMI, DisplayPort, VGA inputs; verify it matches the connected cable
+3. **Check the cable:** Is it firmly seated at both ends? Try reseating. Try a different cable.
+4. **Test with a different monitor** — eliminates the monitor as the problem
+5. **Test with a different port** — if the GPU has multiple outputs, try each one
+6. **Check if the GPU is fully seated** — if recently worked on the PC, the GPU may have come loose from its PCIe slot
+7. **Check BIOS output setting** — some systems output video to integrated GPU by default; if a discrete GPU is installed, the BIOS may need to be changed or the monitor connected to the discrete GPU
+8. **Remove discrete GPU; test with integrated** — this tells you whether the discrete GPU has failed
+
+<ConceptCallout type="tip">
+On systems with both integrated and discrete graphics: if the monitor is connected to the motherboard display output and a discrete GPU is installed, the system may output video only to the discrete GPU ports. Similarly, some BIOS settings disable integrated graphics entirely when a discrete GPU is detected. Try both sets of ports before concluding hardware has failed.
+</ConceptCallout>
+
+---
+
+## Dim or Dark Display
+
+### Backlight Failure
+
+The most common cause of a dim or dark laptop display is backlight failure.
+
+**CCFL (Cold Cathode Fluorescent Lamp) displays:**
+- The backlight is a fluorescent tube that requires an **inverter** to convert 12V DC to high-voltage AC
+- Failure point 1: **Inverter board** — converts power; fails with age and heat; symptoms: dim image or image visible briefly then goes dark
+- Failure point 2: **CCFL tube** — the lamp itself fails (dim pink hue, then dark); requires display panel replacement
+
+**LED-backlit displays:**
+- No inverter required (LEDs run on DC)
+- Failure: LED driver circuit fails (on the LCD controller board or built into the display panel)
+- LED backlight arrays can have individual LED failures causing dark spots or uneven brightness
+
+### Diagnosing Backlight vs. Total Display Failure
+
+Shine a flashlight at an angle close to the display surface:
+- **If you can see a faint image:** The display panel and GPU are working — only the backlight has failed
+- **If you see nothing at all:** The panel itself may have failed, or the GPU is not sending a signal
+
+### Brightness Settings
+
+Before assuming hardware failure, verify:
+- On laptops: `Fn + Brightness Up` key combination
+- Windows display settings: Settings → System → Display → Brightness
+- Power plan settings: battery saver mode reduces brightness aggressively
+- HDR or ambient light sensor may be overriding manual brightness
+
+---
+
+## Flickering Display
+
+Flickering can have multiple causes at different levels:
+
+| Cause | Characteristic | Fix |
+|---|---|---|
+| Loose or damaged video cable | Flicker when cable or lid moves | Reseat or replace cable |
+| Refresh rate mismatch | Consistent regular flicker | Set correct refresh rate in Display Settings |
+| Failing GPU | Erratic flicker under load | Update drivers; if persists, GPU failure |
+| Electrical interference | Flicker near certain equipment | Move power strips, fluorescent lights away |
+| Loose internal cable (laptop) | Flicker when lid angle changes | Re-route or replace eDP/LVDS cable |
+| Driver issue | Started after driver update | Roll back display driver |
+| Monitor hardware failure | Constant unpredictable flicker | Replace monitor |
+
+**Diagnosing refresh rate issues:**
+- Right-click Desktop → Display Settings → Advanced Display Settings → Display adapter properties → Monitor tab
+- Verify refresh rate matches the monitor's spec (60Hz, 75Hz, 120Hz, 144Hz, etc.)
+- Wrong refresh rate causes visible flicker, especially on LCD panels operating below their native rate
+
+<ConceptCallout type="info">
+On laptops, flickering that changes when you move the lid strongly suggests a problem with the internal display cable running through the hinge. The cable is repeatedly flexed every time the lid opens and closes; over time, individual wires break internally. Replacement requires disassembling the display lid to access the hinge area.
+</ConceptCallout>
+
+---
+
+## Incorrect Colors and Color Cast
+
+### Causes of Color Problems
+
+| Symptom | Likely Cause |
+|---|---|
+| Overall pink or red tint | Failing CCFL backlight (nearing end of life) |
+| Single color cast (blue, green, or red dominant) | Damaged video cable (one signal pair broken) |
+| Washed out or faded colors | Incorrect contrast/brightness; display calibration |
+| Inverted colors | Accessibility setting enabled; or GPU color inversion setting |
+| Green or magenta horizontal lines | Failing GPU or display controller |
+| Incorrect colors only on external display | Wrong ICC profile; cable issue to external display |
+
+### Display Calibration
+
+Display calibration corrects color accuracy. Windows includes a built-in calibration tool:
+- Search for "Calibrate display color" in Start menu
+- Adjust gamma, brightness, contrast, and color balance
+- Save the calibration profile
+
+Professional colorimeter tools (Spyder, ColorMunki) create hardware-accurate ICC profiles for photo/video work.
+
+### Driver Issues
+
+- Reinstalling or rolling back the display driver can resolve unexpected color issues introduced by a bad driver update
+- Device Manager → Display Adapters → right-click GPU → Update Driver / Roll Back Driver
+
+---
+
+## Dead Pixels vs Stuck Pixels
+
+### Definitions
+
+| Type | Appearance | Cause | Fixable? |
+|---|---|---|---|
+| Dead pixel | Always black | Transistor not receiving power | Rarely (slight pressure or cycling) |
+| Stuck pixel | Always one color (red, green, or blue) | Pixel element stuck in ON state | Sometimes (pixel refresher tools) |
+| Hot pixel | Bright white always on | Sub-pixel all three elements stuck ON | Rarely |
+
+### Testing for Dead/Stuck Pixels
+
+- Use a pixel testing tool or website that cycles through solid red, green, blue, white, and black screens
+- View the entire screen carefully at each solid color
+
+### Stuck Pixel Repair Attempts
+
+- **Software tools:** JScreenFix and UDPixel rapidly flash colors to unstick the sub-pixel — works sometimes on stuck pixels, never on dead pixels
+- **Gentle pressure:** With a soft cloth, apply very gentle pressure to the stuck pixel area while cycling colors — can sometimes dislodge a stuck sub-pixel
+
+### Manufacturer Warranty Thresholds
+
+Monitor warranties typically define how many dead pixels are required before replacement:
+- Many manufacturers use the ISO 13406-2 standard
+- **Class II** (most consumer monitors): allows up to 2 dead bright pixels and 2 dead dark pixels before warranty replacement
+- Premium monitors may offer "zero dead pixel" policies (dead pixel on arrival = replacement)
+
+<ConceptCallout type="tip">
+Dead pixels that appear during normal use after the warranty period are a manufacturing defect in the LCD panel. A monitor with 1–2 dead pixels is often considered within specification. If dead pixels appear within the first 30 days, contact the manufacturer — most honor warranty replacements even if the pixel count is technically within spec.
+</ConceptCallout>
+
+---
+
+## Artifacts and GPU Issues
+
+### Visual Artifacts
+
+Artifacts are visual distortions that indicate GPU or VRAM failure:
+
+| Artifact Type | Description | Cause |
+|---|---|---|
+| Screen tearing | Horizontal displacement/split in image | V-sync disabled; monitor refresh mismatch |
+| Texture corruption | Wrong colors/patterns on 3D surfaces | Failing VRAM |
+| Random colored pixels/blocks | Scattered dots of wrong color | Overheating VRAM, failing GPU |
+| Geometry distortion | 3D objects have wrong shapes | GPU shader unit failure |
+| Driver crash + black screen | Display goes black, then recovers with "Display driver stopped responding" | GPU overheating, driver bug |
+| System crash/BSOD during gaming | GPU sending corrupt data | GPU hardware failure |
+| Black screen on specific games | Driver/game incompatibility | Update drivers |
+
+### GPU Overheating
+
+GPU temperature limits:
+- Normal gaming load: 70–85°C
+- Maximum thermal limit: 90–95°C (triggers throttling)
+- Above 95°C: risk of permanent damage
+
+**Fixing GPU overheating:**
+1. Clean dust from GPU heatsink, fans, and surrounding area with compressed air
+2. Improve case airflow (add intake/exhaust fans, manage cables)
+3. Replace GPU thermal paste (reapplying requires removing GPU cooler — more advanced)
+4. Reduce overclocking if GPU is overclocked
+5. Ensure the case has adequate cooling for a high-TDP GPU
+
+### GPU Diagnostic Steps
+
+1. Check GPU temperature with GPU-Z or HWiNFO during normal use and under load
+2. Update GPU drivers (or roll back if issue started after update)
+3. Run FurMark to stress the GPU and observe for artifacts/crashes
+4. Underclock or reduce core/memory clock to see if stability improves
+5. Test GPU in a different PCIe slot or a different computer
+
+### Reseating the GPU
+
+A GPU that is not fully seated in the PCIe x16 slot causes no video output or intermittent failures:
+1. Power off, unplug power, discharge
+2. Remove the PCIe retention clip at the end of the slot
+3. Fully press the GPU down until the retention clip clicks
+4. Verify power connectors (6-pin, 8-pin, 16-pin) are fully seated
+
+---
+
+## Resolution and Scaling Issues
+
+### Wrong Resolution
+
+Windows selecting a non-native resolution results in a blurry or improperly scaled display:
+- Right-click Desktop → Display Settings
+- Select the resolution with "(Recommended)" label — this is the native resolution
+- Non-native resolutions will look blurry on LCD panels
+
+### Driver Not Installed
+
+Without a proper GPU driver, Windows uses a generic display driver that:
+- Limits resolution to common low resolutions (1024×768 or 1920×1080 at most)
+- Disables hardware acceleration
+- Shows "Microsoft Basic Display Adapter" in Device Manager
+
+Fix: Install the correct GPU driver from Intel, AMD, or Nvidia.
+
+### DPI Scaling
+
+High-resolution displays (HiDPI, 4K) may show tiny text at native resolution. Windows DPI scaling enlarges the UI:
+- Settings → Display → Scale and Layout → Change the size of text, apps, and other items
+- Per-monitor DPI scaling available for multi-monitor setups in Windows 10/11
+
+### Scaling Issues in Specific Apps
+
+Some older applications are not DPI-aware and appear blurry on high-DPI displays:
+- Right-click app .exe → Properties → Compatibility → Change high DPI settings → Override high DPI scaling behavior
+
+---
+
+## Multiple Monitor Troubleshooting
+
+### Monitor Not Detected
+
+1. Check physical cable connection at both ends
+2. Right-click Desktop → Display Settings → scroll down → Detect
+3. Verify the monitor is powered on
+4. Try a different cable or port
+5. Try the monitor on a different computer to rule out monitor failure
+
+### Incorrect Monitor Arrangement
+
+- Display Settings → drag monitors to match physical left/right arrangement
+- Incorrect arrangement causes the mouse cursor to disappear at the wrong screen edge
+
+### Refresh Rate Per Monitor
+
+Different monitors can run at different refresh rates:
+- Display Settings → click each monitor → Advanced Display Settings → set refresh rate
+- Mismatched refresh rates are supported and normal
+
+### Primary Display Setting
+
+The primary display is where the taskbar, Start menu, and new window defaults appear:
+- Display Settings → click the monitor to make primary → check "Make this my main display"
+
+---
+
+## Projector-Specific Issues
+
+| Problem | Cause | Solution |
+|---|---|---|
+| No image | Incorrect input source | Press Input/Source button on projector |
+| No image | Projector in sleep/standby | Press power button; wait for warmup |
+| No image from laptop | Laptop not sending signal | Press Fn+F5 (or Win+P) to enable external display output |
+| Dim image | Aging lamp | Replace projector lamp (has rated hour life: 2,000–5,000 hours) |
+| Overheating/shutdown | Dusty air filter | Clean or replace air filter |
+| Out of focus | Focus ring not adjusted | Manually adjust focus ring on the lens |
+| Keystone distortion | Projector not perpendicular to screen | Adjust keystone correction in projector menu |
+| Dead lamp | Lamp end of life | Replace with manufacturer-specified lamp |
+
+<ConceptCallout type="warning">
+Allow a DLP/LCD projector to cool down completely before moving it. The lamp is extremely hot during operation and requires a cool-down period (the fan runs after you turn it off). Moving it while hot risks lamp filament breakage or cracking.
+</ConceptCallout>
+
+---
+
+## Laptop Display-Specific Issues
+
+### Black Screen When Lid Opens
+
+1. **Power settings:** Check Windows power plan — is the lid action set to "sleep" or "do nothing"?
+2. **Display output sent to external only:** Press Win+P → select "PC screen only" or "Duplicate"
+3. **Backlight failure:** Shine a flashlight; if faint image visible, backlight has failed
+4. **Display driver:** Safe mode displays correctly? Driver issue.
+
+### External Monitor Works but Built-In Doesn't
+
+This pattern points to an issue between the GPU and the built-in display, not the GPU itself:
+1. **Flex cable (eDP/LVDS):** The cable connecting the GPU output on the motherboard to the display panel runs through the hinge. Repeated opening/closing eventually damages the cable internally. Replace the flex cable.
+2. **Display panel failure:** The panel's internal controller or backlight driver has failed
+3. **Connector at panel:** The connector at the back of the display panel may have come loose
+
+### Inverter Issues (CCFL Laptops)
+
+- Screen goes black after 10–30 seconds of use
+- Pink or dim tint before going dark
+- Image visible with external flashlight
+- Solution: Replace the inverter board (specific to the laptop model) or replace the entire display assembly
+
+### Discoloration at Screen Edges
+
+Pressure on the LCD panel causes discoloration:
+- Caused by: tight screws pressing on display frame, cracked frame, or external pressure
+- Remove and re-torque display bezel screws to spec
+- Ensure nothing in the laptop bag is pressing against the screen

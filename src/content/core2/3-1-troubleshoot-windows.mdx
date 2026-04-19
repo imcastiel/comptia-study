@@ -1,0 +1,189 @@
+# Troubleshoot Common Windows OS Issues
+
+Windows troubleshooting is one of the most tested areas on the 220-1202 exam. You need to recognize symptoms, identify likely causes, and know which tools and commands resolve each class of problem. This objective covers the full range from boot failures to corrupted profiles to Windows Update errors.
+
+## Quick Reference: Symptoms, Causes, and Resolutions
+
+| Symptom | Likely Cause | Resolution |
+|---|---|---|
+| Blue screen with stop code | Driver conflict, bad RAM, kernel error | Check Event Viewer, analyze minidump, roll back driver, run Memory Diagnostic |
+| System won't boot — missing BCD | Corrupt boot configuration | `bootrec /fixbcd`, `bootrec /rebuildbcd` |
+| System won't boot — MBR corrupt | MBR overwritten or damaged | `bootrec /fixmbr` |
+| Slow boot, high disk activity | Too many startup programs, fragmentation | Disable startup items in Task Manager, run Disk Defragmenter (HDD) |
+| Application not responding | Crash, memory leak, compatibility | End Task in Task Manager, reinstall or repair application |
+| Windows Update fails with error code | Cache corruption, low disk space | Clear SoftwareDistribution folder, run Update Troubleshooter |
+| Desktop resets on every login | Corrupt user profile | Create new profile, copy data, delete old profile |
+| "The program can't start because X.dll is missing" | DLL missing or corrupted | Run `sfc /scannow`, reinstall application |
+| sfc finds errors it cannot repair | Component store corruption | Run DISM to repair component store first, then re-run sfc |
+| System unstable after driver install | Driver conflict | Roll back driver via Device Manager, boot into Safe Mode if needed |
+
+## BSOD — Blue Screen of Death (Stop Error)
+
+A BSOD means Windows encountered a fatal error it could not recover from. The system halts to prevent data corruption. Each BSOD displays a **stop code** that identifies the type of failure.
+
+### Common Stop Codes
+
+| Stop Code | What It Indicates |
+|---|---|
+| `IRQL_NOT_LESS_OR_EQUAL` | Driver tried to access memory at too high an interrupt level — usually a bad or incompatible driver |
+| `MEMORY_MANAGEMENT` | RAM problem: bad stick, bad slot, or Windows memory subsystem error |
+| `CRITICAL_PROCESS_DIED` | A core Windows process (like csrss.exe or winlogon.exe) terminated unexpectedly |
+| `SYSTEM_SERVICE_EXCEPTION` | A system service caused an unhandled exception — often a driver or antivirus |
+| `PAGE_FAULT_IN_NONPAGED_AREA` | Memory access to an area that isn't paged in — hardware or driver failure |
+| `KERNEL_SECURITY_CHECK_FAILURE` | Corrupted data in kernel — hardware failure or damaged system files |
+
+### Diagnosing a BSOD
+
+By default, Windows automatically reboots on a BSOD, which means you never see the stop code. To capture it:
+
+**Disable automatic restart**: Right-click This PC → Properties → Advanced system settings → Advanced tab → Startup and Recovery → Settings → uncheck "Automatically restart."
+
+After a BSOD, Windows writes a **minidump file** to `C:\Windows\Minidump\`. Use **WinDbg** (Windows Debugger, from the Windows SDK) to open the .dmp file and read the stop code, faulting module, and call stack. The faulting module is usually what caused the crash.
+
+**Troubleshooting sequence:**
+1. Check Event Viewer (System log) for errors logged just before the crash
+2. Identify the stop code and faulting module from the minidump
+3. If a driver is named, roll it back in Device Manager or uninstall it
+4. Run Windows Memory Diagnostic (search "mdsched.exe") to test RAM
+5. Run `sfc /scannow` to check for corrupted system files
+6. Check for failing storage with `chkdsk /f /r`
+
+<ConceptCallout type="warning">A BSOD that happens at a specific time after boot (e.g., always after 20 minutes) and is accompanied by `MEMORY_MANAGEMENT` strongly points to a bad RAM stick. Test sticks one at a time.</ConceptCallout>
+
+## Slow Boot and Slow Performance
+
+Performance issues are rarely caused by a single thing. Work through each potential cause systematically.
+
+**Startup programs** are the most common cause of slow boot on consumer PCs. Open Task Manager → Startup tab. Review every entry and disable anything non-essential. The "Startup impact" column helps prioritize.
+
+**Services**: Run `msconfig` → Services tab. Check "Hide all Microsoft services" and review what remains. Disable services from software you no longer use.
+
+**Disk fragmentation** only applies to traditional spinning hard drives (HDDs). SSDs must never be defragmented. Run Disk Defragmenter (defragment and optimize drives) on HDDs. Windows schedules this automatically but it may have been disabled.
+
+**Low disk space** slows the entire system because Windows needs free space for the page file, temporary files, and update staging. Keep at least 10-15% of the drive free. Use Disk Cleanup (`cleanmgr`) or Settings → Storage → Storage Sense to reclaim space.
+
+**Low RAM**: Open Task Manager → Performance → Memory. If "In use" is consistently at or near total RAM, the system is paging heavily to disk, which causes severe slowdowns. Upgrade RAM or close applications.
+
+**Malware**: Many malware types run background processes that consume CPU, RAM, and network. If performance issues appeared suddenly, run a full antivirus scan and Malwarebytes.
+
+**Event Viewer**: For systematic boot analysis, open Event Viewer → Windows Logs → System. Filter for errors and warnings around the boot timestamp. This often reveals driver load failures or service errors that extend boot time.
+
+## Application Crashes and "Not Responding"
+
+When an application stops responding, Windows shows it as grayed out with "(Not Responding)" in the title bar. Use Task Manager → Applications tab → End Task to terminate it. This discards unsaved work.
+
+**Troubleshooting application crashes:**
+
+1. Check **Event Viewer → Windows Logs → Application** for error events from the application. The faulting module name often appears here.
+2. **Update the application** — the crash may be a known bug with a patch available.
+3. **Roll back a recent update** if the crash started after an update (Programs and Features → View installed updates).
+4. **Check compatibility mode**: right-click the executable → Properties → Compatibility. If it's an older application, try running in Windows 8 or Windows 7 compatibility mode.
+5. **Repair the installation**: Programs and Features → select app → Change → Repair. This restores missing or corrupted application files without a full reinstall.
+6. **Reinstall**: if repair doesn't work, uninstall completely (including leftover data in AppData) and do a clean reinstall.
+
+<ConceptCallout type="tip">The Event Viewer Application log entry for a crash includes the "Faulting module name" — this tells you whether the crash is inside the application itself or caused by a shared DLL or framework (like .NET or Visual C++ redistributables).</ConceptCallout>
+
+## Windows Update Failures
+
+Windows Update errors are identified by hexadecimal error codes shown in Settings → Windows Update → View update history. Common codes include `0x80070002` (file not found), `0x8024402F` (network issue), and `0x80240034` (general failure).
+
+**Resolution steps in order:**
+
+<ProcessSteps title="Fix Windows Update Failures" color="blue" steps={[
+  { title: "Check disk space", description: "Updates need free space to download and stage. Use Disk Cleanup if low. Windows requires several GB free for major updates." },
+  { title: "Run Windows Update Troubleshooter", description: "Settings → System → Troubleshoot → Other troubleshooters → Windows Update. This automatically detects and fixes many common issues." },
+  { title: "Clear the SoftwareDistribution cache", description: "Open an elevated command prompt. Run: net stop wuauserv. Delete all contents of C:\\Windows\\SoftwareDistribution\\Download. Run: net start wuauserv. Try Windows Update again." },
+  { title: "Manual download from Update Catalog", description: "Go to catalog.update.microsoft.com. Search by the KB number shown in update history. Download and install the standalone .msu package directly." },
+  { title: "Run DISM and sfc", description: "Run DISM /Online /Cleanup-Image /RestoreHealth to repair the component store, then sfc /scannow. Damaged system files can block updates." },
+  { title: "In-place upgrade", description: "As a last resort, run Windows Setup from the ISO or media creation tool and choose Upgrade. This reinstalls Windows while keeping files, apps, and settings." }
+]} />
+
+## Corrupted User Profile
+
+A corrupted profile causes: settings that don't save between logins, a blank desktop on login, a "You've been signed in with a temporary profile" warning, or application settings reverting constantly.
+
+**Cause**: The profile registry hive (`NTUSER.DAT`) or profile folder became corrupted, often due to improper shutdown, disk error, or permission change.
+
+**Fix procedure:**
+1. Log in as a different admin account (not the affected user)
+2. Create a new user account for the affected user
+3. Copy the data from `C:\Users\[OldProfile]\` to the new profile — copy Documents, Desktop, Pictures, AppData\Roaming (selectively), etc.
+4. Test the new profile
+5. Delete the old profile via System Properties → Advanced → User Profiles → Settings
+
+**Advanced fix via registry**: The profile list lives at `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList`. Each profile has a subkey named by its SID. If you see a key ending in `.bak`, Windows failed to load the original and created a temporary profile. You can rename keys to force Windows to use the correct profile — but creating a new profile is safer and more reliable.
+
+## Missing DLLs and Registry Errors
+
+DLL errors ("The program can't start because X.dll is missing") and registry errors can cause application launch failures or system instability.
+
+**sfc /scannow** (System File Checker): scans all protected Windows system files and replaces corrupted or missing ones from the Windows component store. Must run from an elevated command prompt. Results are logged to `C:\Windows\Logs\CBS\CBS.log`.
+
+**DISM /Online /Cleanup-Image /RestoreHealth**: repairs the Windows component store itself by downloading correct files from Windows Update. Must run before sfc if the component store is damaged.
+
+<ConceptCallout type="info">Use DISM before sfc when sfc reports it found errors but could not repair them. sfc needs the component store to source replacement files — if the store is corrupt, sfc cannot fix itself. DISM repairs the store, then sfc can do its job.</ConceptCallout>
+
+**For application-specific DLL errors:**
+- Reinstall the application that uses the DLL (it should restore its own DLLs)
+- Install the required Visual C++ Redistributable or .NET Framework version
+- Never download DLLs from third-party "DLL fix" websites — these are a primary malware vector
+
+## System Restore
+
+System Restore saves snapshots of system files and the registry called **restore points**. It does NOT back up personal files — documents, photos, and downloads are unaffected.
+
+Restore points are created automatically before Windows Updates, driver installs, and application installs. They can also be created manually.
+
+**Access**: Settings → System → About → System Protection (or right-click This PC → Properties → System Protection). Select a drive and click Configure to enable protection, then System Restore to use a restore point.
+
+**When to use it**: after a driver installation causes instability, after an application install breaks other software, or after a registry change causes problems. System Restore does not help with malware (the malware may have created its own restore points) or personal file loss.
+
+## Windows Recovery Environment (WinRE)
+
+WinRE is a lightweight recovery OS that boots separately from Windows and provides repair tools when Windows won't start.
+
+| WinRE Tool | What It Does |
+|---|---|
+| Startup Repair | Automatically diagnoses and fixes boot problems |
+| System Restore | Rolls back to a restore point |
+| System Image Recovery | Restores from a full system image backup |
+| Reset this PC | Reinstalls Windows, optionally keeping personal files |
+| Command Prompt | Full command-line access for manual repair |
+| Uninstall Updates | Removes the most recent quality or feature update |
+
+**How to access WinRE:**
+- Windows 10/11: Settings → System → Recovery → Advanced startup → Restart now
+- If Windows won't boot: interrupt boot 3 times (hold power button during boot) — Windows will automatically enter WinRE
+- Boot from Windows installation media and choose "Repair your computer"
+- Press F11 on some systems during POST
+
+## Boot Failures and Recovery Commands
+
+When Windows fails to boot entirely, you need WinRE Command Prompt and the `bootrec` utility.
+
+| Command | Purpose |
+|---|---|
+| `bootrec /fixmbr` | Writes a new Master Boot Record to the system disk |
+| `bootrec /fixboot` | Writes a new boot sector to the active partition |
+| `bootrec /scanos` | Scans for Windows installations not in the BCD |
+| `bootrec /rebuildbcd` | Rebuilds the Boot Configuration Data from scratch |
+| `bootsect /nt60 sys` | Updates the boot sector to be compatible with BOOTMGR |
+| `bcdedit` | View and manually edit Boot Configuration Data entries |
+
+**Typical UEFI/GPT boot repair sequence**: `bootrec /rebuildbcd` → `bootrec /fixboot` → reboot.
+
+**Typical MBR/BIOS boot repair sequence**: `bootrec /fixmbr` → `bootrec /fixboot` → `bootrec /rebuildbcd` → reboot.
+
+<ConceptCallout type="warning">bootrec /fixmbr overwrites the MBR. On a dual-boot system, this can destroy the other OS's boot entry. Always document and back up BCD data before running these commands on dual-boot systems.</ConceptCallout>
+
+## Windows Recovery Procedure
+
+<ProcessSteps title="Windows Troubleshooting Sequence" color="orange" steps={[
+  { title: "Boot normally and gather symptoms", description: "Note exact error messages, stop codes, when it happens. Check Event Viewer (System and Application logs) for recent errors." },
+  { title: "Try Safe Mode", description: "Restart and press F8 (or hold Shift + Restart). Safe Mode loads minimal drivers. If Windows works in Safe Mode, a third-party driver or startup program is the cause." },
+  { title: "Run sfc and DISM", description: "From elevated command prompt: DISM /Online /Cleanup-Image /RestoreHealth, then sfc /scannow. Fixes corrupted system files." },
+  { title: "System Restore", description: "Roll back to a restore point created before the problem started. Does not affect personal files." },
+  { title: "Uninstall recent changes", description: "Remove recently installed drivers (Device Manager → Roll Back Driver), updates (Settings → Windows Update → Update history → Uninstall updates), or applications." },
+  { title: "Reset this PC", description: "Settings → System → Recovery → Reset this PC. Choose Keep my files to reinstall Windows while preserving personal data. Removes applications and settings." },
+  { title: "Clean install / in-place upgrade", description: "Last resort. Boot from Windows media. In-place upgrade preserves files and apps. Clean install wipes everything. Always back up first." }
+]} />

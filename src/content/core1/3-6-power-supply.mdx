@@ -1,0 +1,136 @@
+# Installing Appropriate Power Supplies
+
+The power supply unit (PSU) converts AC mains power to the DC voltages computer components need. Selecting the right PSU — with sufficient wattage, appropriate efficiency, correct form factor, and proper connectors — is critical for system stability and longevity.
+
+## How PSUs Work
+
+A PSU rectifies incoming AC (120V/240V) to DC, then uses switch-mode regulation to produce stable output voltages. The efficiency of this conversion determines how much power is wasted as heat.
+
+**Power factor** describes how efficiently the PSU draws current from the AC line. Active Power Factor Correction (PFC) circuits improve power factor above 0.95, reducing reactive power and meeting efficiency certification requirements.
+
+## 80 Plus Efficiency Ratings
+
+The **80 Plus** certification program tests PSU efficiency at 20%, 50%, and 100% load. More efficient PSUs waste less power as heat, run cooler, and cost less to operate.
+
+*A 750W Gold PSU drawing 100W load wastes only 13W as heat. A 750W Bronze wastes 18W for the same load.*
+
+| Certification | 20% Load | 50% Load | 100% Load | Notes |
+| --- | --- | --- | --- | --- |
+| 80 Plus (White) | 80% | 80% | 80% | Baseline, rarely sold now |
+| 80 Plus Bronze | 82% | 85% | 82% | Budget builds |
+| 80 Plus Silver | 85% | 88% | 85% | Mid-range |
+| 80 Plus Gold | 87% | 90% | 87% | Sweet spot for most builds |
+| 80 Plus Platinum | 90% | 92% | 89% | High-end efficiency |
+| 80 Plus Titanium | 90% | 92% | 94% | Best available, premium cost |
+
+<ConceptCallout type="tip">
+  The exam tests 80 Plus efficiency numbers. Know that **Gold = 87/90/87%** at 20/50/100% load. Gold is the most commonly recommended tier for a good performance/value ratio.
+</ConceptCallout>
+
+## Form Factors
+
+**ATX** — standard desktop PSU. 150mm × 86mm × 140mm (or deeper). The vast majority of consumer PSUs use ATX.
+
+**SFX (Small Form Factor)** — compact PSU for mini-ITX and SFF cases. 100mm × 63.5mm × 125mm. Less common but required for small builds.
+
+**TFX (Thin Form Factor)** — slim PSU for thin mini-tower and HTPC cases.
+
+## Modular Designs
+
+| Type | Fixed Cables | Detachable Cables | Best For |
+| --- | --- | --- | --- |
+| Non-Modular | All cables permanently attached | None | Budget builds where cost matters most |
+| Semi-Modular | Main ATX 24-pin + CPU 8-pin | PCIe, SATA, Molex cables | Most balanced option |
+| Fully Modular | None — all detachable | All cables | Premium builds, best cable management |
+
+Modular PSUs allow removing unused cables to improve airflow and reduce clutter. Non-modular is cheaper but results in bundled unused cables that must be tucked somewhere.
+
+## Voltage Rails
+
+The PSU outputs multiple DC voltages to power different components:
+
+| Rail | Voltage | Powered Components | Notes |
+| --- | --- | --- | --- |
+| +12V | +12V | CPU, GPU, HDD motors, case fans | Highest current rail — most critical |
+| +5V | +5V | USB ports, logic circuits, older storage | Less critical in modern systems |
+| +3.3V | +3.3V | RAM, chipset, some M.2 drives | Low current requirements |
+| -12V | -12V | Legacy serial ports (RS-232) | Very low current, legacy |
+| +5VSB | +5V standby | Wake-on-LAN, USB wake, RTC | Always active when PSU is plugged in |
+
+<ConceptCallout type="info">
+  The **+5VSB (standby)** rail explains why a plugged-in computer can wake from a network packet or keyboard press while appearing "off." The PSU is always partially powered, maintaining the motherboard's standby logic. This is also why you should use the rear PSU switch or unplug before servicing.
+</ConceptCallout>
+
+## Power Connectors
+
+### 24-pin ATX Main Power
+
+The primary motherboard power connector. Provides all voltage rails and control signals including PS_ON (the "turn on" signal from the power button circuit). Older systems used 20-pin; modern boards use 24-pin (backward compatible with adapters).
+
+### 8-pin EPS12V (CPU Power)
+
+Dedicated +12V connector for the CPU's Voltage Regulator Module (VRM) on the motherboard. Called EPS (Entry-Level Power Supply) or ATX12V. High-end boards may require two 8-pin connectors for overclocking headroom.
+
+### 6+2-pin PCIe GPU Power
+
+Provides supplemental +12V power to discrete graphics cards beyond the 75W available through the PCIe slot itself:
+- **6-pin** — provides approximately 75W additional
+- **8-pin** — provides approximately 150W additional
+- **16-pin 12VHPWR** — new connector for latest high-end GPUs (RTX 4080/4090), up to 600W
+
+Mid-range GPUs (one 8-pin): ~225W total. High-end (two 8-pin): ~375W total.
+
+### SATA Power (15-pin)
+
+L-shaped flat connector powering SATA drives. Provides +3.3V, +5V, and +12V. Modern HDDs use +5V/+12V; SSDs often use only +3.3V/+5V.
+
+### 4-pin Molex
+
+Older large connector for IDE drives (legacy). Still found on some fans, LED controllers, and older devices. Provides +5V (red) and +12V (yellow).
+
+<ConceptCallout type="tip">
+  Connector pin counts to memorize: **24-pin** ATX main, **8-pin** EPS CPU, **6 or 8-pin** PCIe GPU, **15-pin** SATA power, **4-pin** Molex. The exam may also ask you to identify which connector goes where.
+</ConceptCallout>
+
+## Wattage Selection
+
+Selecting appropriate wattage requires summing component requirements and adding headroom:
+
+**Basic system (office PC):** Core i5 + integrated graphics + 1 HDD = 150–200W. Choose 300–400W PSU.
+
+**Mid-range gaming:** Core i7 + RTX 3060 + 2 SATA SSDs = ~350W peak. Choose 550–650W PSU.
+
+**High-end gaming:** Core i9 + RTX 4090 (TDP 450W) + additional components = ~700W+ peak. Choose 850–1000W PSU.
+
+**Why headroom matters:**
+1. PSUs are most efficient at ~50% load — a 750W PSU running a 375W system runs at peak efficiency
+2. Headroom accommodates future upgrades
+3. Capacitors and components last longer running below max rated load
+4. Power spikes during heavy GPU/CPU transients can exceed rated TDP by 30–50%
+
+<ConceptCallout type="why">
+  A PSU running consistently at 95–100% capacity runs hot, degrades faster, and may fail or cause instability under sudden load spikes. Invest in adequate wattage and efficiency — a quality PSU is a one-time purchase that protects all your expensive components.
+</ConceptCallout>
+
+## Troubleshooting: The Paperclip Test
+
+To test if a PSU powers on independently (without a motherboard), short **pin 16 (PS_ON, green wire)** to any adjacent **ground pin (black wire)** on the 24-pin connector with a bent paperclip. The PSU fan should spin and voltages should be measurable.
+
+**Expected voltages (±5% tolerance):**
+- +12V rail: 11.4–12.6V
+- +5V rail: 4.75–5.25V
+- +3.3V rail: 3.135–3.465V
+
+Voltages outside these tolerances indicate a failing PSU. A PSU that won't start at all (nothing when paperclip-tested) is faulty.
+
+**Safety note:** The PSU is energized during this test. Do not touch internal components with bare hands, and ensure the PSU is away from conductive surfaces.
+
+## Common PSU Problems
+
+| Symptom | Likely Cause |
+|---------|--------------|
+| System won't power on | Bad PSU switch (rear), failed PSU, PWR_SW header disconnected |
+| Random reboots/freezes | Insufficient wattage, failing rail voltages, overheating |
+| System shuts off under load | OCP (Over Current Protection) tripping — PSU overloaded |
+| Burning smell | Blown capacitor — replace PSU immediately |
+| Excessive fan noise | Dust buildup or failing fan bearing |

@@ -1,0 +1,184 @@
+# Services Provided by Networked Hosts
+
+Network servers are computers dedicated to providing specific services to clients. As a technician you'll configure, troubleshoot, and support these services. Understanding what each server role does — and which protocols/ports it uses — is essential exam knowledge.
+
+## Server Roles Overview
+
+| Server Role | Primary Function | Key Protocols/Ports |
+| --- | --- | --- |
+| DNS | Resolves hostnames to IPs | DNS (UDP/TCP 53) |
+| DHCP | Assigns IP addresses dynamically | DHCP (UDP 67/68) |
+| File server | Shared storage and file access | SMB (445), NFS (2049) |
+| Print server | Manages shared printers | SMB (445), IPP (631), LPD (515) |
+| Web server | Hosts websites and web apps | HTTP (80), HTTPS (443) |
+| Mail server | Sends and receives email | SMTP (25), POP3 (110), IMAP (143) |
+| Authentication / AAA | Verifies identity, controls access | RADIUS (1812/1813), LDAP (389), Kerberos (88) |
+| Proxy | Intermediary for client requests | HTTP (80/8080) |
+| Load balancer | Distributes traffic across servers | Works at Layer 4/7 |
+| IDS/IPS | Monitors and blocks malicious traffic | Passive/inline |
+| Syslog | Centralized log collection | Syslog (UDP 514) |
+| NTP | Time synchronization | NTP (UDP 123) |
+
+## DNS Server
+
+The DNS server is the internet's phone book — it translates human-readable names (like `google.com`) into IP addresses computers use.
+
+**DNS resolution process (recursive):**
+1. Client asks its configured DNS resolver (usually the router or ISP's DNS)
+2. Resolver checks its cache — if found, returns immediately
+3. If not cached, resolver queries a **root name server** for the TLD (.com, .org, etc.)
+4. Root refers to the **TLD name server** (.com servers)
+5. TLD refers to the **authoritative name server** for the domain
+6. Authoritative server returns the record
+7. Resolver caches the result and returns it to the client
+
+**Internal DNS:** Organizations run their own DNS servers for internal hostnames (like `fileserver.corp.local`). These internal records are not visible on the public internet.
+
+## DHCP Server
+
+DHCP automatically configures client IP settings so users don't need to manually enter network configuration.
+
+**What DHCP assigns (the "DHCP lease"):**
+- IP address (from a defined scope/pool)
+- Subnet mask
+- Default gateway (router)
+- DNS server addresses
+- Lease duration
+
+**DHCP scope:** The configured pool of IP addresses the server can assign. The admin defines the start/end range and any exclusions (for static devices like printers and servers).
+
+**DHCP reservation:** Assigns a fixed IP to a specific MAC address — gives a device the same IP every time while still being managed by DHCP.
+
+<ConceptCallout type="tip">
+  If a client shows an IP in the **169.254.x.x** range, it failed to get a DHCP lease and self-assigned an APIPA address. Troubleshoot: check DHCP server is running, check network connectivity between client and server, check DHCP scope has available addresses.
+</ConceptCallout>
+
+## File Server
+
+File servers provide centralized storage that multiple users can access simultaneously.
+
+**Windows file sharing (SMB/CIFS):** Share folders via `\\servername\sharename`. Permissions controlled at the share level AND NTFS level. Common in Windows Active Directory environments.
+
+**NFS (Network File System):** Unix/Linux native file sharing protocol. Used in mixed environments and NAS devices.
+
+**NAS (Network Attached Storage):** Dedicated storage appliance that presents shared storage over the network. Common in small businesses.
+
+## Print Server
+
+Print servers manage print queues and route jobs to the correct printer.
+
+**Implementation options:**
+- **Dedicated hardware print server** — small device with USB/parallel port that connects the printer to the network
+- **Software (Windows Print Spooler)** — a PC shares its locally-connected printer; other machines add it as a network printer
+- **Printer with integrated NIC** — modern printers connect directly to the switch; built-in print server
+
+**Protocols:**
+- **SMB/Windows** — most common for Windows environments
+- **IPP (Internet Printing Protocol)** — cross-platform, uses HTTP port 631
+- **LPD/LPR** (Line Printer Daemon/Remote) — legacy Unix printing
+
+## Web Server
+
+Web servers respond to HTTP/HTTPS requests and deliver web content.
+
+**Common web server software:**
+- **Apache** (Linux) — most widely deployed
+- **Nginx** — high performance, also used as reverse proxy/load balancer
+- **IIS (Internet Information Services)** — Microsoft's web server, built into Windows Server
+
+Web servers host not just websites but REST APIs, web applications, and admin interfaces for network devices (routers, printers, switches have embedded web servers).
+
+## Mail Server
+
+Email requires multiple server components:
+
+**MTA (Mail Transfer Agent):** Sends and relays email between servers using SMTP.
+
+**MDA (Mail Delivery Agent):** Delivers mail to users' mailboxes.
+
+**Mail client access:** Users retrieve mail via POP3 or IMAP from a mail server (or access webmail via HTTP).
+
+**Spam filtering and security:** Mail servers apply spam filters, DKIM (sender authentication), SPF records, and DMARC policies.
+
+## Authentication Server — AAA
+
+**AAA = Authentication, Authorization, Accounting**
+
+- **Authentication** — Who are you? (verify identity via username/password, certificate, MFA)
+- **Authorization** — What can you do? (access control based on identity)
+- **Accounting** — What did you do? (logging activity for auditing)
+
+**RADIUS (Remote Authentication Dial-In User Service):**
+- Used for network access control: Wi-Fi (WPA2-Enterprise), VPN, wired 802.1X
+- Client (NAS/switch/AP) sends credentials to RADIUS server; RADIUS approves or denies access
+- Ports: **1812** (authentication), **1813** (accounting)
+
+**LDAP (Lightweight Directory Access Protocol):**
+- Queries and modifies directory services (user accounts, groups, policies)
+- **Active Directory** uses LDAP as its query protocol
+- Port 389 (plaintext), 636 (LDAPS — encrypted)
+
+**Kerberos:**
+- Authentication protocol used by Active Directory for domain logins
+- Issues **tickets** that prove identity without transmitting passwords across the network
+- Port 88
+
+## Proxy Server
+
+A proxy server acts as an intermediary between clients and the internet.
+
+**Forward proxy:**
+- Clients send requests to the proxy, which forwards them to the internet
+- **Benefits:** content filtering (block inappropriate sites), caching (faster repeated access), anonymization, logging
+- Configured in browser or OS network settings
+
+**Reverse proxy:**
+- Sits in front of web servers; clients connect to the proxy which forwards to backend servers
+- Used for load balancing, SSL termination, and hiding internal server topology
+
+<ConceptCallout type="info">
+  A **transparent proxy** intercepts traffic without client configuration. Users may not know it exists. Common in corporate networks and ISPs for content filtering.
+</ConceptCallout>
+
+## Load Balancer
+
+Load balancers distribute incoming traffic across multiple servers to:
+- Prevent any single server from being overwhelmed
+- Provide fault tolerance (traffic reroutes if a server fails)
+- Enable horizontal scaling (add more servers to handle more traffic)
+
+**Load balancing algorithms:**
+- **Round-robin** — each server gets the next request in rotation
+- **Least connections** — new requests go to the server with the fewest active connections
+- **IP hash** — client IP determines which server; ensures a client always hits the same server (session persistence)
+
+## IDS and IPS
+
+**IDS (Intrusion Detection System):** Monitors network traffic and generates alerts when suspicious patterns are detected. **Passive** — doesn't block traffic, only alerts.
+
+**IPS (Intrusion Prevention System):** Monitors AND actively blocks malicious traffic in real time. **Inline** — sits in the traffic path.
+
+Both use signatures (known attack patterns) and/or anomaly detection (behavioral baselines).
+
+## Syslog Server
+
+Syslog collects log messages from network devices (routers, switches, firewalls), servers, and applications into a central location.
+
+**Why centralize logs:**
+- Correlation — match events across multiple devices
+- Retention — devices have limited local log storage
+- Security — logs are harder to tamper with when stored off-device
+
+**Syslog severity levels (0–7):** 0 = Emergency, 3 = Error, 5 = Notice, 7 = Debug. Lower number = higher severity.
+
+## NTP Server
+
+NTP (Network Time Protocol, UDP 123) synchronizes clocks across all network devices to a common time source.
+
+**Why time matters:**
+- Log correlation across devices requires matching timestamps
+- Kerberos authentication fails if clocks differ by more than 5 minutes
+- SSL certificate validity windows require accurate time
+- Audit trails depend on synchronized time
+
+**Time hierarchy (stratum):** Stratum 0 = atomic clock (GPS, radio). Stratum 1 = directly synced to stratum 0. Stratum 2 = synced to stratum 1. Most enterprise devices are stratum 2 or 3.

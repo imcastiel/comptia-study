@@ -1,0 +1,353 @@
+# Mobile Device Network Connectivity
+
+## Cellular Data Technology
+
+### 4G LTE
+
+**LTE (Long-Term Evolution)** is the 4G cellular standard that delivers mobile broadband speeds.
+
+| Characteristic | Value | Notes |
+|---|---|---|
+| Typical download speed | 10–50 Mbps | Real-world varies by signal |
+| Peak theoretical download | 300 Mbps (Cat 6) | Carrier aggregation |
+| Frequency bands | 700 MHz – 2600 MHz | Country/carrier specific |
+| Latency | 30–50 ms | Suitable for most apps |
+
+**LTE bands** are numbered frequency ranges. Different countries and carriers use different bands. This is why some unlocked phones don't work well on all carriers — the phone must support the carrier's specific LTE bands. Common US LTE bands include Band 2 (1900 MHz), Band 4 (1700/2100 MHz AWS), Band 12 (700 MHz), Band 66 (1700 MHz), and Band 71 (600 MHz).
+
+**VoLTE (Voice over LTE)** carries voice calls as data over the LTE network rather than falling back to 3G/2G for calls. Enables HD voice quality and simultaneous voice and data.
+
+### 5G
+
+5G is the fifth generation of cellular technology with two primary deployment approaches:
+
+| 5G Type | Frequency | Range | Speed | Penetration | Notes |
+|---|---|---|---|---|---|
+| Sub-6 GHz (FR1) | 600 MHz – 6 GHz | Long | 100–900 Mbps | Good | Covers wide areas; most 5G today |
+| mmWave (FR2) | 24–100 GHz | Very short (&lt;100m) | 1–4 Gbps | Poor | Dense urban; blocked by buildings/rain |
+
+<ConceptCallout type="info">
+**mmWave 5G** offers extreme speed but very short range and terrible building penetration. It requires small cells (antennas) every 100–200 meters. You'll see mmWave in stadiums, airports, and dense downtown areas. **Sub-6 5G** is what most users experience — faster than LTE but the range and coverage are similar.
+</ConceptCallout>
+
+**5G NSA vs SA:**
+- **NSA (Non-Standalone):** 5G NR radio anchored to existing 4G LTE core network. Faster deployment, uses existing infrastructure. Most current 5G deployments.
+- **SA (Standalone):** True 5G — both the radio and core network are 5G. Enables network slicing and ultra-low latency (sub-1ms). The long-term goal.
+
+---
+
+## SIM Cards
+
+A **SIM (Subscriber Identity Module)** card identifies you on the cellular network. It stores:
+- IMSI (International Mobile Subscriber Identity)
+- Authentication keys
+- Contact information (on older SIMs)
+- Carrier network preferences
+
+### SIM Form Factors
+
+| Type | Approximate Size | Common Use |
+|---|---|---|
+| Standard SIM (1FF/2FF) | 25mm × 15mm | Older phones, some feature phones |
+| Micro-SIM (3FF) | 15mm × 12mm | iPhone 4 era, many mid-2010s phones |
+| Nano-SIM (4FF) | 12.3mm × 8.8mm | Current smartphones (iPhone 5+, modern Android) |
+| eSIM (5FF) | Virtual — embedded chip | Modern flagship phones, smartwatches |
+
+<ConceptCallout type="tip">
+SIM cards can be cut down from larger to smaller sizes using a SIM cutter tool. However, they cannot be made larger without a physical adapter tray. Nano-SIM is the smallest physical SIM; eSIM is not a physical card at all.
+</ConceptCallout>
+
+### eSIM
+
+An **eSIM (Embedded SIM)** is a programmable SIM chip soldered directly onto the device motherboard. It is provisioned over the air by the carrier.
+
+**Advantages:**
+- No physical SIM tray needed (thinner devices)
+- Multiple carrier profiles stored simultaneously
+- Can switch carriers without physically swapping a SIM
+- Cannot be easily removed (better for theft recovery)
+
+**Provisioning an eSIM:**
+1. Contact carrier to get an eSIM activation QR code or activation code
+2. Scan QR code in device settings (Settings → Cellular → Add Cellular Plan on iOS)
+3. Carrier provisions the plan wirelessly
+4. Device assigns eSIM profile as primary or secondary line
+
+**Dual SIM:** Many modern phones support one physical nano-SIM + one eSIM (or two nano-SIMs), enabling two active phone numbers on one device.
+
+### SIM Lock vs Unlocked
+
+- **Carrier-locked:** Phone is programmed to work only with the subsidizing carrier's SIM
+- **Unlocked:** Works with any compatible carrier's SIM
+- Carriers are required by law (in most countries) to unlock phones after the contract period
+
+---
+
+## VPN Configuration on Mobile
+
+A **VPN (Virtual Private Network)** on a mobile device encrypts all traffic between the device and a VPN server, protecting data on public Wi-Fi and enabling access to corporate resources.
+
+### VPN Protocol Options
+
+| Protocol | Security | Speed | Notes |
+|---|---|---|---|
+| IKEv2/IPsec | High | Fast | Native iOS/Android support; recommended for mobile |
+| L2TP/IPsec | Moderate | Moderate | Older; some compatibility issues |
+| OpenVPN | High | Moderate | Requires app; very flexible |
+| WireGuard | Very High | Very Fast | Modern; built into Android 12+ |
+| SSL/TLS (SSTP, AnyConnect) | High | Moderate | Often used for corporate |
+
+### Configuring VPN on iOS
+
+1. Settings → General → VPN & Device Management → VPN → Add VPN Configuration
+2. Select Type (IKEv2, IPsec, L2TP)
+3. Enter server address, username, password, shared secret (if required)
+4. Save and toggle VPN on
+
+### Configuring VPN on Android
+
+1. Settings → Network & Internet → VPN → Add VPN
+2. Enter name, server, credentials
+3. Or install a VPN app (OpenVPN Connect, WireGuard, Cisco AnyConnect)
+
+<ConceptCallout type="warning">
+**Always-On VPN** (available in Android and MDM-managed iOS) forces all traffic through the VPN and prevents the device from accessing the internet without it. This is commonly enforced by enterprise MDM policies to ensure employees never accidentally transmit corporate data unencrypted.
+</ConceptCallout>
+
+### Split Tunneling
+
+Split tunneling sends only some traffic through the VPN (e.g., corporate intranet) while other traffic (e.g., YouTube, general browsing) goes directly to the internet. This reduces VPN server load but means non-tunneled traffic is not protected.
+
+---
+
+## Wi-Fi Calling
+
+Wi-Fi Calling routes voice calls over a Wi-Fi connection instead of the cellular network using the **IMS (IP Multimedia Subsystem)** framework.
+
+**Requirements:**
+- Carrier must support Wi-Fi Calling
+- Device must support Wi-Fi Calling
+- Feature must be enabled: Settings → Phone → Wi-Fi Calling (iOS); varies on Android
+
+**How to Enable on iOS:**
+1. Settings → Phone → Wi-Fi Calling → Enable Wi-Fi Calling on This iPhone
+2. Enter or confirm E911 address (emergency services need your location when using Wi-Fi)
+3. Toggle on
+
+**Use cases:**
+- Basements, elevators, rural areas with poor cellular coverage but Wi-Fi
+- International travel — calls route over Wi-Fi at domestic rates (if carrier supports)
+
+---
+
+## Mobile Hotspot Configuration
+
+### Enabling the Hotspot
+
+**iOS:**
+Settings → Personal Hotspot → Allow Others to Join → set Wi-Fi password
+
+**Android:**
+Settings → Network & Internet → Hotspot & Tethering → Wi-Fi Hotspot → configure SSID and password
+
+### Security Configuration
+
+| Setting | Recommended Value | Notes |
+|---|---|---|
+| Security Type | WPA2 or WPA3 | Never use Open (no password) |
+| Password | 8+ characters, complex | Default passwords are often printed on the device |
+| Band | 5 GHz (if supported) | Less interference; shorter range |
+| Maximum connections | Limit as needed | Prevents unauthorized users from consuming data |
+
+### Data Management
+
+- Hotspot uses cellular data from your plan
+- Many carriers throttle hotspot data after a monthly limit
+- Monitor usage in Settings → Cellular → Personal Hotspot Data (iOS) or Settings → Network usage (Android)
+
+---
+
+## Bluetooth Pairing Process
+
+### Step-by-Step Pairing
+
+1. **Enable Bluetooth** on the host device (phone, laptop)
+2. **Enter discoverable mode** on the accessory — typically by holding the pair button until the LED flashes rapidly (usually blue or alternating colors)
+3. **Scan for devices** — the host searches and displays nearby discoverable devices
+4. **Select the device** from the list
+5. **Authenticate:** Depending on the Secure Simple Pairing method:
+   - Confirm matching numbers on both devices (Numeric Comparison)
+   - Enter displayed PIN (Passkey Entry)
+   - No action needed for simple accessories (Just Works)
+6. **Bonding** — devices exchange and store link keys for automatic future connection
+
+### Bluetooth Profiles
+
+Different Bluetooth profiles enable different functions:
+
+| Profile | Abbreviation | Use |
+|---|---|---|
+| Hands-Free Profile | HFP | Car kits, speakerphones |
+| Advanced Audio Distribution Profile | A2DP | Stereo audio streaming to headphones/speakers |
+| Audio/Video Remote Control Profile | AVRCP | Play/pause/skip control |
+| Human Interface Device Profile | HID | Keyboards, mice |
+| Object Push Profile | OPP | File transfer between devices |
+| Personal Area Networking | PAN | Internet sharing via Bluetooth |
+
+<ConceptCallout type="tip">
+If Bluetooth audio sounds poor quality (like a phone call instead of music), the headset is connected using HFP/HSP instead of A2DP. This happens when both the audio streaming profile (A2DP) and the hands-free profile (HFP) are connected simultaneously and the phone prioritizes the microphone. Disconnecting the microphone use or disabling HFP may restore full stereo quality.
+</ConceptCallout>
+
+### Troubleshooting Bluetooth Pairing
+
+- **Device not found:** Make sure accessory is in discoverable mode; move devices closer; check if already paired to another device
+- **Pairing fails:** Delete existing pairing on both devices and retry
+- **Automatic reconnection fails:** Remove device from saved list on both sides, re-pair from scratch
+- **Interference:** 2.4 GHz Wi-Fi and Bluetooth operate in the same frequency range; switching Wi-Fi to 5 GHz reduces interference
+
+---
+
+## Corporate Email Configuration on Mobile
+
+### Exchange ActiveSync (EAS)
+
+Exchange ActiveSync is the Microsoft protocol for synchronizing email, calendar, contacts, and tasks between Exchange Server (or Microsoft 365) and mobile devices.
+
+**Setting up Exchange on iOS:**
+1. Settings → Mail → Accounts → Add Account → Microsoft Exchange
+2. Enter email address → Configure Manually
+3. Enter: Email, Server (e.g., mail.company.com), Domain, Username, Password
+4. Select what to sync: Mail, Contacts, Calendars, Reminders
+5. Accept any security policy (MDM enrollment, PIN requirement, remote wipe authorization)
+
+**Setting up Exchange on Android:**
+1. Settings → Accounts → Add Account → Exchange
+2. Enter email and password → Manual Setup
+3. Enter server settings (same as iOS)
+4. Accept device administrator rights if corporate policy requires
+
+<ConceptCallout type="warning">
+When you add a corporate Exchange account to a personal device, you are often accepting a **Device Administrator** policy. This grants the IT department the ability to enforce PIN requirements, encryption, and perform a **remote wipe** of the entire device (not just corporate data). Read the policy carefully before accepting.
+</ConceptCallout>
+
+### IMAP Configuration
+
+IMAP (Internet Message Access Protocol) keeps email synchronized on the server, allowing access from multiple devices. Changes (read, deleted, moved) sync across all devices.
+
+| Setting | Value | Notes |
+|---|---|---|
+| Protocol | IMAP | Not POP3 for multi-device use |
+| Incoming server | mail.domain.com | Port 993 with SSL/TLS |
+| Outgoing server (SMTP) | smtp.domain.com | Port 587 (STARTTLS) or 465 (SSL) |
+| Authentication | Username / password | Or OAuth2 for Google/Microsoft |
+
+### POP3 Configuration
+
+POP3 (Post Office Protocol 3) downloads email to the device and (by default) deletes it from the server. Not recommended for mobile use since email won't appear on other devices.
+
+| Setting | Value | Notes |
+|---|---|---|
+| Protocol | POP3 | Single-device email retrieval |
+| Incoming server port | 995 (SSL) or 110 (plaintext) | Always use 995 for security |
+| Outgoing server port | 587 (STARTTLS) or 465 (SSL) | Same SMTP as IMAP |
+
+---
+
+## Mobile Device Management (MDM)
+
+**MDM** is a software platform used by organizations to manage, monitor, and secure mobile devices used by employees.
+
+### MDM Enrollment Methods
+
+| Method | Process | Notes |
+|---|---|---|
+| Zero-touch (Apple DEP/ABM) | Device ships pre-enrolled; auto-enrolls on first power-on | Corporate-owned devices |
+| QR code / link | User scans QR or clicks link to download enrollment profile | BYOD common |
+| Manual | IT installs MDM profile directly via cable or email | Less common |
+| BYOD Self-Service | Employee enrolls in company portal | Separates work/personal |
+
+**iOS MDM Enrollment:**
+1. Device detects enrollment profile (via email, QR, or Apple Business Manager)
+2. Settings → General → VPN & Device Management → Install Profile
+3. Accept warnings about device supervision/management
+4. MDM server pushes policies and configurations
+
+**Android MDM Enrollment (Android Enterprise):**
+- **Device Owner:** Full control of corporate-owned device
+- **Work Profile:** Creates a separate encrypted work profile on a personal device (BYOD-friendly)
+- **Fully Managed:** IT manages entire device
+
+### MDM Capabilities
+
+| Capability | What It Does |
+|---|---|
+| Remote Wipe | Erases all data on device (full wipe) or just corporate data (selective wipe) |
+| Remote Lock | Locks the device remotely |
+| Enforce Passcode | Requires PIN/password, sets minimum length and complexity |
+| Enforce Encryption | Requires device storage to be encrypted |
+| Certificate Deployment | Pushes Wi-Fi/VPN certificates without user action |
+| Wi-Fi Profile Push | Automatically configures corporate Wi-Fi (SSID, security, certs) |
+| App Management | Push apps silently, blacklist apps, remove corporate apps |
+| Geofencing | Enforce policies based on device location |
+| Compliance Check | Detect jailbroken/rooted devices and block access |
+
+<ConceptCallout type="info">
+**Remote Wipe vs Selective Wipe:**
+- **Remote wipe** erases the entire device to factory defaults — everything is gone, personal and corporate
+- **Selective wipe** (also called corporate wipe or unenrollment) removes only the MDM profile, corporate apps, and corporate data — personal photos, messages, and apps remain intact
+Selective wipe is the standard approach for BYOD devices when an employee leaves the company.
+</ConceptCallout>
+
+### Corporate Policy Enforcement
+
+Common policies enforced via MDM:
+- Minimum OS version requirement (block outdated/vulnerable OS)
+- Screen lock timeout (maximum 5 minutes, for example)
+- Minimum password complexity
+- Prohibit side-loading apps (Android sideload, iOS AltStore)
+- Restrict camera use
+- Require VPN for all traffic (Always-On VPN)
+- Certificate-based Wi-Fi authentication (802.1X)
+- Disable iCloud Backup for corporate data
+
+---
+
+## Mobile OS Updates and Patch Management
+
+### Why Updates Matter for Security
+
+Mobile OS updates deliver:
+- Security patches for known vulnerabilities (CVEs)
+- Firmware updates for cellular modem, Bluetooth, Wi-Fi chips
+- App compatibility improvements
+- New features
+
+### iOS Updates
+
+- Settings → General → Software Update
+- Updates are cryptographically signed by Apple
+- Apple supports the current iOS version plus typically 5–6 years of prior hardware
+- MDM can push OS updates on supervised/corporate devices
+- **Automatic Updates:** Settings → General → Software Update → Automatic Updates
+
+### Android Updates
+
+Android updates are more fragmented due to the OEM/carrier customization pipeline:
+
+| Source | Update Type | Notes |
+|---|---|---|
+| Google | Android OS security patches | Monthly security patches for Pixel; OEMs may lag |
+| OEM (Samsung, etc.) | Android version upgrade | OEMs customize Android before releasing updates |
+| Carrier | Carrier-specific firmware | Carriers sometimes delay OEM updates further |
+| Google Play System Updates | Play system components | Google can update core libraries without full OS update |
+
+<ConceptCallout type="warning">
+The exam may ask about devices that cannot be updated due to reaching end-of-life. A device running an unsupported OS version should NOT be used for corporate email or sensitive data access, as vulnerabilities will go unpatched. MDM compliance policies should block access from out-of-date devices.
+</ConceptCallout>
+
+### Enterprise Update Management
+
+- MDM platforms allow administrators to delay or schedule OS updates
+- Organizations test updates in a pilot group before broad deployment
+- Critical security patches (zero-days) should be expedited despite testing policies
+- **Apple Business Manager (ABM)** and **Android Enterprise** provide mechanisms for enterprise OS update management

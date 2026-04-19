@@ -1,0 +1,260 @@
+# Windows Networking Configuration
+
+Configuring network settings on a Windows client is a core technician skill. The 220-1202 exam tests your ability to set up adapters, join workgroups or domains, configure file sharing permissions, deploy VPN clients, manage proxy settings, and control Windows Firewall — all from the client side.
+
+## Network Adapter Settings
+
+Every Windows NIC is configured through **Network Connections** (`ncpa.cpl`) or **Settings > Network & Internet**.
+
+### IP Configuration
+
+| Setting | DHCP | Static |
+|---|---|---|
+| IP address | Assigned automatically by DHCP server | Entered manually |
+| Subnet mask | Provided by DHCP | Entered manually |
+| Default gateway | Provided by DHCP | Entered manually |
+| DNS servers | Provided by DHCP | Entered manually |
+| Use case | Most endpoints, laptops | Servers, printers, APs, network devices |
+
+**Key IP terms for the exam:**
+
+- **Subnet mask**: Defines which portion of the IP address is the network vs host. Common: 255.255.255.0 (/24), 255.255.0.0 (/16)
+- **Default gateway**: The router's IP address on the local subnet. All traffic destined for outside the subnet goes here.
+- **DNS server**: Translates hostnames to IP addresses. Primary and alternate (fallback) DNS servers can be configured.
+- **APIPA**: If DHCP fails, Windows assigns itself a 169.254.x.x address. A 169.254 address means the device cannot reach the DHCP server.
+
+<ConceptCallout type="warning">APIPA (169.254.x.x) is a symptom, not a configuration. If a user cannot reach the network and `ipconfig` shows 169.254.x.x, the DHCP server is unreachable — check the cable, switch port, DHCP service, or DHCP scope exhaustion.</ConceptCallout>
+
+### NIC Properties and Speed/Duplex
+
+Right-click a network adapter in `ncpa.cpl` > **Properties** > **Configure** > **Advanced** tab to access hardware-level settings:
+
+- **Speed & Duplex**: Default is "Auto Negotiation". Manually set to match the switch port if auto-negotiation causes problems (e.g., 100Mbps Full Duplex).
+- **Flow Control**: Manages traffic bursts between NIC and switch.
+- **Wake on LAN**: Allows the PC to be powered on remotely via a magic packet.
+- **MAC address**: The hardware address burned into the NIC. Unique, 48-bit, written as XX:XX:XX:XX:XX:XX. Some adapters allow MAC spoofing via the "Network Address" property.
+
+### Key Networking Commands
+
+| Command | Purpose |
+|---|---|
+| `ipconfig` | View IP configuration |
+| `ipconfig /all` | Full details including MAC, DHCP server, DNS servers |
+| `ipconfig /release` | Release DHCP lease |
+| `ipconfig /renew` | Request new DHCP lease |
+| `ipconfig /flushdns` | Clear DNS resolver cache |
+| `ping` | Test connectivity |
+| `nslookup` | Query DNS resolution |
+| `netstat` | Show active connections and listening ports |
+| `tracert` | Trace route to a destination |
+
+## Workgroup vs Domain
+
+<CompareCards
+  title="Workgroup vs Domain"
+  left={{ title: "Workgroup", icon: "Network", color: "blue", points: ["Peer-to-peer network model", "Each PC manages its own accounts", "Up to ~20 computers (practical limit)", "No centralized authentication", "No Group Policy enforcement", "Simple to set up, no server needed", "Users must have accounts on each PC they access"] }}
+  right={{ title: "Domain", icon: "Server", color: "orange", points: ["Centralized via Active Directory (AD)", "Domain Controller manages all accounts", "Scales to thousands of computers", "Single Sign-On across all domain resources", "Group Policy Objects (GPO) enforce settings", "Requires at least one Domain Controller", "Users log in with domain credentials anywhere"] }}
+/>
+
+### Joining a Workgroup
+
+Settings > System > About > **Rename this PC (advanced)** > Change. Select "Workgroup" and enter the name (default: WORKGROUP). Restart required.
+
+### Joining a Domain
+
+Same path as above, but select "Domain" and enter the domain name (e.g., `corp.example.com`). Credentials of a domain account with join permissions are required. The computer object is created in Active Directory. After restart, users log in with domain credentials.
+
+<ConceptCallout type="info">HomeGroup was removed in Windows 10 version 1803. If a legacy exam question references HomeGroup, recognize it as the predecessor to simple file sharing — it used a shared password and allowed easy file/printer sharing within a local network. Modern Windows uses workgroups and network discovery instead.</ConceptCallout>
+
+## File Sharing Permissions
+
+Windows has two permission systems that work together when accessing shared folders over the network.
+
+### Share Permissions
+
+Applied at the shared folder level. Only affect **network access** — local access is not restricted by share permissions.
+
+| Permission | What It Allows |
+|---|---|
+| Read | View files and subfolders, read file contents, run programs |
+| Change | All Read permissions + create/modify/delete files and subfolders |
+| Full Control | All Change permissions + change permissions, take ownership |
+
+Share permissions are set in folder Properties > **Sharing** tab > **Advanced Sharing** > **Permissions**.
+
+### NTFS Permissions
+
+Applied at the file system level. Affect **both local and network access**. More granular than share permissions.
+
+| NTFS Permission | Description |
+|---|---|
+| Full Control | All permissions including changing permissions and taking ownership |
+| Modify | Read, write, execute, and delete files/subfolders |
+| Read & Execute | View contents and run executable files |
+| List Folder Contents | View folder contents (folders only) |
+| Read | View file contents and attributes |
+| Write | Create files, write to files, modify attributes |
+
+### The Effective Permissions Rule
+
+When accessing a shared folder over the network, Windows applies **both** share and NTFS permissions — and enforces **the more restrictive** of the two.
+
+<ConceptCallout type="warning">Exam favorite: A user has Full Control share permission but Read NTFS permission. Their effective network access is Read — the more restrictive permission wins. Always identify both permission types before answering.</ConceptCallout>
+
+**Example:** Shared folder with Share = Full Control, NTFS = Read → Effective = **Read**
+
+### Administrative Shares
+
+Windows automatically creates hidden administrative shares. They are not visible in normal network browsing.
+
+| Share Name | Points To |
+|---|---|
+| `C$` | Root of C: drive |
+| `D$` | Root of D: drive (if present) |
+| `ADMIN$` | Windows installation directory (usually C:\Windows) |
+| `IPC$` | Inter-process communication (not a folder) |
+| `PRINT$` | Printer drivers |
+
+Access via `\\computername\C$`. Only members of Administrators group can connect. IPC$ is used for named pipes and remote administration.
+
+## Network Locations (Profiles)
+
+When you connect to a new network, Windows asks what type it is. The choice affects firewall rules and network discovery settings.
+
+| Profile | Discovery | Sharing | Typical Use |
+|---|---|---|---|
+| Public | Off (hidden from others) | Disabled | Coffee shops, airports, untrusted networks |
+| Private | On (visible to local devices) | Enabled | Home, trusted home network |
+| Domain | Managed by Group Policy | As configured by GPO | Corporate networks with AD domain |
+
+<ConceptCallout type="tip">If file sharing suddenly stops working after a user connects at a coffee shop, check whether the adapter profile switched to Public. Changing it to Private (in Settings > Network & Internet > [connection] > Network profile) will restore discovery and sharing.</ConceptCallout>
+
+## VPN Client Configuration
+
+A VPN (Virtual Private Network) creates an encrypted tunnel from the client to a remote network.
+
+### Built-in Windows VPN Protocols
+
+| Protocol | Security | Notes |
+|---|---|---|
+| PPTP | Weak (deprecated) | Avoid — easily cracked |
+| L2TP/IPsec | Strong | Requires shared key or certificate |
+| SSTP | Strong (SSL/TLS) | Travels over HTTPS port 443, firewall-friendly |
+| IKEv2 | Strong | Fast reconnection, ideal for mobile users |
+
+### Adding a VPN Connection
+
+**Settings > Network & Internet > VPN > Add a VPN connection**
+
+Required fields: VPN provider (Windows built-in), connection name, server address, VPN type, sign-in information (username/password or certificate).
+
+### Split Tunneling
+
+When split tunneling is **enabled**, only traffic destined for the corporate network goes through the VPN — internet traffic uses the local connection directly. When **disabled** (full tunnel), all traffic routes through VPN. Most enterprise VPNs disable split tunneling for security.
+
+### Always-On VPN
+
+An enterprise feature managed via MDM (Intune) or Group Policy. The VPN automatically connects when the device is on any network — the user never has to manually connect. Requires IKEv2 and Windows 10/11 Enterprise.
+
+<ConceptCallout type="info">Third-party VPN clients (Cisco AnyConnect, GlobalProtect, OpenVPN) are common in enterprise environments. The exam may reference the built-in Windows VPN client, but know that third-party clients exist and install like any other application.</ConceptCallout>
+
+## Proxy Settings
+
+A proxy server acts as an intermediary between the client and the internet. Common uses: content filtering, caching, security inspection.
+
+### Configuring Proxy in Windows
+
+**Settings > Network & Internet > Proxy**
+
+Options:
+- **Automatically detect settings**: Windows tries to find a WPAD (Web Proxy Auto-Discovery) proxy on the network
+- **Use setup script**: Points to a PAC (Proxy Auto-Configuration) file URL — a JavaScript file that tells the browser which proxy to use for which URLs
+- **Manual proxy setup**: Enter the proxy server address and port (e.g., proxy.corp.com:8080). Optionally bypass the proxy for local addresses.
+
+### Bypass for Local Addresses
+
+When enabled, traffic to intranet sites (on the same network) bypasses the proxy and connects directly. Prevents routing internal traffic through an external proxy unnecessarily.
+
+<ConceptCallout type="tip">If a user can access internet sites but not intranet sites (or vice versa), check the proxy settings and the bypass list. A misconfigured PAC file or missing bypass rule is a common cause.</ConceptCallout>
+
+## Windows Firewall
+
+Windows Firewall with Advanced Security (WFAS) is a host-based stateful firewall built into Windows. It controls traffic in and out of the device.
+
+### Profiles
+
+Windows Firewall applies different rule sets based on the active network profile:
+
+| Profile | When Active |
+|---|---|
+| Domain | PC is joined to a domain and connected to the domain network |
+| Private | Network type is set to Private |
+| Public | Network type is set to Public |
+
+Each profile can have different inbound/outbound rules. By default, Public is most restrictive and Domain is least (because corporate GPOs manage rules).
+
+### Inbound vs Outbound Rules
+
+- **Inbound rules**: Control traffic coming INTO the computer from the network. Default: block unsolicited inbound connections.
+- **Outbound rules**: Control traffic going OUT from the computer. Default: allow all outbound.
+
+### Creating Firewall Rules
+
+**Windows Defender Firewall with Advanced Security** (`wf.msc`):
+
+Rules can be defined by:
+- **Program**: Allow/block a specific executable (e.g., allow Teams.exe)
+- **Port**: Allow/block a specific TCP/UDP port (e.g., allow TCP 443)
+- **Predefined**: Built-in rules for Windows services (File and Printer Sharing, Remote Desktop, etc.)
+- **Custom**: Full control over all parameters including remote IP address ranges
+
+<ProcessSteps
+  title="Creating an Inbound Firewall Rule"
+  color="blue"
+  steps={[
+    { title: "Open wf.msc", description: "Run wf.msc or search for 'Windows Defender Firewall with Advanced Security' in the Start menu." },
+    { title: "Select Inbound Rules", description: "Click 'Inbound Rules' in the left panel, then 'New Rule' in the right panel." },
+    { title: "Choose Rule Type", description: "Select Program, Port, Predefined, or Custom. For a specific port, choose Port." },
+    { title: "Specify Protocol and Port", description: "Select TCP or UDP, then enter the specific port number (e.g., TCP port 3389 for RDP)." },
+    { title: "Choose Action", description: "Allow the connection, allow only if secure (IPsec), or block the connection." },
+    { title: "Select Profiles", description: "Choose which profiles this rule applies to: Domain, Private, Public, or any combination." },
+    { title: "Name the Rule", description: "Give the rule a descriptive name and optional description. Click Finish." }
+  ]}
+/>
+
+### Windows Firewall Command Line
+
+```
+netsh advfirewall show allprofiles         # Show status of all profiles
+netsh advfirewall firewall add rule ...    # Add a rule
+netsh advfirewall set allprofiles state on # Enable firewall on all profiles
+```
+
+<ConceptCallout type="warning">Disabling Windows Firewall entirely is rarely the right fix. If an application is being blocked, add a specific allow rule for that application or port. Disabling the entire firewall exposes the system to all unsolicited inbound traffic.</ConceptCallout>
+
+## Network and Sharing Center
+
+**Control Panel > Network and Sharing Center** (or right-click the network icon in the system tray)
+
+Key actions available:
+- View current network connections and their status
+- Change adapter settings (opens `ncpa.cpl`)
+- Change advanced sharing settings (discovery, file sharing, password-protected sharing per profile)
+- Set up new connections (dial-up, VPN, broadband)
+- Troubleshoot connection problems
+
+The **Advanced sharing settings** section is where you enable/disable network discovery, file and printer sharing, and public folder sharing — per profile (Private, Public, Domain).
+
+## Exam Scenario Quick Reference
+
+| Scenario | Answer |
+|---|---|
+| User gets 169.254.x.x address | DHCP server unreachable — check cable, DHCP service, or scope |
+| User can access files locally but not over network | Check share permissions (not just NTFS) |
+| Share = Full Control, NTFS = Read, effective = ? | Read (more restrictive wins) |
+| User needs same credentials to work on all company PCs | Domain with Active Directory |
+| Peer-to-peer home network of 5 computers | Workgroup |
+| VPN works but company intranet sites are slow | Split tunneling may be disabled — all traffic going through VPN |
+| Application blocked after Windows reinstall | Add inbound rule in wf.msc for that application or port |
+| User can't see other computers on the network | Check network profile (Public blocks discovery) or enable network discovery |
+| Remote admin needs to access C: drive of a workstation | Use `\\computername\C$` administrative share |

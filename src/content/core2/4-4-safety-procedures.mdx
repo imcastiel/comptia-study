@@ -1,0 +1,114 @@
+# Common Safety Procedures
+
+Safety procedures protect both you and the equipment you work on. The A+ exam covers ESD prevention, electrical safety, fire safety, chemical handling, and personal protective equipment. These are practical, tested-in-the-field procedures — not theoretical knowledge.
+
+## ESD — Electrostatic Discharge
+
+**ESD (Electrostatic Discharge)** occurs when two objects at different electrical potentials make contact and charge equalizes between them. For humans, a static discharge is perceptible around 3,000 volts. For electronic components, damage can occur at as little as 30 volts — well below what humans can feel or notice.
+
+This means you can destroy a CPU, RAM stick, or network card without any sensation whatsoever. The damage may not cause immediate failure — it can degrade components over time, causing intermittent errors that are extremely difficult to diagnose. This is called **latent damage**.
+
+### ESD Prevention Steps
+
+<ProcessSteps title="ESD Prevention Before Handling Components" color="blue" steps={[
+  { title: "Work on a hard, non-conductive surface", description: "Avoid carpeted surfaces — carpet generates significant static. Use an antistatic mat on a hard desk or workbench. The mat connects to ground via a grounding cord." },
+  { title: "Wear an antistatic wrist strap", description: "Clip one end to your wrist and connect the other end to an unpainted metal surface on the computer chassis (or to the antistatic mat's grounding point). This continuously equalizes your charge with the equipment." },
+  { title: "If no wrist strap, touch the chassis first", description: "Before touching any component, touch an unpainted metal part of the computer chassis. This discharges any built-up static before you contact sensitive components. Repeat frequently." },
+  { title: "Keep components in antistatic bags", description: "Store and transport components in their original antistatic (silver or pink) bags until the moment of installation. Set components on the bag, not a random surface." },
+  { title: "Avoid synthetic materials", description: "Synthetic fabrics (polyester, nylon) generate more static than natural fibers. Avoid wearing synthetic clothing when doing component work if possible." },
+  { title: "Handle components by edges", description: "Hold PCBs (cards, RAM, motherboards) by their edges. Never touch the gold connector pins or the IC chips on the board surface." }
+]} />
+
+### ESD Prevention Tools
+
+<CompareCards
+  title="ESD Prevention Tools"
+  left={{ title: "Antistatic Wrist Strap", icon: "Zap", color: "blue", points: ["Worn on wrist, clipped to chassis ground", "Provides continuous grounding while working", "Contains a 1 MΩ resistor for safety (limits current if contacted with live circuit)", "Required for extended component handling", "Must make metal-to-skin contact to work — no watches or bracelets under it"] }}
+  right={{ title: "Antistatic Mat", icon: "Layers", color: "orange", points: ["Placed on workbench under the PC and components", "Connects to ground — dissipates static from components placed on it", "Wrist strap typically clips to the mat's ground point", "Provides a safe surface to lay bare PCBs during work", "Also called an ESD mat or field service mat"] }}
+/>
+
+**Antistatic bags**: the metallic shielding bag that components ship in. The bag creates a Faraday cage that shields the component from external electrostatic fields. Components should be stored in these bags whenever not installed. Do NOT use regular plastic bags — they can generate charge. Place components on top of the bag (outside surface) if no mat is available; the inside is the shielded surface.
+
+<ConceptCallout type="warning">The wrist strap must connect you to the same ground as the equipment. Simply clipping it to a random metal object without a ground connection provides no protection. Verify the ground connection before handling components.</ConceptCallout>
+
+## Proper Lifting Techniques
+
+Server equipment, UPS units, and desktop towers are heavy. Improper lifting causes back injuries that can be career-ending.
+
+**Correct lifting technique:**
+- **Assess the load first** — test the weight before committing to the lift
+- **Get close to the load** — the farther from your body, the more strain on your spine
+- **Bend your knees, not your back** — squat down using your leg muscles
+- **Keep your back straight** — maintain the natural curve of your spine
+- **Lift with your legs** — straighten your knees while keeping your back straight
+- **No twisting** — turn your entire body to change direction; don't twist your spine while holding weight
+- **Ask for help** — for anything above approximately 50 lbs or any item with awkward dimensions, use a second person
+- **Use equipment** — wheeled carts (server rails, equipment carts) for moving heavy items. Server racks have sliding rails precisely so you don't have to lift the server out to service it.
+
+## Electrical Safety
+
+<ConceptCallout type="warning">CRT (cathode ray tube) monitors are extremely dangerous even when completely unplugged. The flyback transformer and capacitors inside a CRT can hold charges of 25,000 volts or more for hours or days after the monitor is turned off and unplugged. Never open a CRT unless specifically trained to do so. This is a favorite exam topic.</ConceptCallout>
+
+**General electrical safety rules:**
+- **Never work on live equipment** — power off and unplug before opening any equipment
+- **Wait before servicing PSUs** — power supply capacitors hold charge after unplugging. Wait at least 30 seconds; some large PSUs need longer. The PSU in a PC should never be opened — it is a sealed unit
+- **Never defeat grounding plugs** — three-prong plugs have a ground pin for a reason. Do not use two-prong adapters ("cheater plugs") that eliminate the ground
+- **Know the Emergency Power Off (EPO)** location — in data centers and server rooms, the EPO switch immediately cuts power to everything. Know where it is before starting work
+
+**GFCI (Ground Fault Circuit Interrupter)** outlets are required by building code in areas where water may be present — bathrooms, kitchens, garages, outdoors. A GFCI monitors the difference in current between the hot and neutral wires. If it detects even a small leakage (indicating current flowing through a person), it cuts power within milliseconds. GFCI outlets have "TEST" and "RESET" buttons visible on the outlet face.
+
+**Voltage hazards in IT equipment:**
+- Standard PSU outputs: 12V, 5V, 3.3V — relatively safe
+- Line voltage input to PSU: 120V AC (US) / 240V AC (international) — dangerous
+- CRT monitors: 25,000V+ — extremely dangerous, even when unplugged
+- Laser printers: high voltage corona wire assembly — discharge before servicing
+- UPS units: contain large batteries and can supply significant current
+
+## Fire Safety
+
+**Fire extinguisher classes:**
+
+| Class | Fire Type | Extinguishing Agent |
+|---|---|---|
+| A | Ordinary combustibles (wood, paper, fabric) | Water, dry chemical |
+| B | Flammable liquids (gasoline, oil, solvents) | CO2, dry chemical, foam |
+| C | Electrical fires (energized equipment) | CO2, dry chemical — non-conductive |
+| D | Combustible metals (magnesium, lithium) | Dry powder (specialized) |
+| K | Cooking oils and fats | Wet chemical |
+
+**For IT environments**: Class C extinguisher is appropriate for electrical fires. ABC dry chemical extinguishers are versatile and handle most fires including electrical. The critical rule: **never use water on an electrical fire** — water conducts electricity and will electrocute you or spread the fire.
+
+**CO2 extinguishers** are often preferred for IT equipment because CO2 leaves no residue that can damage electronics. Dry chemical (ABC) leaves a fine powder that can damage equipment even if it saves it from fire.
+
+**Lithium battery fires** deserve special mention: lithium batteries (in phones, laptops, EVs) can undergo **thermal runaway** — a self-sustaining exothermic reaction. The fire is very difficult to extinguish, produces toxic fumes (hydrogen fluoride), and can reignite hours later. A swollen or punctured lithium battery should be treated as a fire hazard.
+
+## Chemical Safety — SDS
+
+**SDS (Safety Data Sheet)** — formerly called MSDS (Material Safety Data Sheet) — is the standardized documentation for any chemical substance. Every workplace that uses chemicals is required to have SDS documents accessible to all employees.
+
+An SDS contains 16 standardized sections including: chemical identification, hazard identification, composition, first-aid measures, firefighting measures, handling and storage, exposure controls and PPE, and disposal information.
+
+**In IT, the most common chemicals:**
+
+**Toner**: laser printer toner is a very fine powder. Inhaling toner dust is a respiratory hazard.
+- Wear an N95 mask when handling loose toner or cleaning toner spills
+- Do NOT vacuum toner spills with a regular vacuum — standard vacuum filters don't capture particles this small; the toner passes through and is dispersed into the air
+- Use a toner-specific vacuum (designed for fine particles) or a HEPA-filter vacuum
+- Clean skin contact with cold water — hot water fuses toner to skin
+
+**Cleaning solvents**: isopropyl alcohol (IPA) is common for cleaning contacts and components. Avoid inhaling vapors in confined spaces. IPA is flammable — keep away from heat sources.
+
+**Batteries**: lithium batteries are regulated for disposal. Do not throw in regular trash — lithium fires in garbage trucks and landfills are a documented hazard. Use manufacturer take-back programs, retailer recycling bins (Best Buy, Staples), or municipal hazardous waste programs.
+
+## PPE — Personal Protective Equipment
+
+| PPE | When Required |
+|---|---|
+| Safety glasses / goggles | When cutting cables (flying fragments), using compressed air, working near printers with paper jams (toner spray), working in dusty environments |
+| Nitrile gloves | When handling batteries (especially lead-acid or lithium), cleaning chemicals, toner, or unknown substances |
+| N95 respirator / mask | When handling loose toner, working in dusty server rooms, working with fiberglass insulation near cable runs |
+| Ear protection | In loud server rooms — sustained noise above 85 dB causes hearing damage; large server rooms with many fans easily exceed this |
+| Steel-toed boots | When working in data centers where server equipment may fall; required in some data centers as a condition of entry |
+| ESD wrist strap | When handling any electronic component outside its antistatic packaging |
+
+<ConceptCallout type="tip">The A+ exam expects you to match PPE to the scenario. Toner = mask and gloves. Cutting cables = safety glasses. Server room = ear protection. Electronic components = ESD strap. Battery work = gloves. Multiple PPE items may apply simultaneously.</ConceptCallout>

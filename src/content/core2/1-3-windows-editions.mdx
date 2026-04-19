@@ -1,0 +1,233 @@
+# Windows Editions: Features and Differences
+
+Not all Windows installations are equal. Microsoft sells Windows in multiple editions, each targeting a different market segment with a different feature set and price point. The A+ 220-1202 exam heavily tests which features are available in which edition — particularly around BitLocker, domain join, Group Policy, Remote Desktop hosting, and Hyper-V.
+
+<ConceptCallout type="warning">This is one of the most heavily tested topics in Domain 1. Memorize which features require Pro (or higher) and which features are available in Home. Many exam questions are answered simply by knowing "Home can't do that."</ConceptCallout>
+
+## Windows 10 vs Windows 11
+
+Before comparing editions, understand the differences between the two current Windows generations.
+
+| Feature | Windows 10 | Windows 11 |
+|---|---|---|
+| Release date | July 2015 | October 2021 |
+| End of support | October 14, 2025 | October 2031 (estimated) |
+| Min CPU | 1 GHz, 1 core | 1 GHz, 2 cores, compatible CPU list |
+| Min RAM | 1 GB (32-bit) / 2 GB (64-bit) | 4 GB |
+| Min storage | 16 GB (32-bit) / 32 GB (64-bit) | 64 GB |
+| TPM requirement | TPM 1.2 (recommended) | **TPM 2.0 (required)** |
+| Secure Boot | Recommended | **Required** |
+| Start menu | Left-aligned, Live Tiles | Centered, no Live Tiles |
+| Android apps | Not supported | Supported (via Amazon Appstore) |
+| DirectX support | DirectX 12 | DirectX 12 Ultimate |
+| Taskbar customization | Highly customizable | Limited (centered, less flexible) |
+
+<ConceptCallout type="tip">Windows 11 requires a TPM 2.0 chip and Secure Boot. If a PC health check fails for Windows 11, check UEFI settings — TPM may be present but disabled. On older Intel systems look for PTT (Platform Trust Technology); on AMD systems look for fTPM.</ConceptCallout>
+
+## Edition Overview
+
+Windows 10 and 11 share the same edition structure. From simplest to most feature-complete:
+
+**Home → Pro → Pro for Workstations → Enterprise / Education**
+
+Each higher tier adds features on top of the previous tier.
+
+## Full Feature Comparison Table
+
+| Feature | Home | Pro | Pro for Workstations | Enterprise | Education |
+|---|---|---|---|---|---|
+| **Target user** | Consumers | Small business, power users | Power users, engineers | Large organizations | Academic institutions |
+| **Licensing** | OEM / retail | OEM / retail / volume | OEM / retail / volume | Volume (SA required) | Volume |
+| **BitLocker Drive Encryption** | No | Yes | Yes | Yes | Yes |
+| **Domain Join (AD)** | No | Yes | Yes | Yes | Yes |
+| **Azure AD Join** | Yes | Yes | Yes | Yes | Yes |
+| **Group Policy (GPO)** | No | Yes | Yes | Yes | Yes |
+| **Remote Desktop (HOST)** | No | Yes | Yes | Yes | Yes |
+| **Remote Desktop (CLIENT)** | Yes | Yes | Yes | Yes | Yes |
+| **Hyper-V** | No | Yes (64-bit) | Yes | Yes | Yes |
+| **Windows Sandbox** | No | Yes | Yes | Yes | Yes |
+| **AppLocker** | No | No | No | Yes | Yes |
+| **DirectAccess** | No | No | No | Yes | Yes |
+| **BranchCache** | No | No | No | Yes | Yes |
+| **Windows To Go** | No | No | No | Yes (legacy) | Yes (legacy) |
+| **Assigned Access** | No | Yes | Yes | Yes | Yes |
+| **Max RAM** | 128 GB | 2 TB | 6 TB | 6 TB | 2 TB |
+| **Max CPU sockets** | 1 | 2 | 4 | 2 | 2 |
+| **NVMe / persistent memory** | Standard | Standard | Optimized | Standard | Standard |
+
+<ConceptCallout type="warning">Remote Desktop has a critical split: ALL Windows editions can be a Remote Desktop CLIENT (connecting to another machine). Only Pro and above can be a Remote Desktop HOST (accepting incoming connections). Home users who need remote access must use third-party tools like TeamViewer or Chrome Remote Desktop.</ConceptCallout>
+
+## Home vs Pro: The Essential Comparison
+
+<CompareCards
+  title="Windows Home vs Pro"
+  left={{ title: "Windows Home", icon: "Monitor", color: "orange", points: ["No domain join — cannot connect to Active Directory", "No BitLocker full-disk encryption", "No Group Policy editor (gpedit.msc is absent)", "Cannot HOST Remote Desktop connections", "No Hyper-V virtualization", "No Windows Sandbox", "Suitable for personal use and basic business tasks", "Lower cost — typically OEM on consumer PCs"] }}
+  right={{ title: "Windows Pro", icon: "Shield", color: "blue", points: ["Domain join — connects to Active Directory", "BitLocker full disk encryption with TPM", "Group Policy editor (gpedit.msc) available", "Can HOST Remote Desktop connections", "Hyper-V Type 1 hypervisor included", "Windows Sandbox for isolated testing", "Required for most business deployments", "Upgradeable to Enterprise via volume licensing"] }}
+/>
+
+## Feature Deep Dives
+
+### BitLocker
+
+BitLocker is Windows's built-in full-disk encryption technology. It encrypts the entire volume so that if the drive is removed and placed in another system, the data is unreadable without the recovery key.
+
+**Requirements:**
+- Windows Pro, Pro for Workstations, Enterprise, or Education (NOT Home)
+- TPM 1.2 or newer (strongly recommended — allows transparent unlocking at boot)
+- Without TPM, BitLocker requires a USB key to be inserted at every boot
+
+**How it works:**
+- The Volume Master Key (VMK) encrypts the drive
+- The VMK is protected by the TPM (and optionally a PIN or USB key)
+- At boot, the TPM verifies the system hasn't been tampered with (measured boot) and releases the VMK
+- A 48-digit **recovery key** is generated at setup — this is critical to save
+
+**Recovery key storage options:**
+- Microsoft account (cloud backup)
+- Active Directory (domain-joined machines store it automatically)
+- Azure AD
+- Printed copy
+- USB flash drive
+- Saved to file
+
+<ConceptCallout type="warning">If the TPM detects changes to the boot configuration (new hardware, BIOS update, changed boot order), it will lock the drive and demand the 48-digit recovery key. Technicians working on BitLocker-protected machines should suspend BitLocker before making hardware changes or BIOS updates.</ConceptCallout>
+
+**BitLocker To Go** extends BitLocker encryption to removable drives (USB flash drives, external HDDs). It requires Pro+ on the encrypting machine but can be read on any Windows edition (the user is prompted for the password).
+
+### Domain Join
+
+Domain join connects a Windows PC to an **Active Directory (AD)** domain — a centralized directory managed by Windows Server. Once joined:
+
+- Users log in with domain credentials (not local accounts)
+- IT administrators control the machine via Group Policy
+- User profiles, files, and settings can roam between machines
+- Software can be deployed centrally via Group Policy or SCCM
+- Security policies are enforced from the domain controller
+
+**Home cannot join a domain.** This is the most fundamental reason businesses must license Windows Pro or Enterprise. A Home machine can connect to shared network drives and printers, but it cannot be centrally managed through Active Directory.
+
+**Azure AD Join** (also called Microsoft Entra Join) is the cloud equivalent — joining to Microsoft's cloud directory instead of an on-premises server. This is available on all editions including Home, but Home editions lack many of the management capabilities that make it useful in enterprise scenarios.
+
+### Group Policy (GPO)
+
+Group Policy is the mechanism through which administrators configure Windows settings across many machines simultaneously. Settings range from desktop wallpaper to password complexity requirements to software installation.
+
+**Two scopes:**
+- **Domain Group Policy**: Applied to machines and users by the domain controller. Requires domain join (Pro+).
+- **Local Group Policy**: Applied to the local machine only. Configured via `gpedit.msc`. Available on Pro+, absent on Home.
+
+<ConceptCallout type="info">On Home edition, gpedit.msc does not exist. Technicians troubleshooting Home machines must make changes through the Settings app, Registry Editor (regedit), or third-party tools. Many security hardening guides assume Pro because of GPO availability.</ConceptCallout>
+
+Common Group Policy use cases:
+- Force screen lock after inactivity
+- Prevent users from changing desktop wallpaper
+- Block access to Control Panel
+- Redirect My Documents to a network share
+- Deploy software (MSI packages)
+- Configure Windows Defender settings
+- Enforce password complexity and expiration
+
+### Remote Desktop Protocol (RDP)
+
+Remote Desktop allows one computer to control another's desktop session over the network.
+
+| Role | Required Edition | Notes |
+|---|---|---|
+| **Client** (connecting to another PC) | ANY edition | Remote Desktop Connection (mstsc.exe) is present on all editions |
+| **Host** (accepting incoming connections) | Pro or higher | Must be explicitly enabled in System Properties > Remote settings |
+
+**Enabling Remote Desktop hosting (Pro+):**
+1. Open Settings > System > Remote Desktop (or System Properties > Remote tab)
+2. Enable "Enable Remote Desktop"
+3. Confirm the user account that will be allowed to connect
+4. Note the PC name for the client to use
+5. Ensure TCP port 3389 is open in the firewall (Windows Firewall configures this automatically)
+
+**RDP uses port 3389 TCP** — memorize this for the exam.
+
+<ConceptCallout type="tip">Remote Assistance (not Remote Desktop) is available on Home — it lets someone help you by sharing your session with your permission. Remote Desktop lets you access the machine without the current user's active participation. Both use RDP under the hood, but only Remote Desktop hosting requires Pro+.</ConceptCallout>
+
+### Hyper-V
+
+Hyper-V is Microsoft's Type 1 (bare-metal) hypervisor, built directly into Windows. It allows you to run multiple virtual machines on a single physical host.
+
+**Requirements for Hyper-V:**
+- Windows Pro, Pro for Workstations, Enterprise, or Education (NOT Home)
+- 64-bit processor with SLAT (Second Level Address Translation) — Intel EPT or AMD RVI
+- CPU virtualization extensions enabled in UEFI (Intel VT-x / AMD-V)
+- Minimum 4 GB RAM (8+ GB strongly recommended)
+- Hyper-V feature enabled via "Turn Windows features on or off"
+
+<ConceptCallout type="info">Enabling Hyper-V changes how Windows itself runs — Windows becomes a VM on top of the Hyper-V hypervisor. This can cause compatibility issues with other hypervisors (VMware Workstation, VirtualBox) that also need direct hardware access. Modern versions of VMware and VirtualBox include Hyper-V compatibility modes.</ConceptCallout>
+
+**Type 1 vs Type 2 hypervisors:**
+- **Type 1 (bare-metal)**: Runs directly on hardware. Hyper-V, VMware ESXi, Xen. Better performance, used in production.
+- **Type 2 (hosted)**: Runs as an application on top of an existing OS. VMware Workstation, VirtualBox. Easier to set up, used for development and testing.
+
+Hyper-V in Windows Pro is technically Type 1 even though it's installed on a desktop OS — the OS becomes a privileged VM once Hyper-V is enabled.
+
+### Windows Sandbox
+
+Windows Sandbox creates an isolated, temporary Windows desktop environment for safely running untrusted software.
+
+**Key characteristics:**
+- Requires Pro or higher
+- Uses hardware virtualization (Hyper-V must be available)
+- Every time Sandbox is opened, it starts fresh from a clean Windows state
+- When Sandbox is closed, all content inside is permanently deleted
+- Files can be dragged in from the host
+- No persistence — perfect for testing suspicious installers or evaluating software
+
+<ConceptCallout type="tip">If an exam question asks how to safely test a suspicious executable without risking the host system and without a separate physical machine, Windows Sandbox is the answer (assuming Pro+). If the OS is Home, that option is off the table.</ConceptCallout>
+
+## Enterprise-Only Features
+
+Features available only in Enterprise and Education editions:
+
+**AppLocker:** Whitelist/blacklist application execution rules. Administrators define which applications users are allowed to run based on publisher, path, or file hash. More powerful than Software Restriction Policies.
+
+**DirectAccess:** Allows domain-joined machines to connect automatically to the corporate network over the internet without a traditional VPN client interaction. The connection is transparent to the user — the machine is always connected to the domain. Requires Windows Server with DirectAccess configured.
+
+**BranchCache:** A WAN optimization technology that caches content (files, web pages, SharePoint data) locally at a branch office. When a remote user requests content from headquarters, it can be served from the local cache instead of traversing the WAN link repeatedly. Reduces bandwidth consumption at branch offices.
+
+## Exam Tips: What Home Cannot Do
+
+<ConceptCallout type="warning">Memorize this list for the exam — these are the most frequently tested Home limitations:
+
+- **No domain join** (cannot connect to Active Directory)
+- **No BitLocker** (no full-disk encryption — BitLocker To Go also requires Pro+)
+- **No gpedit.msc** (no Local Group Policy editor)
+- **No Remote Desktop HOST** (can connect to others but cannot accept connections)
+- **No Hyper-V** (cannot run virtual machines natively)
+- **No Windows Sandbox** (cannot create disposable isolated environments)
+- **No AppLocker** (this requires Enterprise)
+
+If a question describes a business need for any of these features, the answer is Pro (or higher) — not Home.</ConceptCallout>
+
+## Edition Selection Guide
+
+| Business Need | Minimum Edition |
+|---|---|
+| Personal home use, basic tasks | Home |
+| Join Active Directory domain | Pro |
+| Encrypt the hard drive with BitLocker | Pro |
+| Use Group Policy to lock down the desktop | Pro |
+| Allow IT to remote into the machine | Pro |
+| Run virtual machines with Hyper-V | Pro |
+| Safely test suspicious software | Pro (Windows Sandbox) |
+| Block unauthorized applications with AppLocker | Enterprise |
+| Automatic VPN to corporate network | Enterprise (DirectAccess) |
+| K-12 school or university deployment | Education |
+| High-end workstation with more than 2 TB RAM | Pro for Workstations |
+
+## Upgrading Between Editions
+
+You can upgrade Windows editions without reinstalling the OS. The upgrade path must follow the hierarchy (lower → higher only):
+
+- Home → Pro: Purchase a Pro license key and enter it in Settings > Activation, or use a volume license activation
+- Pro → Enterprise: Volume licensing activation through Microsoft's Volume Licensing Service Center (VLSC)
+- Any edition → Education: Requires enrollment in Microsoft's academic licensing programs
+
+Downgrading (Enterprise → Pro → Home) requires a clean install.
+
+<ConceptCallout type="info">Organizations often purchase Windows Home on consumer hardware (it costs less) and then upgrade to Pro using a volume license key. This is a legitimate and common practice called "license uplift" or edition upgrade.</ConceptCallout>

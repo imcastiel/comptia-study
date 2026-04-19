@@ -1,0 +1,154 @@
+# Configuring Basic Wired and Wireless SOHO Networks
+
+SOHO (Small Office/Home Office) networks are the most common environments you'll configure and troubleshoot as an A+ technician. This topic covers the complete setup of a typical SOHO router — from basic connectivity to security hardening.
+
+## SOHO Network Overview
+
+A typical SOHO network consists of:
+- **ISP modem/ONT** — connects to the internet service
+- **SOHO router** — provides routing, NAT, DHCP, wireless, and firewall
+- **Wired clients** — connected via Ethernet to the router's built-in switch
+- **Wireless clients** — connected to the integrated wireless AP
+
+Most consumer "routers" are actually **combo devices**: modem + router + switch + wireless AP in one box.
+
+## Initial Router Configuration
+
+Access the router's admin interface by navigating to its IP address in a browser (typically `192.168.0.1` or `192.168.1.1`). Default credentials are printed on the device label.
+
+**First steps — always do these:**
+1. Change the admin password (default credentials are publicly known)
+2. Update firmware (fixes vulnerabilities and bugs)
+3. Configure the WAN interface (DHCP from ISP, or static IP if required)
+
+## DHCP Configuration
+
+The router acts as the DHCP server for the local network.
+
+**Configure:**
+- **IP pool range** — e.g., 192.168.1.100 to 192.168.1.200 (leaves lower addresses for static assignment)
+- **Lease time** — how long an assignment lasts before renewal
+- **DNS servers** — sent to clients (router IP for DNS relay, or public DNS like 8.8.8.8)
+- **Default gateway** — router's LAN IP
+
+**Static reservations:** Bind a device's MAC address to a specific IP so it always gets the same address. Use for printers, NAS, servers, and network cameras.
+
+**Exclusions:** Reserve IPs outside the pool for manually-configured static devices to avoid conflicts.
+
+## Wireless Configuration
+
+### SSID
+
+The **SSID** (network name) identifies your wireless network. Configuration choices:
+- Use a name that doesn't reveal your ISP, router model, or exact location
+- Set up separate SSIDs for different security zones (guest vs. primary)
+- A single physical AP can broadcast multiple SSIDs (common for guest networks)
+
+### Wireless Security
+
+| Setting | Recommended Value | Reason |
+| --- | --- | --- |
+| Security mode | WPA3 (or WPA2 if devices don't support WPA3) | Best current security |
+| Passphrase | 12+ characters, mixed case + numbers + symbols | Resist brute-force attacks |
+| WPS | Disabled | WPS PIN mode has known vulnerabilities |
+| Admin via wireless | Disabled | Prevents unauthorized admin access from wireless clients |
+
+**WPS (Wi-Fi Protected Setup):** Intended to simplify connecting devices by pressing a button or entering a PIN. The PIN method has a critical vulnerability — disable WPS entirely.
+
+### Band Steering
+
+Dual-band routers can broadcast the same SSID on both 2.4 GHz and 5 GHz. **Band steering** automatically guides capable clients to the 5 GHz band for better performance. Can also set separate SSIDs per band for manual control.
+
+### Changing the Wireless Channel
+
+On 2.4 GHz, use channels **1, 6, or 11** only — these are the only non-overlapping channels. Check neighboring networks with a Wi-Fi analyzer and pick the channel with least usage.
+
+On 5 GHz, auto-channel selection works well due to the many available channels.
+
+## NAT and Internet Access
+
+The router performs **NAT/PAT** — all internal devices share the single public IP assigned by the ISP. Internal private addresses (192.168.x.x, 10.x.x.x) are translated to the public IP for outbound connections.
+
+From the internet's perspective, all traffic from your network originates from one IP address.
+
+## Port Forwarding
+
+**Port forwarding** (also called **destination NAT**) directs incoming traffic on a specific port to a specific internal device.
+
+**Use cases:**
+- Hosting a game server: forward TCP 25565 to 192.168.1.50 (Minecraft)
+- Remote desktop access: forward TCP 3389 to internal PC
+- Web server: forward TCP 80/443 to internal server
+
+**Configuration fields:**
+- External port (what port internet traffic arrives on)
+- Internal IP (which device to forward to)
+- Internal port (what port the internal service listens on)
+- Protocol (TCP, UDP, or both)
+
+<ConceptCallout type="warning">
+  Port forwarding opens your internal network to inbound internet connections. Only forward ports that are absolutely necessary. Use non-standard external ports when possible. Ensure the service being exposed is patched and secure.
+</ConceptCallout>
+
+## DMZ Host
+
+A **DMZ host** (in SOHO context) exposes one internal device to all inbound internet traffic on all ports. Unlike enterprise DMZ, SOHO DMZ is just "forward everything to this IP."
+
+**Use for:** Devices that need many inbound ports (game consoles, DVRs) when individual port forwarding is impractical.
+
+**Risk:** The DMZ host has no firewall protection for inbound connections — only use for dedicated devices, not primary PCs.
+
+## UPnP
+
+**UPnP (Universal Plug and Play):** Allows devices and applications to automatically request port forwarding from the router without manual configuration. Used by gaming consoles, torrents, video conferencing apps.
+
+**Security concern:** UPnP has been abused by malware to open firewall rules. Many security professionals recommend disabling it in high-security environments.
+
+## Content Filtering and Parental Controls
+
+SOHO routers often include:
+- **Website category blocking** — block known categories (adult content, gambling, malware sites)
+- **DNS-based filtering** — use a filtering DNS service (e.g., OpenDNS, Cisco Umbrella) as the upstream DNS
+- **Schedule-based access** — restrict internet access by time of day per device
+- **MAC address filtering** — block specific devices by MAC
+
+**Limitation:** MAC filtering provides minimal security — MAC addresses can be spoofed.
+
+## Guest Network
+
+A **guest network** is a separate SSID with its own isolated subnet. Guests get internet access but cannot reach the primary network (your computers, NAS, printers).
+
+**Best practice:** Enable guest network isolation (prevents guest-to-guest communication as well) and enable client isolation.
+
+## Quality of Service (QoS)
+
+**QoS** prioritizes certain types of traffic to ensure performance for latency-sensitive applications.
+
+**Common priority rules:**
+- Voice/video calls — highest priority (VoIP, video conferencing)
+- Gaming — high priority
+- Streaming — medium priority
+- Background updates/downloads — lowest priority
+
+**Application-based QoS:** Some routers can identify application types (Netflix, Zoom) and prioritize automatically.
+
+## Typical SOHO Router Physical Ports
+
+| Port | Description |
+| --- | --- |
+| WAN / Internet | Uplink to modem or ISP. Single port. |
+| LAN 1–4 | Built-in 4-port switch for wired clients |
+| USB | Printer sharing or USB storage access |
+
+## Security Hardening Checklist
+
+| Setting | Action |
+| --- | --- |
+| Admin password | Change from default |
+| Firmware | Update to latest version |
+| Remote management | Disable unless needed |
+| WPS | Disable |
+| Unused services | Disable (Telnet, FTP if present) |
+| Wireless encryption | WPA2/WPA3 minimum |
+| SSID | Change from default (don't reveal model/ISP) |
+| Default IP range | Optionally change 192.168.1.x to reduce scripted attacks |

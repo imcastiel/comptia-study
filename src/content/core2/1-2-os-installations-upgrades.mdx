@@ -1,0 +1,177 @@
+# OS Installations and Upgrades in Diverse Environments
+
+Installing and upgrading operating systems is one of the most hands-on skills a technician uses. The exam tests your ability to choose the right installation method, configure boot media, select partition schemes, pick appropriate file systems, and execute post-installation tasks correctly.
+
+## Clean Install vs Upgrade
+
+The first decision in any OS deployment is whether to perform a clean install or an in-place upgrade.
+
+<CompareCards
+  title="Installation Method Comparison"
+  left={{ title: "Clean Install", icon: "HardDrive", color: "blue", points: ["Wipes existing data — starts fresh", "Eliminates accumulated junk, malware, misconfiguration", "Requires reinstalling all applications and migrating data", "Best for new hardware, problem systems, or major OS version jumps", "Always produces a stable, predictable result", "Required when changing from 32-bit to 64-bit OS"] }}
+  right={{ title: "In-Place Upgrade", icon: "ArrowRight", color: "orange", points: ["Preserves installed apps, settings, and user data", "Faster to deploy on a single machine", "Risk of carrying over old problems or incompatibilities", "Supported upgrade paths are limited (e.g., Windows 10 Home → Windows 11 Home)", "Windows.old folder created — rollback possible within 10 days", "Cannot upgrade across architectures (32-bit → 64-bit requires clean install)"] }}
+/>
+
+<ConceptCallout type="tip">When in doubt on the exam, a clean install is always the safer, more thorough answer. If the question says the machine is slow, has malware, or needs a major version change, choose clean install.</ConceptCallout>
+
+**Supported Windows 10 upgrade paths** (in-place):
+- Home → Home, Pro, Pro Education, Education
+- Pro → Pro, Pro Education, Education, Enterprise
+- Enterprise → Enterprise, Education
+
+You cannot in-place upgrade from Windows 10 to Windows 11 without meeting all hardware requirements (TPM 2.0, Secure Boot, compatible CPU).
+
+## Boot Media Types
+
+To install an OS, the system must boot from installation media rather than the existing hard drive.
+
+### USB Flash Drive (Most Common)
+
+USB is the dominant installation method. It is faster than optical media, reusable, and works on modern hardware that may not have an optical drive. Tools for creating bootable USB drives include:
+
+- **Rufus** — Windows utility, supports both MBR and GPT, UEFI and Legacy BIOS
+- **Windows Media Creation Tool** — official Microsoft tool for creating Windows 10/11 USB media
+- **balenaEtcher** — cross-platform, used for Linux ISOs
+- **dd** (Linux/macOS command line) — low-level disk imaging to USB
+
+<ConceptCallout type="warning">Simply copying ISO files to a USB drive does NOT make it bootable. You must use a proper tool (Rufus, Media Creation Tool) that writes the boot sector and partition structure correctly.</ConceptCallout>
+
+### Optical Disc (Legacy)
+
+DVD and CD installation media is now largely obsolete but may appear on the exam in legacy contexts. DVDs hold up to 8.5 GB (dual layer), which is enough for Windows installation media. Optical drives are increasingly absent from modern hardware.
+
+### PXE / Network Boot (Enterprise)
+
+Preboot Execution Environment (PXE) allows a computer to boot and load an OS image from the network without any local boot media. The system's NIC must support PXE, which is enabled in UEFI/BIOS settings.
+
+**PXE boot sequence:**
+1. System powers on — NIC broadcasts a DHCP discovery packet
+2. DHCP server responds with an IP address and the address of a TFTP server
+3. System downloads the bootloader from the TFTP server via TFTP
+4. Bootloader loads the OS image or installer from the network
+5. Installation or imaging proceeds without any physical media
+
+PXE is the foundation of enterprise imaging solutions like Windows Deployment Services (WDS) and SCCM/Intune OS deployment. It allows a single technician to image hundreds of machines simultaneously across the network.
+
+<ConceptCallout type="info">PXE requires DHCP, TFTP, and a WDS or similar server. The client NIC must be PXE-capable and the boot order must have "Network" listed before the local hard drive.</ConceptCallout>
+
+## MBR vs GPT Partition Schemes
+
+Before installing an OS, the drive must be partitioned. The partition scheme determines how partitions are structured on the disk.
+
+<CompareCards
+  title="Partition Scheme Comparison"
+  left={{ title: "MBR (Master Boot Record)", icon: "HardDrive", color: "orange", points: ["Maximum disk size: 2 TB", "Maximum 4 primary partitions", "Uses extended + logical partitions to work around the limit", "Compatible with Legacy BIOS and older systems", "Boot code stored in first 512 bytes of disk", "No redundancy — corruption of MBR = unbootable disk"] }}
+  right={{ title: "GPT (GUID Partition Table)", icon: "Shield", color: "blue", points: ["Maximum disk size: 9.4 ZB (zettabytes)", "Up to 128 primary partitions (Windows)", "Each partition has a globally unique identifier (GUID)", "Required for UEFI boot (UEFI + GPT = modern standard)", "Backup partition table stored at end of disk", "CRC32 checksums detect corruption"] }}
+/>
+
+<ConceptCallout type="warning">UEFI requires GPT. If you are doing a clean install on a modern system using UEFI mode, you must use GPT. Attempting to install in UEFI mode on an MBR disk will fail. Legacy BIOS mode can use MBR or GPT, but booting from a GPT disk in legacy mode requires special configuration.</ConceptCallout>
+
+**Key rule for the exam:** UEFI + GPT = modern systems. Legacy BIOS + MBR = older systems. If a question mentions a disk larger than 2 TB that needs to boot, GPT is required.
+
+## File System Comparison
+
+The file system determines how data is organized, stored, and accessed on a partition. Choosing the wrong file system for the job causes compatibility problems.
+
+| File System | OS | Max File Size | Max Volume | Key Features | Use Case |
+|---|---|---|---|---|---|
+| NTFS | Windows | 16 TB (practical) | 256 TB | Journaling, permissions, encryption (EFS), compression, ACLs | Windows system and data drives |
+| FAT32 | Cross-platform | **4 GB** | 2 TB | Maximum compatibility, no permissions, no journaling | USB drives, legacy compatibility |
+| exFAT | Cross-platform | 128 PB | 128 PB | Large files, no 4 GB limit, cross-platform | Large removable drives, SD cards, video files |
+| ext4 | Linux | 16 TB | 1 EB | Journaling, permissions, large files, Linux-native | Linux system and data drives |
+| APFS | macOS | 8 EB | 8 EB | Snapshots, clones, encryption, space sharing | macOS system drives (SSD-optimized) |
+
+<ConceptCallout type="warning">FAT32's 4 GB file size limit is a critical exam point. If someone tries to copy a large video file (e.g., a 6 GB movie) to a USB drive formatted as FAT32, the copy will fail even if there is enough free space. Format the drive as exFAT instead.</ConceptCallout>
+
+**NTFS key features to know:**
+- **Journaling**: Logs file system transactions — allows recovery from unexpected shutdowns without data corruption
+- **Permissions**: NTFS ACLs control read, write, execute access per user/group
+- **EFS (Encrypting File System)**: File-level encryption tied to user account
+- **Compression**: Native file/folder compression
+- **Quotas**: Limit disk space per user
+
+## Windows Installation Process
+
+<ProcessSteps
+  title="Windows Clean Installation"
+  color="blue"
+  steps={[
+    { title: "Prepare Boot Media", description: "Download the Windows ISO from Microsoft and create a bootable USB drive using the Media Creation Tool or Rufus. Verify the USB is at least 8 GB." },
+    { title: "Configure UEFI/BIOS", description: "Enter UEFI settings (usually Del, F2, or F12 at POST). Confirm Secure Boot is enabled for Windows 11. Set boot order to boot from USB first. Disable CSM/Legacy mode for UEFI installations." },
+    { title: "Boot from USB", description: "Insert the USB drive and restart. Press the boot menu key (F11, F12, or Esc on most systems) to select the USB device. The Windows setup screen will appear." },
+    { title: "Language and Region", description: "Select your language, time format, and keyboard layout. Click Install Now." },
+    { title: "Product Key", description: "Enter the Windows product key or click 'I don't have a product key' to activate later. Selecting edition here is critical — choose the correct edition matching the license." },
+    { title: "Partition the Drive", description: "Select 'Custom: Install Windows only (advanced)'. Delete existing partitions on the target drive. Select unallocated space and click Next — Windows will create the required partitions automatically (EFI, MSR, Windows, Recovery). For a drive larger than 2 TB, ensure GPT was selected when creating the USB." },
+    { title: "Installation", description: "Windows copies files, expands the installation, installs features and updates. The system reboots multiple times — leave the USB inserted but do not boot from it again (remove after first reboot or set internal drive first in boot order)." },
+    { title: "OOBE Setup", description: "Complete the Out-of-Box Experience: region, keyboard, network connection, Microsoft account or local account (for Pro editions, local account is available; Home now requires a Microsoft account online workaround)." },
+    { title: "Install Drivers", description: "Windows Update will download most drivers automatically. Manually install chipset, GPU, network, and any specialty hardware drivers from manufacturer websites. Check Device Manager for any yellow warning icons." },
+    { title: "Run Windows Update", description: "Open Settings > Update & Security > Windows Update and install all available updates. This may require multiple restarts. Do not skip this step — updates patch security vulnerabilities present in the base install." }
+  ]}
+/>
+
+## Post-Installation Tasks Checklist
+
+After the OS is installed and updated, a standard set of tasks ensures the machine is ready for use:
+
+| Task | Why It Matters |
+|---|---|
+| Install all drivers | Hardware won't function properly without correct drivers |
+| Run Windows Update fully | Base install has known vulnerabilities |
+| Install antivirus / endpoint protection | Unprotected system is at risk immediately |
+| Configure Windows Firewall | Ensure firewall rules are appropriate |
+| Join domain or configure workgroup | Required before deploying to a user |
+| Install required applications | Line-of-business software, productivity tools |
+| Migrate user data | Transfer documents, browser favorites, email profiles |
+| Verify backup is configured | Confirm the system is included in backup jobs |
+| Enable BitLocker (if Pro/Enterprise) | Encrypt the drive before handing to user |
+| Test application functionality | Confirm all required apps launch and work |
+
+## Upgrade Paths and the Windows Upgrade Assistant
+
+For in-place upgrades, Microsoft provides the **PC Health Check** tool (for Windows 11 readiness) and the **Windows Upgrade Assistant** (for upgrading from Windows 10 to Windows 11).
+
+**Before an in-place upgrade:**
+1. Run the compatibility check tool
+2. Verify all hardware drivers have Windows 11 versions available
+3. Back up the system completely (non-negotiable)
+4. Disconnect non-essential peripherals
+5. Ensure at least 20 GB free disk space
+6. Plug in the laptop (never upgrade on battery)
+
+**After an in-place upgrade:** Windows creates a `Windows.old` folder containing the previous installation. This allows rollback via Settings > Recovery > Go back within 10 days. After 10 days, the option disappears and Windows.old can be deleted via Disk Cleanup to reclaim space.
+
+## Unattended and Automated Installations
+
+In enterprise environments, manually clicking through the installation wizard for every machine is impractical. Automated deployment methods include:
+
+**Answer Files (unattend.xml):** An XML file that pre-populates installation wizard responses — language, product key, partition layout, regional settings, user account creation. Created using the Windows System Image Manager (SIM) tool, part of the Windows Assessment and Deployment Kit (ADK). The answer file is placed on the USB drive or a network share and referenced during installation.
+
+**Windows Deployment Services (WDS):** A Windows Server role that enables PXE network boot and OS deployment across the network. WDS hosts WIM (Windows Imaging Format) files and answer files. Technicians can deploy a standard image to many machines simultaneously without touching each one physically.
+
+**Sysprep + WIM Imaging:**
+
+<ProcessSteps
+  title="Creating a Standard Image with Sysprep"
+  color="purple"
+  steps={[
+    { title: "Build Reference Machine", description: "Install Windows on a reference machine. Install drivers, configure settings, and install standard applications that every machine in the organization should have." },
+    { title: "Run Sysprep", description: "Execute sysprep /oobe /generalize /shutdown. Generalize removes machine-specific information (SID, hardware identifiers, activation state). OOBE means the next boot will start the Out-of-Box Experience for the new user. The machine shuts down." },
+    { title: "Capture the Image", description: "Boot the reference machine from Windows PE (WinPE) media. Use DISM or imagex to capture the partition into a WIM file: dism /capture-image. Store the WIM file on a network share or WDS server." },
+    { title: "Deploy the Image", description: "Boot target machines via PXE or WinPE USB. Use DISM to apply the WIM image to the target drive. Apply the appropriate answer file for automated setup. The machine boots, runs OOBE, generates a new unique SID, and is ready for use." }
+  ]}
+/>
+
+<ConceptCallout type="info">Sysprep is required before capturing an image. Without generalize, every deployed machine would have the same SID (Security Identifier), causing domain join failures and other conflicts in Active Directory environments.</ConceptCallout>
+
+## Exam Scenario Quick Reference
+
+| Scenario | Correct Choice |
+|---|---|
+| New hire, fresh hardware, never had an OS | Clean install |
+| Customer wants Windows 11, currently on Windows 10, hardware compatible | In-place upgrade |
+| Machine has severe malware infection | Clean install |
+| 50 machines need the same OS + apps deployed overnight | WDS + PXE imaging |
+| USB drive won't accept a 5 GB file | Reformat as exFAT (FAT32 has 4 GB file limit) |
+| New 3 TB hard drive won't show more than 2 TB | Convert to GPT |
+| UEFI system won't boot Windows from disk | Ensure disk is GPT, not MBR |
+| Customer needs cross-platform USB compatibility | FAT32 (small files) or exFAT (large files) |

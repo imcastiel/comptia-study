@@ -1,0 +1,404 @@
+# Windows Administrative Tools
+
+Windows includes a comprehensive set of built-in administrative tools that every technician uses daily. The exam tests whether you know **what each tool does**, **how to open it**, and what the key indicators mean (yellow exclamation, red X, event levels, etc.).
+
+## Quick Reference — All Tools at a Glance
+
+| Tool | Launch Command | Purpose |
+|------|---------------|---------|
+| Task Manager | `Ctrl+Shift+Esc` or `taskmgr` | Processes, performance, startup programs |
+| Device Manager | `devmgmt.msc` | Hardware drivers and device status |
+| Disk Management | `diskmgmt.msc` | Partitions, volumes, drive letters |
+| Registry Editor | `regedit` | Low-level Windows configuration database |
+| Event Viewer | `eventvwr.msc` | System logs and error events |
+| System Configuration | `msconfig` | Startup mode, boot options, services |
+| Services | `services.msc` | Start/stop/configure Windows services |
+| Performance Monitor | `perfmon` | Real-time performance counters and reports |
+| Resource Monitor | `resmon` | Per-process CPU/Memory/Disk/Network usage |
+| Computer Management | `compmgmt.msc` | Unified console (Device Mgr + Disk Mgmt + more) |
+| Local Users and Groups | `lusrmgr.msc` | Local user accounts and group membership |
+| System Information | `msinfo32` | Hardware resources, components, software environment |
+
+<ConceptCallout type="tip">
+  Most of these tools can also be found by right-clicking the Start button (Win 10/11) to open the Power User Menu — a fast shortcut on the exam and in real life.
+</ConceptCallout>
+
+---
+
+## Task Manager
+
+**Open with:** `Ctrl+Shift+Esc`, `Ctrl+Alt+Del` → Task Manager, or right-click the taskbar → Task Manager. Also: `taskmgr` in Run.
+
+Task Manager is the primary tool for seeing what is running on a system right now — and for killing processes that are unresponsive.
+
+### Tabs (Windows 10/11)
+
+| Tab | What It Shows |
+|-----|--------------|
+| Processes | All running apps and background processes; CPU/Memory/Disk/Network columns; right-click to End Task or Go to Details |
+| Performance | Real-time graphs for CPU, Memory, Disk, Ethernet/Wi-Fi, GPU |
+| App history | Cumulative resource usage per app (useful for identifying bandwidth hogs) |
+| Startup | Programs that launch at login; shows Startup impact (Low/Medium/High/Not measured) |
+| Users | Active user sessions; resource usage per user |
+| Details | Granular process list with PID, CPU%, memory, status, description |
+| Services | Running/stopped services with quick start/stop; links to services.msc |
+
+### Key Actions
+
+- **End Task** — forcibly terminates a process. Use when an application is frozen. Available from Processes tab (right-click) and Details tab.
+- **Startup tab** — right-click any entry and choose **Disable** to prevent it from running at login. This is the recommended method in Windows 10/11 (older versions used msconfig for this).
+- **Performance tab** — click any resource to open Resource Monitor directly.
+
+<ConceptCallout type="tip">
+  The exam often asks which tab shows startup programs and their impact. In Windows 10/11, that is the **Startup tab** in Task Manager, not msconfig. In Windows 7 and earlier, msconfig was used.
+</ConceptCallout>
+
+---
+
+## Device Manager
+
+**Open with:** `devmgmt.msc`, or right-click This PC → Manage → Device Manager, or via Computer Management.
+
+Device Manager lists every hardware device Windows knows about and shows the driver status for each.
+
+### Device Status Icons
+
+| Icon | Meaning |
+|------|---------|
+| Yellow exclamation mark (!) | Driver problem — device present but driver is missing, corrupt, or conflicting |
+| Red X | Device is disabled — right-click → Enable to restore |
+| Down arrow | Device has been disabled by the user |
+| Unknown device (question mark) | Windows does not have a driver and cannot identify the device |
+| No icon | Device is working normally |
+
+<ConceptCallout type="warning">
+  **Yellow exclamation = driver problem.** This is one of the most tested Device Manager facts on the exam. When you see it, the fix is to update, reinstall, or roll back the driver.
+</ConceptCallout>
+
+### Driver Operations (right-click a device)
+
+- **Update driver** — search Windows Update or browse for a driver file manually
+- **Roll back driver** — reverts to the previously installed driver version (useful after a bad update)
+- **Disable device** — device stays installed but stops functioning; sets the red X
+- **Uninstall device** — removes the driver; Windows may reinstall it on next reboot
+- **Scan for hardware changes** — forces Windows to re-detect newly connected hardware
+
+### View Menu Options
+
+- **Show hidden devices** — reveals devices that have been removed or are not currently connected (useful for cleaning up phantom devices)
+- **Devices by type** (default), **Devices by connection**, **Resources by type**
+
+---
+
+## Disk Management
+
+**Open with:** `diskmgmt.msc`, or right-click This PC → Manage → Disk Management, or via Computer Management.
+
+Disk Management handles everything related to partitions, volumes, and drive letters — without needing the command line.
+
+### Key Operations
+
+| Operation | Notes |
+|-----------|-------|
+| Initialize disk | Required for brand-new drives — choose MBR or GPT |
+| Create volume | Simple, spanned, striped, mirrored, or RAID-5 |
+| Format | Choose file system (NTFS, FAT32, exFAT) and allocation unit size |
+| Assign/change drive letter | Right-click a volume → Change Drive Letter and Paths |
+| Extend volume | Add unallocated space immediately to the right of the volume |
+| Shrink volume | Reclaim unallocated space from a volume |
+| Convert MBR to GPT | **Requires deleting all partitions first — data loss** |
+| Mark partition as active | Sets which partition boots on MBR disks |
+
+<ConceptCallout type="warning">
+  Converting a disk from MBR to GPT in Disk Management **destroys all data** on the disk. In Windows 10 version 1703 and later, `mbr2gpt.exe` can convert without data loss while Windows is running.
+</ConceptCallout>
+
+### Partition / Volume Colors
+
+| Color | Meaning |
+|-------|---------|
+| Dark blue | Primary partition |
+| Light blue | Logical drive (inside an extended partition) |
+| Green | Extended partition |
+| Black | Unallocated space |
+| Purple | Primary partition on a dynamic disk |
+| Red/Orange | Failed or missing dynamic volume |
+
+---
+
+## Registry Editor
+
+**Open with:** `regedit` in Run or Search.
+
+The registry is a hierarchical database that stores all Windows configuration settings — hardware, software, user preferences, and security policies. It is the most powerful and most dangerous tool on this list.
+
+### The Five Root Keys
+
+| Hive | Abbreviation | Contains |
+|------|-------------|----------|
+| HKEY_LOCAL_MACHINE | HKLM | Hardware and software settings that apply to all users |
+| HKEY_CURRENT_USER | HKCU | Settings for the currently logged-in user |
+| HKEY_CLASSES_ROOT | HKCR | File associations and COM object registrations |
+| HKEY_USERS | HKU | Settings for all user profiles (HKCU is a subkey here) |
+| HKEY_CURRENT_CONFIG | HKCC | Current hardware profile (pointer into HKLM) |
+
+### Exam-Relevant Registry Locations
+
+| Path | Purpose |
+|------|---------|
+| `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run` | Programs that run at startup for all users |
+| `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run` | Programs that run at startup for current user |
+| `HKLM\SYSTEM\CurrentControlSet\Services` | Windows services configuration |
+| `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion` | Windows version, build number, install date |
+
+<ConceptCallout type="warning">
+  Always **export a backup** (File → Export) before editing any registry key. A bad registry edit can prevent Windows from booting. The exam expects you to know this.
+</ConceptCallout>
+
+### Safe Practices
+
+- Export the key (or entire registry) before making changes
+- Never edit the registry on a live production system without a tested rollback plan
+- Use Group Policy or Settings whenever possible instead of direct registry edits
+
+---
+
+## Event Viewer
+
+**Open with:** `eventvwr.msc`, or right-click This PC → Manage → Event Viewer.
+
+Event Viewer logs everything that happens on a Windows system — errors, warnings, successful operations, security audits, and more. It is the first place to look when troubleshooting an unexplained problem.
+
+### Windows Logs
+
+| Log | Contents |
+|-----|----------|
+| Application | Events logged by applications and programs |
+| Security | Logon/logoff events, audit successes and failures, privilege use |
+| Setup | Windows installation and update events |
+| System | Events from Windows system components and drivers |
+| Forwarded Events | Events collected from remote computers |
+
+### Event Levels
+
+| Level | Icon | Meaning |
+|-------|------|---------|
+| Critical | Red circle | A fatal failure that requires attention immediately |
+| Error | Red X | A significant problem; a service or function failed |
+| Warning | Yellow triangle | A potential issue that may become a problem |
+| Information | Blue circle | Normal operation successfully recorded |
+| Audit Success | Gold key | A security audit event that succeeded (Security log) |
+| Audit Failure | Gold lock | A security audit event that failed (Security log) |
+
+<ConceptCallout type="tip">
+  **Event IDs are tested.** Common ones: 4624 (successful logon), 4625 (failed logon), 4648 (logon using explicit credentials), 6005 (Event Log service started = system boot), 6006 (Event Log service stopped = clean shutdown), 41 (unexpected shutdown/kernel power error).
+</ConceptCallout>
+
+### Filtering Events
+
+Right-click any log → **Filter Current Log** to filter by event level, date/time range, event source, or event ID. Use **Find** (Ctrl+F) to search within a log. Custom Views let you save filters and combine events from multiple logs.
+
+---
+
+## System Configuration (msconfig)
+
+**Open with:** `msconfig` in Run or Search.
+
+System Configuration controls how Windows starts. It is primarily a diagnostic tool — use it to isolate startup problems by stripping the boot process down to basics.
+
+### Tabs
+
+| Tab | Purpose |
+|-----|---------|
+| General | Choose Normal startup, Diagnostic startup (minimal drivers/services), or Selective startup |
+| Boot | Safe boot options (Minimal, Alternate shell, Active Directory repair, Network), boot timeout, OS selection for multi-boot |
+| Services | List all services; "Hide all Microsoft services" checkbox is critical for isolating third-party service conflicts |
+| Startup | In Windows 10/11, clicking Open Task Manager redirects here; in Windows 7 it lists programs directly |
+| Tools | Shortcuts to common admin tools (UAC, Event Viewer, System Restore, Command Prompt, etc.) |
+
+### Boot Tab — Safe Boot Options
+
+| Option | What Loads |
+|--------|-----------|
+| Minimal | Safe Mode — GUI, minimal drivers, no networking |
+| Alternate shell | Safe Mode with Command Prompt |
+| Active Directory repair | For domain controller recovery |
+| Network | Safe Mode with Networking |
+
+<ConceptCallout type="tip">
+  Use **"Hide all Microsoft services"** on the Services tab before disabling services. This prevents accidentally disabling critical Windows services while hunting for a rogue third-party service.
+</ConceptCallout>
+
+---
+
+## Services (services.msc)
+
+**Open with:** `services.msc`, or via Computer Management, or the Services tab in Task Manager.
+
+The Services console manages all Windows background services — the processes that run without a user interface to provide system functionality.
+
+### Startup Types
+
+| Type | Behavior |
+|------|---------|
+| Automatic | Starts when Windows boots, before user login |
+| Automatic (Delayed Start) | Starts shortly after boot completes; improves boot speed for non-critical services |
+| Manual | Only starts when something explicitly requests it |
+| Disabled | Cannot start — must be changed to Manual or Automatic first |
+
+### Key Service Properties (double-click a service)
+
+- **General tab** — service name, display name, description, executable path, startup type, current status (Start/Stop/Pause/Resume)
+- **Log On tab** — which account the service runs as (Local System, Local Service, Network Service, or a specific account)
+- **Recovery tab** — what happens when the service fails: Take No Action, Restart the Service, Run a Program, or Restart the Computer. Can set different actions for 1st/2nd/subsequent failures.
+- **Dependencies tab** — services this service depends on, and services that depend on it
+
+### Exam-Critical Services
+
+| Service | Purpose | Default Startup |
+|---------|---------|----------------|
+| Print Spooler | Manages print jobs; must be running to print | Automatic |
+| Windows Update | Downloads and installs updates | Automatic |
+| Windows Defender Antivirus Service | Real-time malware protection | Automatic |
+| Remote Desktop Services | Enables RDP connections | Manual |
+| DNS Client | Caches DNS results | Automatic |
+| DHCP Client | Gets IP address from DHCP server | Automatic |
+| Server | Enables file/printer sharing over the network | Automatic |
+| Workstation | Enables connecting to network shares | Automatic |
+
+<ConceptCallout type="tip">
+  If a user cannot print, check that the **Print Spooler** service is running. If it is stuck, stop it, clear the contents of `C:\Windows\System32\spool\PRINTERS`, and restart it.
+</ConceptCallout>
+
+---
+
+## Performance Monitor
+
+**Open with:** `perfmon` in Run or Search.
+
+Performance Monitor collects and displays real-time and historical performance data using hundreds of built-in counters.
+
+### Key Performance Counters
+
+| Counter | What It Measures | Problem Threshold |
+|---------|-----------------|-------------------|
+| Processor\% Processor Time | Overall CPU utilization | Sustained >85% |
+| Memory\Pages/sec | Memory pages swapped to/from disk | >20 sustained (RAM shortage) |
+| PhysicalDisk\Avg. Disk Queue Length | I/O requests waiting for disk | >2 per spindle |
+| PhysicalDisk\% Disk Time | Percentage of time disk is busy | >80% sustained |
+| Network Interface\Bytes Total/sec | Network throughput | Near interface capacity |
+| Memory\Available MBytes | Free physical RAM | &lt;100 MB (warning) |
+
+### Data Collector Sets
+
+Data Collector Sets record performance data over time for later analysis. The System Performance and System Diagnostics sets are built in and generate HTML reports showing resource bottlenecks. Right-click a set → Start to begin recording.
+
+<ConceptCallout type="info">
+  Performance Monitor is the tool to use when a user says "my computer is slow." Run a System Diagnostics data collector set for 60 seconds to get a report identifying the bottleneck (CPU, RAM, disk, or network).
+</ConceptCallout>
+
+---
+
+## Resource Monitor
+
+**Open with:** `resmon` in Run or Search, or via the Performance tab in Task Manager → Open Resource Monitor.
+
+Resource Monitor provides a **per-process breakdown** of CPU, Memory, Disk, and Network usage in real time — more granular than Task Manager's Overview.
+
+| Tab | Shows |
+|-----|-------|
+| Overview | Summary of all four resources simultaneously |
+| CPU | Per-process CPU usage, threads, handles, services associated with each process |
+| Memory | Working set, private bytes, shareable bytes per process; physical memory usage map |
+| Disk | Per-process disk I/O, active files being read/written, response times |
+| Network | Per-process network activity, TCP connections, listening ports |
+
+---
+
+## Computer Management
+
+**Open with:** `compmgmt.msc`, or right-click This PC → Manage.
+
+Computer Management is a unified console that combines multiple administrative tools into one window. It can also connect to and manage **remote computers**.
+
+### What It Contains
+
+| Section | Tool |
+|---------|------|
+| System Tools | Task Scheduler, Event Viewer, Shared Folders, Local Users and Groups, Performance, Device Manager |
+| Storage | Disk Management |
+| Services and Applications | Services, WMI Control |
+
+<ConceptCallout type="tip">
+  Computer Management is the fastest way to access Disk Management and Device Manager together without opening separate windows. Remember `compmgmt.msc` for the exam.
+</ConceptCallout>
+
+---
+
+## Local Users and Groups
+
+**Open with:** `lusrmgr.msc`, or via Computer Management → System Tools → Local Users and Groups.
+
+<ConceptCallout type="warning">
+  Local Users and Groups is not available on Windows Home editions — only Pro, Enterprise, and Education. The exam expects you to know this limitation.
+</ConceptCallout>
+
+### Users Node
+
+- Create, delete, and rename local user accounts
+- Reset passwords
+- Disable accounts without deleting them
+- Set "User must change password at next logon," "User cannot change password," "Password never expires"
+- View group membership
+
+### Groups Node
+
+Key built-in groups:
+
+| Group | Members Can |
+|-------|------------|
+| Administrators | Do anything on the local computer |
+| Standard Users | Use the computer; cannot install software or change system settings |
+| Remote Desktop Users | Connect via RDP without being an administrator |
+| Backup Operators | Back up and restore files regardless of permissions |
+| Power Users | Legacy group — limited administrative rights (mostly deprecated) |
+| Guests | Very restricted access; Guest account is disabled by default |
+
+---
+
+## System Information (msinfo32)
+
+**Open with:** `msinfo32` in Run or Search.
+
+System Information provides a read-only snapshot of the entire system configuration — hardware, components, and software environment. Useful for quickly gathering specs on an unfamiliar machine.
+
+### Three Main Categories
+
+| Category | Contains |
+|----------|----------|
+| System Summary | OS name, version, build, BIOS mode (Legacy/UEFI), manufacturer, model, processor, installed RAM, locale |
+| Hardware Resources | IRQs, I/O addresses, DMA channels, memory addresses, conflicts/sharing |
+| Components | Display adapter, sound, storage, network, USB, and other hardware details |
+| Software Environment | Drivers, running tasks, startup programs, services, loaded modules, environment variables |
+
+<ConceptCallout type="tip">
+  `msinfo32` is the fastest way to check whether a system is using **Legacy BIOS or UEFI** — look at BIOS Mode in System Summary. Also shows whether Secure Boot is on, total/available RAM, and exact OS build number.
+</ConceptCallout>
+
+---
+
+## Exam Summary — What to Know Cold
+
+<ConceptCallout type="tip">
+  **Device Manager quick facts:** Yellow ! = driver problem. Red X = device disabled. Unknown device = no driver.
+
+  **Task Manager:** Startup tab (Win 10/11) manages startup programs. Performance tab has real-time graphs. End Task kills unresponsive processes.
+
+  **Event Viewer:** Critical > Error > Warning > Information. Security log has Audit Success/Failure. Event ID 4625 = failed logon.
+
+  **Registry:** Five hives — HKLM, HKCU, HKCR, HKU, HKCC. Run keys control startup. Always export before editing.
+
+  **Services:** Print Spooler must be running to print. Recovery tab controls what happens on failure. Automatic Delayed Start = starts after boot.
+
+  **msconfig:** Diagnostic startup = minimal boot for troubleshooting. Boot tab = safe mode options. Hide Microsoft services before disabling to avoid breaking Windows.
+</ConceptCallout>

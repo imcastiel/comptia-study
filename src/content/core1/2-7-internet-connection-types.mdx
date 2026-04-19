@@ -1,0 +1,148 @@
+# Internet Connection Types and Network Characteristics
+
+Understanding the different ways a network connects to the internet — their speeds, limitations, and appropriate use cases — is practical knowledge for selecting and troubleshooting connectivity.
+
+## Wired Broadband Connections
+
+### DSL (Digital Subscriber Line)
+
+DSL delivers internet over existing **telephone copper wire** infrastructure. The signal coexists with voice calls on the same pair using different frequencies.
+
+| DSL Type | Max Download | Max Upload | Notes |
+| --- | --- | --- | --- |
+| ADSL | 8–24 Mbps | 1–3 Mbps | Asymmetric — common residential |
+| ADSL2+ | Up to 24 Mbps | Up to 3.3 Mbps | Extended range |
+| VDSL/VDSL2 | 52–100+ Mbps | 16–100 Mbps | Very fast, short range only |
+
+**Key DSL characteristics:**
+- Speed decreases significantly with distance from the telephone exchange (DSLAM)
+- Requires a **DSL modem** (or modem/router combo)
+- **Asymmetric** (ADSL) — faster download than upload; reflects typical residential usage
+- Still widely available in areas without cable or fiber
+
+### Cable Internet
+
+Cable internet uses **coaxial cable** TV infrastructure (DOCSIS standard). Delivers much higher speeds than DSL.
+
+| DOCSIS Version | Max Download | Max Upload |
+| --- | --- | --- |
+| DOCSIS 3.0 | 1 Gbps | 200 Mbps |
+| DOCSIS 3.1 | 10 Gbps | 1–2 Gbps |
+
+**Key characteristics:**
+- **Shared medium** — bandwidth is shared among users in a neighborhood node. Speeds can drop during peak hours.
+- Requires a **cable modem** (DOCSIS)
+- Faster than DSL for most residential users
+- Widely available in urban and suburban areas
+
+### Fiber Optic (FTTH/FTTP)
+
+Fiber delivers internet over glass or plastic fiber optic cables using **light pulses** instead of electrical signals.
+
+| Type | Speed | Notes |
+| --- | --- | --- |
+| Fiber (typical residential) | 100 Mbps – 1 Gbps (symmetric) | Google Fiber, AT&T Fiber, ISP fiber |
+| Fiber (business/enterprise) | 1–100 Gbps | Dedicated fiber circuits |
+
+**Key characteristics:**
+- **Symmetric speeds** — equal upload and download (ideal for video conferencing, cloud backup, hosting)
+- No signal degradation over distance (unlike copper)
+- Immune to electrical interference
+- Requires an **ONT (Optical Network Terminal)** where fiber enters the building, which converts to Ethernet
+- Not universally available — infrastructure build-out is ongoing
+- Most expensive to install; long-term lowest operating cost
+
+<ConceptCallout type="tip">
+  **DSL vs Cable vs Fiber exam summary:** DSL = phone lines, distance-limited. Cable = coax, shared neighborhood bandwidth. Fiber = fastest, symmetric, most reliable. Fiber is always the best choice when available.
+</ConceptCallout>
+
+## Wireless Broadband
+
+### Satellite Internet
+
+Satellite internet connects through geostationary (GEO) or low-earth-orbit (LEO) satellites.
+
+| Type | Latency | Speed | Example |
+| --- | --- | --- | --- |
+| Geostationary (GEO) | 500–600 ms (high) | 25–100 Mbps | HughesNet, Viasat |
+| Low Earth Orbit (LEO) | 20–60 ms (low) | 50–300+ Mbps | Starlink |
+
+**Key characteristics:**
+- Available anywhere with a clear view of the sky — rural and remote areas
+- GEO latency makes it unsuitable for VoIP, gaming, and real-time applications
+- LEO (Starlink) has dramatically improved latency — viable for most applications
+- Data caps common on GEO services
+- Weather can affect signal quality
+
+### Cellular (4G LTE / 5G)
+
+Cellular internet uses the same towers that provide mobile phone service.
+
+| Generation | Typical Speed | Latency | Notes |
+| --- | --- | --- | --- |
+| 4G LTE | 10–100 Mbps | 20–60 ms | Current wide coverage standard |
+| 5G Sub-6 GHz | 50–500 Mbps | 10–30 ms | Broad coverage; improving |
+| 5G mmWave | 1–4 Gbps | &lt;10 ms | Ultra-fast; short range, dense urban only |
+
+**Key characteristics:**
+- **Hotspots / mobile broadband routers** — a cellular modem provides Wi-Fi from cellular
+- Data caps and throttling after thresholds are common
+- Excellent for backup connectivity (failover when wired connection fails)
+- **5G mmWave** uses millimeter-wave frequencies — huge bandwidth but blocked by walls and trees; requires dense small-cell deployment
+
+### Fixed Wireless Access (FWA)
+
+Fixed wireless uses cellular or licensed wireless signals to provide internet to a **stationary location** (home or business) without cables.
+
+**How it works:** A directional antenna mounted on the building points at a nearby tower or base station. Often uses licensed spectrum for reliable, dedicated bandwidth.
+
+**Use cases:** Rural areas where fiber or cable aren't available but cellular infrastructure exists. Some ISPs offer 5G fixed wireless as a cable alternative.
+
+## Metro Ethernet / Fiber WAN
+
+For businesses, ISPs offer **Ethernet-based WAN services** — the ISP delivers a standard Ethernet handoff at the business, and the WAN is transparent to the customer's equipment.
+
+**Types:**
+- **EoC (Ethernet over Copper)** — bonded DSL pairs delivering 10–100 Mbps
+- **Metro Ethernet** — fiber-based, very high speed, common in cities
+
+## Dedicated Leased Lines
+
+| Type | Speed | Notes |
+| --- | --- | --- |
+| T1 | 1.544 Mbps | 24 DS0 channels; symmetric; largely legacy |
+| T3 | 44.736 Mbps | 28 T1s; data center connectivity; legacy |
+| MPLS | Varies | Provider-managed WAN with traffic prioritization |
+
+Leased lines provide **guaranteed, symmetric bandwidth** with SLAs — used by enterprises and businesses that need reliable connectivity rather than best-effort. Largely being replaced by fiber internet with VPNs.
+
+## Bandwidth vs Latency vs Throughput
+
+These three metrics define network performance and are regularly confused:
+
+| Term | Definition | Analogy |
+| --- | --- | --- |
+| Bandwidth | Maximum capacity of a link (Mbps/Gbps) | Width of a highway |
+| Latency | Time for a packet to travel from source to destination (ms) | Speed limit on the highway |
+| Throughput | Actual data rate achieved, accounting for overhead/retransmissions | Actual cars that get through per hour |
+
+**Latency sources:**
+- **Propagation delay** — speed of light through the medium (unavoidable)
+- **Serialization delay** — time to put bits on the wire
+- **Queuing delay** — waiting in router buffers
+- **Processing delay** — time for devices to process packets
+
+**Why latency matters:** For real-time applications (VoIP, gaming, video calls), low latency is more important than raw bandwidth. A 1 Gbps satellite link with 500 ms latency performs worse for calls than a 50 Mbps fiber link with 5 ms latency.
+
+## Connection Type Comparison
+
+| Type | Speed | Latency | Reliability | Availability |
+| --- | --- | --- | --- | --- |
+| Fiber | Highest | Lowest | Best | Urban/suburban |
+| Cable | Very high | Low | Good | Urban/suburban |
+| Fixed wireless | High | Low-medium | Good | Expanding |
+| DSL | Medium | Low | Good | Near exchanges |
+| Cellular 5G | High | Low | Variable | Urban areas |
+| Cellular 4G LTE | Medium | Medium | Good | Wide |
+| Satellite (LEO) | Medium-high | Medium | Weather-dependent | Global |
+| Satellite (GEO) | Medium | Very high | Weather-dependent | Global |

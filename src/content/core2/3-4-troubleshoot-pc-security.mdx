@@ -1,0 +1,119 @@
+# Troubleshoot Common Personal Computer Security Issues
+
+PC security troubleshooting on the 220-1202 exam centers on recognizing malware infection symptoms, identifying signs of unauthorized access, understanding certificate errors, and knowing when to clean a system versus when to wipe and reinstall. Memorize the malware symptom list — multiple exam questions will describe symptoms and ask you to identify the type of threat.
+
+## Malware Symptoms — Recognize These on the Exam
+
+The following symptoms indicate a malware infection. Some point to specific malware types; others are general indicators.
+
+| Symptom | Likely Malware Type | Notes |
+|---|---|---|
+| System running slow, high CPU or memory from unknown processes | Cryptominer, botnet client, trojan | Check Task Manager for unknown processes consuming resources |
+| Pop-up ads appearing constantly, even without a browser open | Adware | Pop-ups outside the browser indicate a system-level adware component |
+| Browser redirects to a different search engine or homepage | Browser hijacker | Check browser extensions, homepage settings, and default search engine |
+| Antivirus disabled or cannot update its signatures | Rootkit, advanced trojan | Malware specifically disables defenses to persist |
+| Unknown programs in startup, Task Manager, or Programs list | Trojan, adware, PUP | Check Task Manager Startup tab, shell:startup folder, and Programs list |
+| Files encrypted with a ransom note | Ransomware | Do NOT pay without consulting IT security — no guarantee of recovery |
+| Unexpected outbound network traffic | Botnet, data exfiltration malware, RAT | Monitor with Resource Monitor (resmon) or netstat -an |
+| Security tools won't install or run | Rootkit | Malware actively blocks security software to prevent removal |
+| Frequent system crashes or BSODs | Rootkit, corrupted system files from malware | Rootkits modify kernel components |
+| Missing or hidden files | Rootkit, ransomware in pre-encryption phase | Rootkits hide files from the OS |
+| Unusual disk activity at idle | Cryptominer encrypting files, malware writing logs | Check Resource Monitor → Disk tab |
+| Spam being sent from user's email account | Email account compromised; malware harvesting credentials | Change passwords immediately; check email forwarding rules |
+| Unknown icons in system tray | Adware, PUP, potentially unwanted software | Right-click tray icon to identify; uninstall the software |
+
+### Ransomware — Special Considerations
+
+Ransomware encrypts user files and demands payment for the decryption key. Once executed:
+- Disconnect from the network immediately (prevents spreading to network shares)
+- Do NOT attempt to pay — there is no guarantee the attacker provides a working key
+- Restore from a clean backup (this is the correct resolution on the exam)
+- Report to management and potentially law enforcement (FBI IC3)
+- Before restoring, determine the infection vector so it doesn't happen again
+
+<ConceptCallout type="warning">A backup is only useful against ransomware if it was taken before the encryption and if the backup is isolated from the infected network. Cloud-synced backups may sync the encrypted files, overwriting the clean versions. Offline or air-gapped backups are the defense against ransomware.</ConceptCallout>
+
+## Unauthorized Access Indicators
+
+Malware isn't always loud. Some attackers establish quiet persistence — they want to stay undetected while exfiltrating data, using compute resources, or waiting for an opportunity.
+
+**Signs to investigate:**
+
+- **Unknown user accounts**: Local Users and Groups (lusrmgr.msc) — check for accounts you didn't create, especially accounts with admin privileges
+- **Unfamiliar startup entries**: `shell:startup` (current user) and `shell:common startup` (all users) — these are folders; any executable here runs at login. Also check Task Manager → Startup tab and `msconfig` → Startup.
+- **Scheduled tasks**: Task Scheduler (taskschd.msc) — look for tasks with suspicious names, unknown executables, or tasks scheduled to run at unusual times (2 AM daily). Attackers commonly use scheduled tasks for persistence.
+- **Event Viewer anomalies**: Windows Logs → Security — filter for Event ID 4625 (failed logon) and 4624 (successful logon). Many failed logons followed by a success at 3 AM is a significant indicator. Also check for Event ID 4720 (user account created) and 4728 (member added to group).
+- **Unauthorized firewall rules**: Windows Firewall with Advanced Security — check inbound and outbound rules for entries you didn't create. Attackers may open ports for remote access.
+- **Antivirus or firewall disabled without explanation**: users rarely disable security tools intentionally. If they're off, investigate how they were disabled.
+
+## Real vs. Fake Security Alerts
+
+<CompareCards
+  title="Real vs. Fake Security Alerts"
+  left={{ title: "Real Security Alert", icon: "Shield", color: "blue", points: ["Comes from installed security software (Windows Defender, Norton, etc.)", "Appears as a Windows notification or the AV application's own window", "Does not ask you to call a phone number", "Does not ask for payment to remove a threat", "Provides specific file path and threat name", "Can be verified by opening the AV application directly"] }}
+  right={{ title: "Fake Alert / Scareware", icon: "Monitor", color: "orange", points: ["Appears in a web browser as a pop-up or full-screen page", "Claims to be from Microsoft, Apple, or a well-known AV brand", "Provides a phone number to call immediately", "Creates urgency: 'Your data is being stolen RIGHT NOW'", "May lock the browser in full-screen (press F11 or Escape to exit)", "Has no access to your actual system — it is just a webpage"] }}
+/>
+
+**Response to a fake alert in the browser:**
+1. Press Escape or F11 to exit full-screen
+2. Close the browser tab — if the tab resists closing, use Task Manager to kill the browser process
+3. Do NOT call the number; do NOT click any buttons within the pop-up
+4. Clear browser cache and cookies
+5. Run a real security scan with Windows Defender or Malwarebytes to confirm no actual infection
+
+**UAC prompts for unexpected programs**: if a UAC prompt appears asking for elevation for a program you didn't launch, click No and investigate. The executable path shown in the UAC dialog tells you what is requesting elevation.
+
+## Certificate Errors on Windows
+
+Certificate errors on HTTPS sites mean the browser couldn't validate the site's SSL/TLS certificate. The cause determines the correct fix.
+
+| Error Message | Cause | Resolution |
+|---|---|---|
+| Certificate expired | The server's certificate passed its expiration date | Notify the server/site owner; renew the certificate |
+| Certificate not trusted / self-signed | Certificate wasn't issued by a trusted CA | For internal servers: install the organization's root CA cert on the client |
+| Hostname mismatch | Certificate is for a different domain name | Check the URL; may be a misconfigured redirect or MitM |
+| Certificate revoked | The certificate was explicitly revoked by the issuer | Site has a security problem; avoid it |
+| Certificate valid dates in the future | Client system clock is behind the certificate's start date | Correct the system date and time |
+
+<ConceptCallout type="warning">An incorrect system clock is a frequently overlooked cause of widespread certificate failures. If a user reports that multiple HTTPS sites suddenly show certificate errors, check the system date and time before anything else. If the clock drifted significantly (happens with dead CMOS battery), fixing the time resolves all the errors instantly.</ConceptCallout>
+
+**Deploying trusted internal certificates**: organizations that run their own internal websites, mail servers, or tools sign them with an internal Certificate Authority. Client machines need the organization's root CA certificate installed in the Trusted Root Certification Authorities store. This is deployed via Group Policy in domain environments.
+
+## Malware Removal Procedure
+
+<ProcessSteps title="Malware Removal Procedure" color="orange" steps={[
+  { title: "Identify and quarantine", description: "Run Windows Defender full scan. Run Malwarebytes (free version is effective). Note all detected threats. If ransomware: disconnect from network first, before scanning, to prevent spreading." },
+  { title: "Enter Safe Mode if needed", description: "Restart into Safe Mode (hold Shift + Restart or F8). Safe Mode loads minimal drivers and disables most startup programs, which may prevent malware from loading and blocking removal tools." },
+  { title: "Remove detected threats", description: "Use the security tool's quarantine and removal functions. For stubborn malware, use the security tool's bootable rescue disk, which runs outside the infected OS." },
+  { title: "Check persistence mechanisms", description: "Review: Task Manager Startup tab, Task Scheduler, shell:startup folders, browser extensions, and installed programs list. Remove anything suspicious." },
+  { title: "Repair system files", description: "Run DISM /Online /Cleanup-Image /RestoreHealth, then sfc /scannow. Malware often corrupts system files. Run chkdsk /f /r if disk errors are suspected." },
+  { title: "Change credentials", description: "Change passwords for all accounts used on the infected machine. The machine may have had a keylogger. Inform IT security if work accounts were used." },
+  { title: "Verify and monitor", description: "Reboot normally. Run security scan again. Monitor for 24-48 hours. Check Event Viewer for lingering issues." }
+]} />
+
+## OS Reinstall Decision Tree
+
+Sometimes cleaning is impractical or policy prohibits it. Know when to clean and when to wipe.
+
+**Clean first when:**
+- Infection is detected early by AV before significant damage
+- Malware type is known and has reliable removal tools
+- No evidence of rootkit activity (rootkits hide in the kernel and survive normal removal)
+- The system is not handling sensitive data (workstation, not a server)
+- Time investment of cleaning is reasonable compared to reinstall time plus reconfiguration
+
+**Reinstall when:**
+- Rootkit is suspected or confirmed — rootkits modify the OS kernel and bootloader, making complete removal unreliable
+- The malware persists after multiple removal attempts
+- System files are severely corrupted beyond what sfc/DISM can repair
+- Corporate policy requires reinstall for confirmed infections (common in regulated industries)
+- The scope and dwell time of the infection are unknown — the damage may be beyond what's visible
+- Faster to rebuild than to forensically verify cleanliness
+
+**Before reinstalling:**
+1. Back up user data — verify the backup does NOT include executable files that might re-infect
+2. Document installed software and capture license keys
+3. Note network configuration and any custom settings
+4. Verify the backup media itself is not infected before restoring data post-install
+
+<ConceptCallout type="tip">On the A+ exam, if a question mentions a rootkit or says the malware cannot be removed and keeps returning, the correct answer is OS reinstall (nuke and pave), not another removal attempt. Rootkits are specifically designed to survive cleaning.</ConceptCallout>

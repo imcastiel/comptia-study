@@ -1,0 +1,339 @@
+# Mobile Device Hardware Components
+
+## Laptop Display Technology
+
+### Display Types
+
+Laptop displays come in several technologies, each with distinct exam-relevant characteristics:
+
+| Display Type | Backlight | Viewing Angle | Response Time | Power Use | Notes |
+|---|---|---|---|---|---|
+| TN (Twisted Nematic) | LED | Narrow | Fast | Low | Older budget laptops |
+| IPS (In-Plane Switching) | LED | Wide | Moderate | Moderate | Most modern laptops |
+| VA (Vertical Alignment) | LED | Moderate | Slow | Moderate | Rare in laptops |
+| OLED | Self-lit | Very Wide | Very Fast | Variable | High-end ultrabooks |
+| CCFL-backlit LCD | Cold cathode fluorescent | Moderate | Moderate | Higher | Older pre-2012 laptops |
+
+<ConceptCallout type="tip">
+The exam distinguishes between CCFL (Cold Cathode Fluorescent Lamp) and LED backlights. CCFL requires an inverter board to convert DC to AC for the lamp. LED-backlit displays do NOT need an inverter. When a CCFL screen is dim, the inverter or the lamp itself is the likely culprit.
+</ConceptCallout>
+
+### Inverter Board
+
+The inverter is a small circuit board found only in laptops with CCFL backlights. It converts the DC power from the laptop's battery/adapter into the high-voltage AC needed to power the fluorescent backlight tube.
+
+**Symptoms of a failed inverter:**
+- Screen appears completely black but image is visible when a flashlight is held close
+- Screen works for a few seconds then goes dark
+- Visible flickering before failure
+
+**Replacement:** Inverter boards are laptop-model-specific. They are typically located at the bottom of the display panel behind a strip of plastic trim.
+
+### Digitizer
+
+A digitizer is the component that converts touch or stylus input into digital coordinates. On tablets and touchscreen laptops, the digitizer is a separate layer bonded to or placed in front of the LCD panel.
+
+- **Capacitive digitizer:** Responds to electrical conductivity of a finger or active stylus
+- **Active digitizer:** Used with a pressure-sensitive stylus (common in Microsoft Surface, Wacom tablets); can detect tilt and pressure
+
+A broken digitizer results in touch input that does not work even though the screen image is fine.
+
+### Webcam and Microphone
+
+Most modern laptops integrate a webcam at the top bezel of the display. The webcam module typically includes:
+- A small image sensor (usually 720p or 1080p)
+- An integrated microphone (or two microphones for noise cancellation)
+- IR sensors for Windows Hello facial recognition on some models
+
+The webcam connects via a thin ribbon cable running through the display lid hinge.
+
+### Keyboard
+
+Laptop keyboards connect to the motherboard via a ribbon cable (ZIF — Zero Insertion Force connector). Key characteristics:
+- Most laptop keyboards are secured with screws from beneath the palmrest or with plastic clips
+- Backlit keyboards add an LED layer beneath the keys, connected via a second ribbon cable
+- Keyboards are not universal — they are laptop-model-specific
+
+### Touchpad
+
+The touchpad (trackpad) is a pressure and capacitive-sensitive surface that translates finger movement into cursor movement. Modern touchpads are "precision touchpads" that comply with Microsoft/Google standards for gesture support.
+
+- Connect via ribbon cable to the motherboard
+- Some touchpads integrate mouse buttons; others use a clickable surface (haptic)
+- Touchpad issues are often driver-related before hardware replacement is needed
+
+### Speakers
+
+Laptop speakers are small and typically positioned on the bottom or sides of the chassis. They connect via small wire connectors to the motherboard audio subsystem. Speaker issues (distortion, no audio) should be isolated from software audio settings and audio driver problems before replacement.
+
+---
+
+## Expansion Slots and Readers
+
+### ExpressCard
+
+ExpressCard was a standard used in mid-2000s to early 2010s laptops for adding expansion cards (NICs, eSATA, USB, etc.).
+
+| Standard | Slot Width | Interface | Notes |
+|---|---|---|---|
+| ExpressCard/34 | 34 mm | USB 2.0 + PCIe x1 | Narrower, fits in /54 slot |
+| ExpressCard/54 | 54 mm | USB 2.0 + PCIe x1 | Wider form factor |
+
+<ConceptCallout type="info">
+ExpressCard/34 cards can physically fit in an ExpressCard/54 slot (with an adapter or extra space). ExpressCard/54 cards cannot fit in an /34 slot. This detail appears on the exam.
+</ConceptCallout>
+
+### Smart Card Reader
+
+A Smart Card reader accepts ISO 7816-compliant contact smart cards (the type with the gold chip). Common uses:
+- Government/military CAC (Common Access Card) authentication
+- Corporate logical access control
+- PIV (Personal Identity Verification) cards
+
+Some laptops have built-in smart card readers; external USB smart card readers are also common.
+
+### SD Card Slot
+
+Most laptops include a built-in SD card reader (SD, SDHC, SDXC). These connect internally via USB or PCIe.
+
+| SD Standard | Max Capacity | Max Speed | Notes |
+|---|---|---|---|
+| SD | 2 GB | 25 MB/s | Legacy |
+| SDHC | 32 GB | 25 MB/s | Most common |
+| SDXC | 2 TB | 104 MB/s+ | Modern cameras/laptops |
+| microSD | Same | Same | Smaller form, with adapter |
+
+---
+
+## Laptop RAM
+
+### SO-DIMM
+
+Laptops use **SO-DIMM** (Small Outline Dual Inline Memory Module), which is physically smaller than the desktop DIMM. SO-DIMMs have 260 pins (DDR4) or 262 pins (DDR5).
+
+| Type | Pins | Notes |
+|---|---|---|
+| DDR3 SO-DIMM | 204 | Older laptops |
+| DDR4 SO-DIMM | 260 | Current standard |
+| DDR5 SO-DIMM | 262 | Latest high-end laptops |
+
+<ConceptCallout type="warning">
+DDR3, DDR4, and DDR5 SO-DIMMs are NOT interchangeable — they have different pin counts and notch positions. Always verify the laptop's supported RAM type before purchasing a replacement.
+</ConceptCallout>
+
+Some ultrabooks use **soldered RAM** directly on the motherboard. This RAM cannot be upgraded or replaced — it is a permanent failure point.
+
+---
+
+## Laptop Storage
+
+### 2.5" SATA HDD/SSD
+
+The most common legacy storage form factor for laptops. Uses a 7mm or 9.5mm height 2.5-inch bay with a SATA connector.
+
+- HDDs: 5400 RPM (quiet/low power) or 7200 RPM (performance)
+- SSDs: Same form factor, SATA III interface (max ~550 MB/s)
+
+### mSATA
+
+mSATA (mini-SATA) is a smaller solid-state drive form factor that plugs into a dedicated mSATA slot on the motherboard. Physically looks like a PCIe Mini Card. Uses the SATA protocol over the smaller connector.
+
+- Max speed: ~550 MB/s (SATA III limit)
+- Being replaced by M.2
+
+### M.2
+
+M.2 is the current standard for laptop SSDs. It is a small rectangular card that plugs directly into the motherboard.
+
+| M.2 Key | Protocol | Lanes | Max Speed | Notes |
+|---|---|---|---|---|
+| M.2 SATA (B+M key) | SATA | — | ~550 MB/s | Uses SATA protocol |
+| M.2 NVMe (M key) | NVMe/PCIe | PCIe 3.0 x4 | ~3,500 MB/s | Much faster |
+| M.2 NVMe (M key) | NVMe/PCIe | PCIe 4.0 x4 | ~7,000 MB/s | Latest high-end |
+
+<ConceptCallout type="tip">
+M.2 drives come in different lengths: 2230, 2242, 2260, 2280. The number means width × length in mm (22mm wide × 80mm long for 2280). Most laptops use 2280. Always check the motherboard's supported lengths.
+</ConceptCallout>
+
+---
+
+## Laptop CPUs
+
+### Mobile TDP
+
+Mobile processors are designed for lower **TDP (Thermal Design Power)** compared to desktop CPUs:
+
+| Segment | Typical TDP | Notes |
+|---|---|---|
+| Ultra-low voltage (U-series) | 15–28W | Ultrabooks, long battery life |
+| Standard mobile (H-series) | 35–65W | Gaming/workstation laptops |
+| Desktop | 65–125W+ | Requires desktop cooling |
+
+Lower TDP means less heat and better battery life but reduced peak performance.
+
+### Integrated vs Discrete GPU
+
+| GPU Type | Location | VRAM | Performance | Power Use |
+|---|---|---|---|---|
+| Integrated | Built into CPU die | Shared system RAM | Moderate | Low |
+| Discrete | Separate GPU chip | Dedicated VRAM | High | High |
+
+Most modern laptops include both. The system switches between integrated (for everyday tasks/battery life) and discrete (for demanding workloads) automatically via Nvidia Optimus or AMD Switchable Graphics.
+
+---
+
+## Docking Stations vs Port Replicators
+
+| Feature | Port Replicator | Docking Station |
+|---|---|---|
+| Connectivity | Mirrors laptop ports | Adds new ports/functionality |
+| Power delivery | May or may not charge | Usually charges laptop |
+| Interface | Proprietary or USB-C | Proprietary or Thunderbolt/USB-C |
+| Expansion | Minimal | Can add PCIe, display outputs |
+
+<ConceptCallout type="info">
+The exam distinguishes these: a **port replicator** simply provides convenient access to the same ports the laptop already has. A **docking station** actively extends functionality — it may add monitor outputs, PCIe slots, Ethernet, and charging via a single connection.
+</ConceptCallout>
+
+---
+
+## Laptop Display Connections (Internal)
+
+### LVDS
+
+**LVDS (Low-Voltage Differential Signaling)** was the standard internal display interface for laptops from roughly 2000–2012. It uses a wide ribbon cable (typically 30 or 40 pins) to carry the video signal from the GPU to the display panel.
+
+- Analog-based signal encoding
+- Susceptible to interference if cable is damaged
+- Found on older laptops with CCFL or early LED backlights
+
+### eDP
+
+**eDP (Embedded DisplayPort)** replaced LVDS as the internal display interface. It is a digital protocol based on DisplayPort.
+
+- Thinner cable, fewer pins
+- Better image quality, supports higher resolutions and refresh rates
+- Used in all modern laptops (2012 onward)
+- Cable damage causes symptoms: flickering, color artifacts, no image
+
+---
+
+## Replacing Laptop Components
+
+### Battery Replacement
+
+1. Power off completely and disconnect AC adapter
+2. On older laptops: slide battery release latches on the bottom
+3. On modern laptops: remove bottom cover screws, pry off bottom panel, disconnect battery connector from motherboard, unscrew battery
+4. Replace with OEM or compatible battery (same voltage, equal or greater mAh)
+5. Calibrate new battery: fully charge, then fully discharge once
+
+### Keyboard Replacement
+
+1. Power off, disconnect power
+2. Some keyboards are top-accessed: pry up keyboard from tabs around edges
+3. Disconnect ribbon cable (ZIF connector — flip the locking tab up before pulling cable)
+4. Install new keyboard, reconnect ribbon cable, lock ZIF tab, test before reassembly
+
+### RAM Replacement
+
+1. Power off, disconnect power, remove bottom cover
+2. Locate SO-DIMM slots (usually 1–2 slots)
+3. Press outward on the retention clips on both sides — module pops up at an angle
+4. Pull module out at the same angle it was seated
+5. Install new module at a 45° angle, push down until clips click
+
+### Storage Replacement
+
+1. Power off, disconnect power, remove bottom cover
+2. For 2.5": unscrew drive bracket, disconnect SATA cable, swap drive
+3. For M.2: remove single retaining screw, slide out at angle, insert new drive, replace screw
+
+### Screen Replacement
+
+1. Power off, remove battery
+2. Peel rubber screw covers on display bezel, remove screws, pry off bezel
+3. Remove screws holding display panel to lid frame
+4. Tilt panel forward, disconnect eDP/LVDS cable (and webcam cable if present)
+5. Install new panel (verify same resolution, interface, connector)
+6. Route cables carefully to avoid pinching in hinge area
+
+<ConceptCallout type="warning">
+Always document screw locations during disassembly — laptop screws are often different lengths and mixing them up damages the motherboard or chassis. Use a magnetic parts tray or draw a diagram.
+</ConceptCallout>
+
+---
+
+## Tablet and Smartphone Hardware
+
+### Touchscreen Technologies
+
+| Type | How It Works | Stylus Support | Notes |
+|---|---|---|---|
+| Capacitive | Detects electrical charge from finger | Active stylus only | Multi-touch, most common |
+| Resistive | Detects physical pressure | Any stylus/fingernail | Single-touch, older/industrial |
+
+**Capacitive** screens will not respond to a regular stylus or gloved finger because there is no conductive charge. **Resistive** screens work with any object that applies pressure and are used in industrial, medical, and outdoor environments.
+
+### Internal Sensors
+
+| Sensor | Function | Use Cases |
+|---|---|---|
+| Accelerometer | Measures linear acceleration | Screen rotation, step counting |
+| Gyroscope | Measures rotational movement | Gaming, AR, precise orientation |
+| Magnetometer (compass) | Detects magnetic field direction | Maps, compass apps |
+| GPS | Determines geographic location | Navigation, location services |
+| Proximity sensor | Detects objects close to screen | Turns off screen during calls |
+| Ambient light sensor | Measures surrounding light level | Auto-brightness |
+| Barometer | Measures air pressure | Altitude, weather apps |
+
+<ConceptCallout type="tip">
+The exam may ask you to distinguish accelerometer from gyroscope. An **accelerometer** detects gravity and linear motion (useful for knowing if the phone is face-up or tilting). A **gyroscope** detects rotational rate (useful for knowing how fast the device is spinning). Together they provide full 6-axis motion tracking.
+</ConceptCallout>
+
+### NFC (Near Field Communication)
+
+NFC operates at 13.56 MHz with a range of ~4 cm. Used for:
+- Mobile payments (Apple Pay, Google Pay)
+- Access cards/transit passes
+- Quick device pairing
+- Asset tracking tags
+
+NFC requires both devices to be within a few centimeters, which is a security feature (prevents accidental or eavesdropped transactions at longer ranges).
+
+### IR Blaster
+
+An IR (Infrared) blaster transmits infrared signals that can control IR-enabled devices like TVs, air conditioners, and set-top boxes. Common in Android devices; Apple removed IR blasters from iPhones after the iPhone 4s. When an IR blaster is present, the phone can act as a universal remote control.
+
+---
+
+## iOS vs Android Hardware Ecosystems
+
+| Characteristic | iOS (Apple) | Android (Various OEMs) |
+|---|---|---|
+| Chip design | Apple Silicon (A-series, M-series) | Qualcomm Snapdragon, MediaTek, Samsung Exynos, Google Tensor |
+| RAM | Not user-serviceable, soldered | Mostly soldered; some mid-range phones have slots |
+| Storage | UFS, soldered (no expansion) | UFS or eMMC; many support microSD expansion |
+| Charging connector | Lightning (older), USB-C (iPhone 15+) | USB-C (current), micro-USB (older) |
+| Fingerprint sensor location | Under screen (Face ID on newer), side button, or home button | Under screen, side button, rear panel |
+| Software updates | 5–6 years from Apple | Varies by OEM: Google Pixel 7+ years, Samsung 4 years, others less |
+| Repairability | Generally harder (proprietary screws, glued) | Varies widely; Fairphone designed for repair |
+
+---
+
+## Laptop Disassembly Best Practices
+
+1. **Power down completely** — do not just sleep or hibernate; disconnect AC power
+2. **Remove the battery** (if possible) before touching internal components
+3. **Ground yourself** — use an ESD wrist strap connected to a ground point
+4. **Work on an ESD-safe mat** — avoid carpeted areas
+5. **Document as you go** — photograph each step before disassembly; note screw locations
+6. **Use correct tools** — Phillips #0 and #00, Torx T5/T6, spudger/plastic pry tool
+7. **Handle PCBs by edges** — never touch component surfaces or traces
+8. **ZIF connectors** — always lift the locking tab before pulling the ribbon cable; forcing the cable out destroys the connector
+9. **Label or bag screws** — different screw lengths go in different locations
+10. **Test before full reassembly** — power on before replacing all covers to confirm the repair works
+
+<ConceptCallout type="warning">
+Static electricity is the most common cause of accidental damage during laptop repair. A single ESD event can destroy RAM, a GPU, or the motherboard. Always use an ESD wrist strap and mat when working on laptop internals.
+</ConceptCallout>

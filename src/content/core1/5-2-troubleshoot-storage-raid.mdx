@@ -1,0 +1,317 @@
+# Troubleshooting Storage Devices and RAID Arrays
+
+## HDD Failure Symptoms
+
+Hard disk drives are mechanical devices with moving parts (spinning platters and read/write heads), making them prone to specific failure modes.
+
+### Physical / Audible Symptoms
+
+| Symptom | What It Indicates |
+|---|---|
+| Clicking or ticking sound (click of death) | Read/write head failing to find or read tracks; severe failure imminent |
+| Grinding sound | Head physically contacting platter surface — immediate data loss risk |
+| Repetitive chirping | Calibration failure; seek errors |
+| Drive spinning up and spinning down repeatedly | Power issue, or drive is unresponsive to commands |
+| Silence (drive doesn't spin) | Seized spindle motor or PCB failure |
+
+<ConceptCallout type="warning">
+If you hear clicking or grinding from an HDD, **power it off immediately**. Every rotation of the platter while the head is crashing risks overwriting data, scratching the platter, and making recovery impossible. Data recovery from a drive with platter damage requires a cleanroom environment and costs thousands of dollars.
+</ConceptCallout>
+
+### Software / Logical Symptoms
+
+| Symptom | Likely Cause |
+|---|---|
+| Drive not detected in BIOS/UEFI | Cable failure, connector damage, failed drive electronics |
+| Read/write errors in OS | Bad sectors, failing heads |
+| Extremely slow performance | Drive retrying reads on bad sectors repeatedly (high reallocated sector count) |
+| File system errors on boot | Bad sectors affecting file system structures (MBR, MFT, FAT) |
+| File corruption | Data written to bad sectors contains errors |
+| "No bootable device" error | MBR or boot sector corrupted, or BIOS doesn't detect the drive |
+
+### Bad Sectors
+
+A bad sector is a sector on the disk that can no longer reliably store data.
+- **Soft/logical bad sectors:** Caused by improper shutdown, power loss; can sometimes be repaired by writing zeros to that area
+- **Hard/physical bad sectors:** Physical damage to the platter coating; permanent and unrecoverable
+
+The drive firmware automatically remaps bad sectors to spare sectors — this is tracked in S.M.A.R.T. When spare sectors are exhausted, errors begin to surface to the OS.
+
+---
+
+## SSD Failure Symptoms
+
+SSDs (Solid State Drives) fail differently from HDDs — there are no moving parts, so audible symptoms don't apply.
+
+### SSD-Specific Failure Signs
+
+| Symptom | Description |
+|---|---|
+| Sudden disappearance | Drive was working, now BIOS and OS cannot see it — controller failure |
+| Read-only mode | SSD firmware detected failure, locked drive to read-only to preserve data |
+| Corrupted files | Worn NAND cells writing incorrect data |
+| Drive appears but cannot be formatted/written | Controller or NAND failure |
+| Extremely slow performance | Heavy garbage collection, pseudo-SLC cache exhausted, or wear leveling overhead |
+| Short lifespan on consumer SSDs in servers | SSDs have rated TBW (Terabytes Written) limits; exceeding causes rapid wear |
+
+**TBW (Terabytes Written)** — the total data that can be written to an SSD over its lifetime. A typical 500 GB consumer SSD might have 300 TBW. Enterprise SSDs have much higher TBW ratings.
+
+<ConceptCallout type="info">
+When an SSD approaches its write limit, it transitions to read-only mode before complete failure. This is a graceful degradation — the data is still accessible but no new data can be written. This is a significant advantage over HDDs, which may lose data without warning. Monitor S.M.A.R.T. attributes for wear indicators.
+</ConceptCallout>
+
+---
+
+## S.M.A.R.T. Monitoring
+
+**S.M.A.R.T. (Self-Monitoring, Analysis and Reporting Technology)** is a monitoring system built into HDDs and SSDs that tracks health indicators and predicts failure.
+
+### Key S.M.A.R.T. Attributes
+
+| Attribute | ID | Description | Warning Level |
+|---|---|---|---|
+| Reallocated Sectors Count | 0x05 | Number of bad sectors remapped to spares | Any count above 0 is concerning |
+| Spin-Up Time | 0x03 | Time for drive to reach operating speed | Increasing = mechanical problem |
+| Seek Error Rate | 0x07 | Rate of seek errors | High rate = head problems |
+| Power-On Hours | 0x09 | Total powered-on time | Context only |
+| Reallocated Event Count | 0xC4 | Number of reallocation events | Any increase is serious |
+| Current Pending Sectors | 0xC5 | Sectors waiting to be remapped | Non-zero = active read errors |
+| Uncorrectable Sector Count | 0xC6 | Sectors that couldn't be corrected | Any non-zero = critical |
+| SSD Wear Leveling Count | 0xB3 | Remaining SSD write endurance | Decreasing over time; 0 = end of life |
+
+### CrystalDiskInfo
+
+CrystalDiskInfo is a Windows utility that reads and displays S.M.A.R.T. data in a human-readable format.
+
+**Status interpretations:**
+- **Good:** Drive is healthy, no concerning attributes
+- **Caution:** One or more attributes have triggered warning thresholds — plan for replacement
+- **Bad:** Drive is failing — back up immediately and replace
+
+<ConceptCallout type="tip">
+Check S.M.A.R.T. status regularly as part of preventive maintenance. A drive with a "Caution" status for Reallocated Sectors Count or Current Pending Sectors should be considered unreliable — back up data and replace the drive before it reaches complete failure. S.M.A.R.T. does not catch all failure modes (sudden controller death bypasses S.M.A.R.T.).
+</ConceptCallout>
+
+---
+
+## Data Recovery Basics
+
+### The Most Important Rule
+
+**Do not write to a failing drive.** Every write operation risks overwriting recoverable data. This means:
+- Do not attempt to save files to the failing drive
+- Do not defragment the failing drive
+- Do not run chkdsk /r on the failing drive (it writes to sectors)
+- Do not attempt OS installation on the failing drive
+
+### Immediate Steps When a Drive Fails
+
+1. **Power off** the system if the drive is clicking or grinding
+2. If drive still appears: **image the drive** first (sector-by-sector copy using ddrescue or Clonezilla) before attempting any recovery
+3. Recover files from the image, not the original drive
+
+### Bootable Recovery Tools
+
+| Tool | Type | Capabilities |
+|---|---|---|
+| Clonezilla | Bootable Linux | Full disk/partition imaging and cloning |
+| GParted Live | Bootable Linux | Partition management and recovery |
+| TestDisk | CLI (bootable) | Partition table repair, boot sector recovery |
+| PhotoRec | CLI (bootable) | File carving recovery (companion to TestDisk) |
+| Hiren's BootCD PE | Windows PE | Comprehensive recovery toolkit |
+| System Rescue | Bootable Linux | File system tools and hardware diagnostics |
+
+### File Recovery Software
+
+| Tool | OS | Best For |
+|---|---|---|
+| Recuva | Windows | Deleted file recovery from NTFS/FAT |
+| PhotoRec | Cross-platform | File carving by signature (any file type) |
+| R-Studio | Windows/Mac/Linux | Professional recovery, damaged file systems |
+| Disk Drill | Windows/Mac | User-friendly recovery |
+| GetDataBack | Windows | NTFS and FAT recovery |
+
+### Data Recovery Workflow
+
+1. Stop using the drive — minimize writes
+2. If drive is still functional: image with `ddrescue` or Clonezilla to another drive
+3. Run file recovery on the image file, not the original
+4. For physically damaged drives: send to professional data recovery (DriveSavers, Ontrack, etc.)
+5. Professional recovery involves cleanroom environments, platter transplants, and specialized tools
+
+---
+
+## RAID Failure Scenarios
+
+RAID (Redundant Array of Independent Disks) provides data protection or performance by combining multiple drives.
+
+### RAID Levels and Fault Tolerance
+
+| RAID Level | Minimum Drives | Fault Tolerance | Notes |
+|---|---|---|---|
+| RAID 0 (Striping) | 2 | None — any drive fails = total loss | Performance only; no redundancy |
+| RAID 1 (Mirroring) | 2 | 1 drive can fail | All data mirrored; 50% capacity |
+| RAID 5 (Stripe with parity) | 3 | 1 drive can fail | Distributed parity; n-1 capacity |
+| RAID 6 (Stripe with dual parity) | 4 | 2 drives can fail | Two parity blocks; n-2 capacity |
+| RAID 10 (Stripe of mirrors) | 4 | 1 drive per mirrored pair | Performance + redundancy; 50% capacity |
+
+### RAID 0 Failure
+
+RAID 0 stripes data across all drives with no parity or redundancy.
+
+- **Any single drive failure = 100% data loss** for the entire array
+- Data from both drives is required to reconstruct any file
+- Not suitable for any data you cannot afford to lose
+- RAID 0 is only appropriate for scratch data, rendering caches, or where speed matters more than data
+
+### RAID 1 Failure
+
+RAID 1 maintains an identical mirror copy on two (or more) drives.
+
+- **One drive can fail** — the mirror continues operating from the good drive
+- Failed drive is indicated by RAID controller alerts or status LEDs
+- **Recovery:** Replace the failed drive; the controller automatically rebuilds (synchronizes) the mirror from the good drive
+- During rebuild: array is in degraded mode (no fault tolerance); another failure during rebuild = total loss
+
+### RAID 5 Failure
+
+RAID 5 stripes data and parity information across all drives. Parity allows reconstruction of any one failed drive's data.
+
+- **One drive failure:** Array enters **degraded mode** — still operational but with no redundancy and reduced performance
+- Data is reconstructed on reads using the parity from surviving drives
+- **Recovery:**
+  1. Replace the failed drive with a drive of equal or greater size
+  2. Initiate rebuild via RAID controller (automatic on hot-swap controllers)
+  3. Controller recalculates parity and writes missing data to the new drive
+  4. Rebuild time: hours to days depending on array size
+
+<ConceptCallout type="warning">
+**RAID 5 rebuild is the highest-risk time for data loss.** During a rebuild, all surviving drives are read in their entirety. If another drive fails during this process — the array fails completely. Always maintain a spare drive for immediate replacement, and back up RAID 5 arrays regularly because they cannot survive two simultaneous failures.
+</ConceptCallout>
+
+### RAID 6 Failure
+
+RAID 6 adds a second independent parity calculation.
+- **Two drives can fail simultaneously** — array remains operational
+- After first drive fails: replace it, array rebuilds (still tolerates one more failure during rebuild)
+- Rebuild time is longer than RAID 5 due to more parity calculation
+
+### RAID 10 Failure
+
+RAID 10 creates mirrored pairs (RAID 1) then stripes across the pairs (RAID 0).
+
+- **Which failures are survivable:** One drive from each mirrored pair can fail simultaneously — array survives
+- **Which failures are catastrophic:** Both drives in the same mirrored pair fail — that pair's data is lost, array fails
+- Four-drive RAID 10: can survive 1 or 2 drives failing if they are from different pairs; fails if both drives in the same pair fail
+
+| RAID 10 Drive Failure Scenario | Result |
+|---|---|
+| Drive A1 fails (from pair A1+A2) | Degraded but operational; rebuild from A2 |
+| Drive A1 + Drive B1 fail (different pairs) | Operational (each pair has one good drive) |
+| Drive A1 + Drive A2 fail (same pair) | Array fails — complete data loss |
+
+---
+
+## RAID Controller Failure vs Drive Failure
+
+It is critical to distinguish between the RAID controller failing and an individual drive failing.
+
+| Symptom | Controller Issue | Drive Issue |
+|---|---|---|
+| All drives appear in BIOS but RAID volume gone | RAID metadata lost on controller | Unlikely |
+| Single drive not detected | Possibly | Yes — drive or cable failure |
+| Array degraded, one drive failed | No | Yes |
+| System won't boot; all drives undetected | BIOS/controller failure | Unlikely to affect all drives |
+
+**If the RAID controller hardware fails:**
+- Replace with the same model controller (RAID configurations are stored on drives or controller card's non-volatile memory)
+- If the controller stored config internally and that's lost, you may need recovery software to reconstruct the array
+- R-Studio, ReclaiMe RAID Recovery, and similar tools can often reconstruct a RAID 5/6 configuration by analyzing drive contents
+
+---
+
+## Rebuilding a RAID Array
+
+### Hardware RAID Rebuild Steps
+
+1. **Identify the failed drive** via RAID controller utility or LED indicators on the drive chassis
+2. **Hot-swap or power off** to replace (depends on controller and chassis support)
+3. **Insert replacement drive** — same or larger capacity; same or faster speed recommended
+4. **Initiate rebuild** — on most controllers this is automatic after inserting the replacement
+5. **Monitor rebuild progress** via controller management software (e.g., Intel RST, LSI MegaRAID Storage Manager, Dell OpenManage)
+6. **Verify completion** — controller reports array is optimal/healthy
+7. **Test the array** — run a surface scan of the rebuilt array to verify integrity
+
+### Rebuild Time Estimates
+
+| Array Size | Approximate Rebuild Time |
+|---|---|
+| 1 TB RAID 5 | 4–8 hours |
+| 4 TB RAID 5 | 16–24 hours |
+| 8 TB RAID 6 | 48+ hours |
+| RAID 10 (1 TB per drive) | 2–4 hours |
+
+Rebuild time depends on drive speed, controller speed, and system load during rebuild.
+
+---
+
+## Boot Order Troubleshooting
+
+### Drive Not Detected in BIOS
+
+1. **Check physical connections:** SATA data cable, SATA power connector, or M.2 seating
+2. **Try a different SATA port:** Some ports share bandwidth or can malfunction
+3. **Try a different cable:** SATA data cables fail more often than people expect
+4. **Check BIOS storage mode:** AHCI vs IDE mode — changing this after OS installation breaks Windows boot
+5. **Verify drive power:** PSU Molex/SATA power connector supplying power to the drive
+
+### Wrong Boot Device
+
+- Error: "No bootable device" / "Operating System not found" / "Boot device not found"
+- Enter BIOS Setup, navigate to Boot Order or Boot Priority
+- Set the correct drive (with the OS) as the first boot device
+- If installing a second OS: BIOS may be attempting to boot from the old drive
+
+### Troubleshooting Boot Failures
+
+| Error Message | Cause | Fix |
+|---|---|---|
+| NTLDR is missing | Windows XP boot file missing | Boot from Windows XP CD, run recovery console |
+| BOOTMGR is missing | Windows Vista/7/8/10 boot manager missing | Boot from Windows media, run Startup Repair |
+| Operating System not found | Boot device not in BIOS boot order, or drive failure | Check BIOS boot order; check drive health |
+| Grub rescue prompt | GRUB bootloader corrupted or missing | Boot from Linux live USB; run grub-install |
+
+---
+
+## MBR vs GPT Corruption
+
+### MBR (Master Boot Record)
+
+The MBR occupies the first 512 bytes of the disk. It contains:
+- Boot code (446 bytes)
+- Partition table (64 bytes, up to 4 primary partitions)
+- Signature (2 bytes: 0x55AA)
+
+**MBR corruption symptoms:**
+- "Invalid partition table"
+- "Error loading operating system"
+- "Missing operating system"
+
+**MBR repair:**
+- Windows: `bootrec /fixmbr` from Windows Recovery Environment
+- Linux: `grub-install` or `testdisk` to repair partition table
+
+### GPT (GUID Partition Table)
+
+GPT is the modern standard, required for drives larger than 2 TB and for UEFI systems.
+
+- Stores partition data in multiple locations (header + backup at end of disk)
+- Supports up to 128 partitions by default
+- Includes CRC checksums for data integrity
+
+**GPT corruption symptoms:** Similar to MBR; GPT has a backup header which can often auto-repair.
+
+**GPT repair:**
+- Windows: `diskpart` → `recover` or `bootrec /rebuildbcd`
+- Linux: `gdisk` → recover backup GPT
+- `testdisk`: Analyze and repair GPT partition tables

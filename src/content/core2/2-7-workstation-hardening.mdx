@@ -1,0 +1,188 @@
+# Workstation Security and Hardening
+
+Hardening a workstation means reducing its attack surface by removing unnecessary functionality, enforcing strong authentication, and keeping the system patched. The goal is defense-in-depth: multiple overlapping controls so that no single failure compromises the machine.
+
+---
+
+## Password Policies
+
+Password policies are configured via **Local Security Policy** (`secpol.msc`) on standalone machines or via **Group Policy** (GPO) on domain-joined machines. They are the first line of defense against unauthorized account access.
+
+| Policy Setting | Recommended Value | Rationale |
+|---|---|---|
+| Minimum password length | 12+ characters | Each added character multiplies brute-force time exponentially |
+| Complexity requirement | Upper, lower, numbers, symbols | Blocks simple dictionary and name-based passwords |
+| Maximum password age | 90 days | Limits the window of exposure after a silent compromise |
+| Minimum password age | 1 day | Prevents users from cycling through history to reuse old password |
+| Password history | Last 10–24 passwords | Prevents reuse of recently changed passwords |
+| Account lockout threshold | 3–5 failed attempts | Stops online brute-force attacks cold |
+| Lockout duration | 30 minutes | Forces delay before retry; alert admin if automated |
+| Lockout observation window | 30 minutes | Resets the failed-attempt counter after this period |
+
+<ConceptCallout type="tip">The exam frequently asks about account lockout. Typical scenario: 3–5 failed attempts triggers a 30-minute lockout. The administrator can unlock accounts manually before the duration expires.</ConceptCallout>
+
+---
+
+## Screen Lock and Auto-Lock
+
+An unlocked, unattended workstation is a physical security failure. Screen locks prevent unauthorized access when a user steps away.
+
+- **Windows + L**: instantly locks the current session regardless of timeout setting
+- **Screensaver with password lock**: set screensaver to activate after inactivity, check "On resume, display logon screen"
+- **Group Policy enforcement**: `Computer Configuration > Policies > Windows Settings > Security Settings > Local Policies` — set interactive logon machine inactivity limit
+- **Recommended timeout**: 5–15 minutes for most office environments; shorter in high-security areas
+
+<ConceptCallout type="info">In a domain environment, Group Policy overrides local settings. If a user disables their screensaver lock, Group Policy reapplies the setting at next refresh (every 90 minutes by default).</ConceptCallout>
+
+---
+
+## OS Patching
+
+Unpatched systems are the most common attack vector. Patch management is not optional — it is a foundational control.
+
+- **Patch Tuesday**: Microsoft releases security patches on the second Tuesday of each month. Administrators plan maintenance windows around this schedule.
+- **Zero-day patches**: critical vulnerabilities receive out-of-band patches outside the normal cycle. These should be applied immediately, not held for the next cycle.
+- **Windows Update**: configure to download and install updates automatically. Check `Settings > Windows Update`. On managed systems, updates may be staged through testing environments first.
+- **WSUS (Windows Server Update Services)**: enterprise solution that centralizes update management. Admins approve, schedule, and deploy updates across the organization. Prevents individual machines from going directly to Microsoft — important for bandwidth management and controlled rollouts.
+- **Third-party applications**: Windows Update does not patch Chrome, Adobe Reader, Java, etc. Use separate patch management (SCCM, Intune, Chocolatey) or configure individual apps to auto-update.
+
+<ProcessSteps
+  title="Workstation Hardening Checklist"
+  color="blue"
+  steps={[
+    { title: "Apply OS and Application Patches", description: "Enable Windows Update for automatic patching. Deploy WSUS in enterprise environments. Patch third-party software separately." },
+    { title: "Configure Password Policy", description: "Set minimum length to 12+, enable complexity, set 90-day maximum age, configure 3–5 attempt lockout for 30 minutes." },
+    { title: "Enable Screen Lock", description: "Set auto-lock after 5–15 minutes of inactivity. Enforce via Group Policy on domain machines." },
+    { title: "Disable Unused Services and Ports", description: "Stop and disable services not required for the machine's function. Close associated ports in the host-based firewall." },
+    { title: "Enable Host-Based Firewall", description: "Verify Windows Firewall is on. Block all inbound connections except explicitly required services." },
+    { title: "Deploy Antivirus / EDR", description: "Install real-time antivirus. Schedule full scans. Keep definitions current. Consider EDR for enhanced threat detection." },
+    { title: "Enforce Least Privilege", description: "Standard user account for daily use. Separate admin account used only when needed for elevated tasks." },
+    { title: "Enable Drive Encryption", description: "BitLocker (Windows), FileVault (macOS), or LUKS (Linux). Store recovery key securely off the device." },
+    { title: "Configure BIOS/UEFI Security", description: "Set supervisor password. Lock boot order. Enable Secure Boot and TPM." },
+    { title: "Disable AutoRun/AutoPlay", description: "Prevent automatic execution from USB drives via Group Policy or registry." }
+  ]}
+/>
+
+---
+
+## Disabling Unused Services and Ports
+
+Every running service is a potential attack vector. Services that are not required should be stopped and set to **Disabled** — not just stopped — so they cannot be started by an attacker or by accident.
+
+**Commonly disabled services on workstations:**
+
+| Service | Reason to Disable |
+|---|---|
+| Telnet | Transmits data in plaintext; replaced by SSH |
+| FTP Server | Plaintext credentials; use SFTP or HTTPS instead |
+| Remote Registry | Allows remote modification of registry; not needed on workstations |
+| Print Spooler | Only needed on workstations that print; PrintNightmare vulnerability history |
+| SMBv1 | Legacy protocol; WannaCry and NotPetya propagated via SMBv1 |
+| SNMP | Used for network monitoring; disable if not managed |
+
+Manage services via `services.msc` or Group Policy (`Computer Configuration > Windows Settings > System Services`).
+
+---
+
+## Host-Based Firewall
+
+The host-based firewall is the last line of network defense — it applies even if the machine is connected directly to the internet or to an untrusted network.
+
+- **Windows Defender Firewall**: built into all Windows versions. Three profiles: Domain (corporate network), Private (home/trusted), Public (untrusted).
+- **Default behavior**: block all inbound connections; allow all outbound.
+- **Allow by exception**: create specific inbound rules only for required services (e.g., allow RDP from specific IP range only).
+- **Linux**: `iptables` (lower-level) or `ufw` (Uncomplicated Firewall — simpler management). `ufw enable`, `ufw allow ssh`, etc.
+- **Advanced configuration**: Windows Firewall with Advanced Security (`wf.msc`) allows port-level, application-level, and protocol-level rules.
+
+---
+
+## Antivirus and Endpoint Detection and Response (EDR)
+
+- **Antivirus**: signature-based detection, heuristics, real-time file scanning, scheduled full scans. Keep definitions updated — most update multiple times per day.
+- **EDR (Endpoint Detection and Response)**: advanced threat detection using behavioral analysis, not just signatures. Detects fileless malware, living-off-the-land attacks, lateral movement. Records telemetry for forensic investigation. Examples: CrowdStrike Falcon, Microsoft Defender for Endpoint, Carbon Black.
+- **Differences**: traditional AV blocks known-bad files. EDR monitors behavior patterns, can detect novel threats that have no signature yet.
+
+<ConceptCallout type="info">For the exam, know that EDR goes beyond traditional antivirus by monitoring system behavior rather than just matching file signatures. It is the enterprise replacement for legacy AV.</ConceptCallout>
+
+---
+
+## Mobile Device Management (MDM)
+
+MDM allows organizations to centrally enforce security policies across laptops, smartphones, and tablets — especially important for remote workers.
+
+- **Enrollment**: device is enrolled into the MDM platform (Microsoft Intune, Jamf, VMware Workspace ONE)
+- **Enforced policies**: encryption, screen lock type/timeout, minimum OS version, VPN configuration, blocked apps
+- **Remote wipe**: administrator can remotely erase a lost or stolen device
+- **App management**: control which apps can be installed; push required apps silently
+- **Compliance reporting**: MDM reports which devices are compliant or non-compliant with policy
+
+---
+
+## Principle of Least Privilege
+
+<ConceptCallout type="warning">Most organizations require standard user accounts for daily use. Admin credentials should only be used for specific administrative tasks and then the session ended. Never run as administrator by default.</ConceptCallout>
+
+<CompareCards
+  title="Standard User vs Administrator Account"
+  left={{ title: "Standard User Account", icon: "Shield", color: "green", points: ["Used for all daily work — email, documents, browsing", "Cannot install software system-wide", "Cannot modify system settings or registry", "Malware runs with limited permissions if account is compromised", "Required by least privilege principle", "Prompt for admin credentials when elevation needed (UAC)"] }}
+  right={{ title: "Administrator Account", icon: "Lock", color: "blue", points: ["Used only for specific admin tasks", "Can install software and modify system settings", "Full access to all system resources", "Malware runs with full system access if compromised", "Separate account — not your daily login", "Log off admin session when task is complete"] }}
+/>
+
+**User Account Control (UAC)**: Windows feature that prompts for confirmation or credentials before allowing elevation. Even if logged in as admin, UAC prevents silent privilege escalation. Never disable UAC.
+
+---
+
+## Application Allowlisting
+
+Application allowlisting (previously called whitelisting) permits only pre-approved applications to run. Anything not on the list is blocked, including malware.
+
+- **AppLocker**: Windows Enterprise/Education feature. Create rules based on publisher, file path, or file hash. Prevents unauthorized executables, scripts, and installers.
+- **Software Restriction Policies**: older Group Policy mechanism, compatible with all Windows editions. Less granular than AppLocker.
+- **Benefit**: even if an attacker delivers a malicious executable to the machine, it cannot run if it is not on the allowlist.
+- **Downside**: administrative overhead. Requires maintaining the list and approving new legitimate software.
+
+---
+
+## Disabling AutoRun and AutoPlay
+
+AutoRun (Windows XP era) automatically executed programs on inserted media. AutoPlay presents a dialog asking what to do. Both can be exploited — a malicious USB drive could run malware automatically.
+
+- **AutoRun**: disable via Group Policy (`Computer Configuration > Administrative Templates > Windows Components > AutoPlay Policies > Turn off AutoPlay`)
+- **Registry**: `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\IniFileMapping\Autorun.inf` — redirect to a null key
+- **Best practice**: disable AutoPlay/AutoRun for all drives on all workstations. USB drives should be scanned manually before use.
+
+---
+
+## Drive Encryption
+
+Full disk encryption protects data if a device is physically stolen. Without the encryption key, the data on the drive is unreadable.
+
+| Platform | Encryption Tool | Notes |
+|---|---|---|
+| Windows | BitLocker | Requires TPM 1.2+ (preferred) or USB key. Pro/Enterprise editions. Managed via GPO or Intune. |
+| macOS | FileVault | Built into all modern macOS. Encrypts entire startup disk. Recovery key stored in iCloud or locally. |
+| Linux | LUKS (dm-crypt) | Linux Unified Key Setup. Configured at install time or post-install. |
+
+**BitLocker recovery key**: store in Active Directory, Azure AD, or a separate secure location — not on the encrypted drive itself.
+
+---
+
+## BIOS/UEFI Security
+
+The firmware layer runs before the OS. Securing it prevents boot-level attacks and unauthorized OS installation.
+
+- **Supervisor/admin password**: prevents unauthorized access to BIOS/UEFI settings. Without it, an attacker can change boot order, disable Secure Boot, etc.
+- **Boot order lock**: restrict boot to the internal drive only. Prevents booting from live USB to bypass OS security.
+- **Secure Boot**: UEFI feature that verifies the bootloader's digital signature before executing it. Prevents unsigned bootloaders (used by rootkits and bootkits) from loading. Requires a UEFI-signed OS.
+- **TPM (Trusted Platform Module)**: hardware chip that stores encryption keys, certificates, and measurements of system state. Required for BitLocker without a USB key. Validates that the system has not been tampered with.
+
+---
+
+## DNS Filtering
+
+DNS filtering blocks access to malicious or prohibited domains at the DNS resolution level — before any connection is established.
+
+- **How it works**: DNS queries are forwarded to a filtering service. If the domain is on a blocklist (malware, phishing, adult content, etc.), the query returns a blocked page instead of the real IP.
+- **Enterprise solutions**: Cisco Umbrella, Zscaler DNS, Cloudflare Gateway
+- **Home/SOHO solutions**: Pi-hole (local), OpenDNS, Quad9 (9.9.9.9 — blocks malware domains by default)
+- **Benefit**: stops malware C2 (command-and-control) callbacks even if malware is already on the machine. The malware cannot reach its controller if the domain is blocked at DNS.

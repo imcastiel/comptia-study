@@ -1,0 +1,159 @@
+# Troubleshoot Common Mobile OS and Application Security Issues
+
+Mobile security issues differ from traditional PC threats — most originate from behavioral risks (clicking phishing links, granting excessive permissions, installing untrusted apps) rather than self-propagating malware. The A+ exam tests your ability to recognize the symptoms of these issues and know the correct response for each.
+
+## Unexpected or High Data Usage
+
+**Symptoms**: data plan depletes faster than usual; carrier sends overage alerts; Settings → Mobile Data shows more usage than expected.
+
+**Common causes:**
+
+| Cause | What to Look For |
+|---|---|
+| Malware or spyware | Unknown app with high data usage, background data spikes at night |
+| Background sync gone wrong | A cloud backup or sync service stuck in a loop |
+| Hotspot being used without knowledge | Hotspot enabled; check connected devices |
+| Video autoplay in apps | Social media apps set to autoplay on cellular |
+| Operating system update downloading | Large OTA update staging in background |
+
+**Investigation steps:**
+1. Settings → Mobile Data (iOS) or Settings → Network → Data Usage (Android) — review per-app data consumption
+2. Reset statistics after noting current readings — watch for 24-48 hours to identify what's accumulating data
+3. Look for apps you don't recognize or didn't install
+4. Check if mobile hotspot is enabled and connected devices are authorized
+5. If an unknown app is consuming data, uninstall it and run a security scan
+
+<ConceptCallout type="warning">Unexpected high background data — especially when the phone is idle or overnight — is one of the clearest behavioral indicators of spyware or a compromised app. Do not dismiss it as a network glitch without investigating per-app usage.</ConceptCallout>
+
+## Fake Security Warnings and Scareware
+
+**Symptoms**: browser displays a pop-up saying "Your iPhone has a virus! Call Apple Support at 1-800-XXX-XXXX immediately!" or "WARNING: Your device is infected — tap here to clean." The popup may prevent navigating away, play alarm sounds, or vibrate the device.
+
+**What it is**: scareware. It is a social engineering attack delivered through a malicious or compromised website. There is no actual virus. The goal is to get the user to call a fraudulent "support" number (toll fraud, paid "cleaning" service) or install a malicious app.
+
+**Correct response:**
+1. Do NOT call the number displayed
+2. Do NOT tap any button inside the pop-up (including "Cancel" — some fake buttons redirect)
+3. Close the browser tab by navigating to the tab switcher and closing that specific tab
+4. If the browser cannot be navigated away from the page, force close the browser app
+5. Clear browser history and website data: Settings → Safari/Chrome → Clear History and Website Data
+6. Report the domain to your organization's security team if on a corporate device
+
+<ConceptCallout type="info">Legitimate security software never delivers alerts through a web browser pop-up. Real antivirus alerts on mobile appear as system notifications from the installed security app. A web browser has no ability to scan your device for malware.</ConceptCallout>
+
+## Leaked Credentials
+
+**Symptoms**: user is notified their email/password appeared in a data breach (notification from browser, HaveIBeenPwned.com, or the company's security team); credential stuffing alerts from an account.
+
+**Immediate response:**
+1. Change the compromised password immediately — do this from a trusted, secure network (not public Wi-Fi)
+2. Change the password on any other account where the same password was reused (password reuse is extremely common and dangerous)
+3. Enable Multi-Factor Authentication (MFA) on the affected account and any related accounts
+4. Review account activity / login history for signs of unauthorized access
+5. Check HaveIBeenPwned.com (hibp) with the email address to understand the scope of exposure
+6. If corporate credentials are involved, notify IT security immediately — they may need to invalidate sessions, rotate service account passwords, and investigate for data exfiltration
+
+**Prevention**: use a password manager to generate and store unique passwords for every account. Enable MFA everywhere it is offered.
+
+## Unauthorized Account Access
+
+**Symptoms**: user cannot log in with correct password; recovery email or phone number has been changed; unknown devices appear in account settings; user receives 2FA codes they didn't request; unfamiliar activity in account history.
+
+**Indicators of compromise in account settings:**
+- Login history shows IP addresses or geolocations the user doesn't recognize
+- Connected apps include applications the user didn't authorize
+- Account settings (email forwarding rules, recovery contacts) were changed
+
+**Response:**
+1. Use account recovery options (secondary email, backup codes) to regain access
+2. Immediately change the password to something new and unique
+3. Enable MFA — the attacker likely doesn't have access to the user's physical phone
+4. Review and revoke all connected/authorized apps (attackers often add OAuth apps for persistent access)
+5. Check for email forwarding rules that forward copies of email to an external address (a common persistence technique)
+6. Alert IT security if this is a corporate account
+7. If the account is a work account tied to SSO, IT may need to force a password reset and session invalidation across all connected services
+
+## Unexpected Charges
+
+**Symptoms**: carrier bill shows premium SMS charges for services the user didn't subscribe to; unexpected in-app purchases; app subscription charges for apps the user doesn't recognize.
+
+**Premium SMS fraud**: malware can silently send text messages to premium-rate numbers, which generate per-message charges billed to the carrier account. This was more prevalent on Android before tighter Play Store controls but still occurs via sideloaded apps.
+
+**In-app purchase fraud**:
+- Children using a parent's device with stored payment methods — configure parental controls and require authentication for purchases
+- App Store / Google Play accounts compromised — change password, enable MFA, review purchase history and dispute unauthorized charges through the platform
+
+**Investigation:**
+1. Check the carrier bill for premium SMS or unusual per-message charges — contact carrier to block premium SMS
+2. Check App Store (iOS) or Google Play (Android) purchase history for unauthorized purchases
+3. Dispute fraudulent charges with the carrier and/or the app store
+4. On Android, review installed apps for anything unfamiliar — especially if unknown sources were ever enabled
+5. Enable purchase authentication: require Face ID / fingerprint / password for every app store purchase
+
+## App Permissions
+
+Every app you install requests access to device capabilities: camera, microphone, location, contacts, storage, calendar, health data. Excessive permissions are a major privacy and security risk.
+
+**The principle of least privilege applied to apps**: apps should only have permissions they genuinely need to function. A flashlight app has no legitimate need for your contacts, location, or microphone.
+
+| Permission | Legitimate Use Case | Red Flag |
+|---|---|---|
+| Camera | Video calling app, document scanner, QR reader | Flashlight app, simple game |
+| Microphone | Voice calling, voice assistant, voice memos | Calculator, weather app |
+| Location (Always) | Navigation app, food delivery | Game, flashlight, simple utility |
+| Contacts | Dialer, messaging app, contact manager | Game, photo editor |
+| Storage | Photo editor, file manager, backup app | Simple utility with no file needs |
+| Accessibility | Screen reader, password manager (for autofill) | Any app that isn't obviously assistive |
+
+**How to review and revoke permissions:**
+- iOS: Settings → Privacy & Security → select a permission type to see all apps with that access
+- Android: Settings → Privacy → Permission Manager → select a permission type
+
+<ConceptCallout type="tip">On the A+ exam, the question "Why does a flashlight app need access to your contacts and location?" is rhetorical — the answer is it does not, and you should revoke those permissions or uninstall the app entirely.</ConceptCallout>
+
+## Certificate Errors on Mobile
+
+**Symptoms**: browser shows "Your connection is not private," "Certificate error," or "This site's security certificate is not trusted" when accessing an HTTPS site that should work.
+
+**Possible causes:**
+
+| Cause | Context | Action |
+|---|---|---|
+| Expired server certificate | Any site | Notify the site owner; avoid the site |
+| Self-signed certificate | Internal corporate site | Install the root CA cert on the device (MDM can push this) |
+| Man-in-the-Middle attack | Public Wi-Fi, untrusted network | Disconnect from the network immediately |
+| Captive portal redirect | Hotel/airport Wi-Fi before logging in | Normal; open a browser and accept the portal |
+| MDM SSL inspection proxy | Corporate-managed device | IT-controlled; the MDM installs a trusted root cert for this |
+| Incorrect device date/time | Any | Correct the clock and retry |
+
+On corporate MDM-enrolled devices, certificate inspection proxies are common — the organization intercepts HTTPS traffic for content filtering and data loss prevention. The device trusts the proxy's certificate because MDM pushes a trusted root CA. This is expected and intentional.
+
+On a personal device on public Wi-Fi, a certificate warning on a site you trust is a significant red flag for a MitM attack. Disconnect immediately.
+
+## Bootleg Apps and Sideloading Risks
+
+**Sideloading** means installing an application from outside the official app store (App Store or Google Play). On Android, this is allowed by default when you enable "Install unknown apps" or "Unknown sources." On iOS, sideloading normally requires a jailbreak (which defeats iOS security architecture).
+
+**Risks of sideloaded apps:**
+- No security review — Google and Apple both vet apps for malware before listing them. Sideloaded apps skip this entirely.
+- No automatic updates — you don't receive security patches
+- May request excessive permissions and the user grants them without scrutiny
+- Common vector for stalkerware and banking trojans
+
+**Best practice**: Keep "Install unknown apps" disabled on Android (Settings → Apps → Special app access → Install unknown apps — verify all entries are set to "Not allowed"). Never jailbreak iOS devices in a corporate environment — MDM policies typically detect and block jailbroken devices.
+
+## MDM Enrollment Issues
+
+In enterprise environments, mobile devices are enrolled in Mobile Device Management (MDM) systems (Intune, Jamf, VMware Workspace ONE, etc.). MDM enforces compliance policies — minimum OS version, screen lock required, encryption enabled, jailbreak/root detection, approved app list.
+
+**Common MDM problems:**
+
+| Problem | Cause | Resolution |
+|---|---|---|
+| Device blocked from corporate email | Not MDM-enrolled or enrollment expired | Re-enroll: Settings → General → VPN & Device Management (iOS) or Settings → Accounts → [MDM Profile] (Android) |
+| MDM reports device non-compliant | OS version too old, screen lock not set, encryption off | Update OS, enable screen lock with PIN/biometric, enable device encryption |
+| MDM reports device as jailbroken/rooted | Device has been jailbroken, or detection false positive | Factory reset device; re-enroll with clean OS |
+| Apps pushed by MDM not installing | Insufficient storage, network issue | Free storage, connect to corporate Wi-Fi |
+| Certificate pushed by MDM not trusted | Profile not fully installed | Re-download and install MDM profile, approve certificate installation |
+
+<ConceptCallout type="info">If an employee's device shows as "non-compliant" in MDM and loses access to corporate resources, the fix is always to bring the device into compliance — update the OS, set required PIN, enable encryption — not to disable MDM controls.</ConceptCallout>

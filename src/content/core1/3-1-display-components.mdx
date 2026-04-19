@@ -1,0 +1,118 @@
+# Display Components and Attributes
+
+Displays are how users interact visually with computers. The A+ exam expects you to compare panel technologies, understand key specifications, recognize connector types, and know how touchscreens work.
+
+## LCD Panel Technologies
+
+LCD (Liquid Crystal Display) is the dominant display technology. The panel itself doesn't emit light — it manipulates a backlight shining through liquid crystals and color filters. Three panel subtypes exist, each with real trade-offs:
+
+*LCD panel subtypes — all use LED backlighting on modern monitors*
+
+| Panel Type | Viewing Angles | Color Accuracy | Response Time | Best Use Case |
+| --- | --- | --- | --- | --- |
+| TN (Twisted Nematic) | Narrow (~160°/170°) | Poor | 1–5 ms | Competitive gaming |
+| IPS (In-Plane Switching) | Wide (~178°/178°) | Excellent | 4–8 ms | Design, general use |
+| VA (Vertical Alignment) | Medium (~178°/178°) | Good | 4–10 ms | Media consumption, movies |
+
+<DisplayTechComparison />
+
+**TN** panels twist their crystals in response to voltage. They're the oldest and cheapest technology, with the fastest pixel response times, making them popular for gaming. The trade-off is poor color reproduction and colors that shift dramatically when viewed from an angle.
+
+**IPS** panels align crystals parallel to the glass, enabling consistent color from almost any angle. They deliver accurate, wide color gamut output preferred by photographers, designers, and anyone who needs reliable colors. Response times are slightly slower than TN but imperceptible for most tasks.
+
+**VA** panels stand crystals vertically, achieving high contrast ratios (3000:1+) and deep blacks that make dark scenes in movies look excellent. They fall between IPS and TN for color accuracy and response time.
+
+<ConceptCallout type="tip">
+  On the exam, if asked which panel type has the best color accuracy or widest viewing angles, the answer is **IPS**. If asked which is fastest for gaming, it's **TN**.
+</ConceptCallout>
+
+## OLED Displays
+
+OLED (Organic Light-Emitting Diode) works fundamentally differently from LCD. Each pixel is an individual light-emitting element — no backlight at all. When a pixel shows black, it simply turns off completely.
+
+This gives OLED:
+- **Infinite contrast ratio** — true blacks vs any LCD's "dark gray"
+- **Faster response times** than any LCD (microseconds)
+- **Thinner form factor** — no backlight layer needed
+- **Wide viewing angles** comparable to IPS
+
+The trade-off: OLED pixels can **burn in** if static images (taskbars, game UI elements) are displayed for extended periods. OLED is prevalent in smartphones, tablets, high-end TVs, and premium thin laptops.
+
+## Key Display Specifications
+
+### Resolution
+
+Resolution = total number of pixels (horizontal × vertical). More pixels = sharper image at the same screen size.
+
+| Name | Resolution | Common Use |
+| --- | --- | --- |
+| HD / 720p | 1280 × 720 | Budget monitors, older TV |
+| FHD / 1080p | 1920 × 1080 | Standard desktop monitors |
+| QHD / 1440p | 2560 × 1440 | Mid-range gaming/productivity |
+| 4K UHD | 3840 × 2160 | High-end monitors, TVs |
+| 8K UHD | 7680 × 4320 | Professional video, cinema |
+
+### Refresh Rate
+
+Refresh rate (Hz) = how many times per second the display redraws its image. Higher refresh rates produce smoother, less choppy motion. Standard is 60 Hz. Gaming monitors offer 120, 144, 240, or 360 Hz.
+
+<ConceptCallout type="info">
+  Refresh rate and frame rate are different things. The GPU produces frames; the monitor refreshes. If a 144 Hz monitor receives only 60 frames per second from the GPU, you still see only 60 fps. Technologies like G-Sync (NVIDIA) and FreeSync (AMD) synchronize GPU frame output to monitor refresh to eliminate screen tearing.
+</ConceptCallout>
+
+### Response Time
+
+Response time (ms) = how long a pixel takes to change from one color to another (gray-to-gray, GtG). Lower is better — slow response creates motion blur in fast-moving images. **Not the same as input lag.**
+
+### Brightness (Nits)
+
+Brightness is measured in nits (cd/m²). Typical ranges:
+- Office monitors: 250–350 nits
+- HDR-capable displays: 400–1000+ nits
+- Outdoor/high-ambient-light use: 1000+ nits
+
+### Aspect Ratio
+
+The ratio of width to height:
+- **4:3** — legacy CRT and older displays
+- **16:9** — modern widescreen standard
+- **16:10** — used in many laptops (extra vertical space)
+- **21:9** — ultrawide (gaming, multitasking)
+
+### Pixel Pitch
+
+Pixel pitch = distance between pixel centers (mm). Smaller pitch = higher pixel density (PPI). A 27" 4K monitor has a much smaller pixel pitch than a 27" 1080p monitor, producing a significantly sharper image.
+
+## Backlighting
+
+Modern LCD monitors use **LED backlighting** — older models used CCFL (Cold Cathode Fluorescent Lamp), which was thicker and less efficient. Most monitors use **edge-lit LED** (LEDs around the border). Higher-end monitors use **full-array local dimming (FALD)** with LED zones across the entire panel, allowing individual zones to dim independently for better contrast in dark scenes.
+
+## Display Connectors
+
+| Connector | Signal Type | Audio | Max Resolution | Notes |
+| --- | --- | --- | --- | --- |
+| VGA (15-pin D-Sub) | Analog only | No | 2048×1536 | Legacy — avoid for new installs |
+| DVI-D | Digital only | No | 2560×1600 (dual-link) | Common on older desktops |
+| DVI-I | Digital + Analog | No | 2560×1600 (dual-link) | Can adapt to VGA |
+| HDMI 2.0 | Digital | Yes | 4K @ 60Hz | Universal on consumer devices |
+| HDMI 2.1 | Digital | Yes | 8K @ 60Hz / 4K @ 144Hz | Used in gaming TVs, PS5, Xbox |
+| DisplayPort 1.4 | Digital | Yes | 8K @ 60Hz | PC monitors, supports daisy-chain |
+| Thunderbolt 3/4 | Digital (USB-C) | Yes | Dual 4K | Data + video over USB-C |
+
+<ConceptCallout type="tip">
+  **DVI variants:** DVI-A (analog only), DVI-D (digital only), DVI-I (both). Single-link DVI-D: 1920×1200 max. Dual-link DVI-D: 2560×1600 max. HDMI carries audio; VGA and DVI do not.
+</ConceptCallout>
+
+## Touchscreen Technologies
+
+Laptops, tablets, and all-in-ones often include touchscreen digitizers mounted over the display.
+
+**Resistive touchscreens** use two flexible conductive layers separated by a small gap. Physical pressure deforms the top layer until it contacts the bottom, registering a touch coordinate. Advantages: works with any object (finger, gloved hand, stylus). Disadvantages: less accurate, not multi-touch capable, less vibrant display quality.
+
+**Capacitive touchscreens** use a conductive ITO coating on the glass that maintains a consistent electrostatic field. A bare finger disturbs this field, allowing the controller to calculate exact position. Advantages: high accuracy, supports multi-touch, excellent image clarity. Disadvantages: requires conductive input (bare skin or special stylus), doesn't work with regular gloves.
+
+Most modern devices — smartphones, tablets, modern laptop touchscreens — use **projected capacitive** (PCT) technology, a variant of capacitive sensing.
+
+<ConceptCallout type="warning">
+  Capacitive touchscreens do **not** work with regular gloves because gloves insulate the finger from the electrostatic field. Resistive screens work with any stylus or gloved hand, which is why they're still used in medical/industrial environments.
+</ConceptCallout>

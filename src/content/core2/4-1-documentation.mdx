@@ -1,0 +1,115 @@
+# Documentation and Support Systems Management
+
+Documentation is the operational backbone of IT support. Without it, every solved problem gets solved again, every configuration change is a mystery, and every new technician starts from zero. This objective tests whether you know the types of documentation IT produces, the systems used to manage it, and why each type matters.
+
+## Why Documentation Matters
+
+Documentation serves five organizational functions:
+
+1. **Consistency**: documented procedures ensure every technician performs tasks the same way, reducing variability and errors
+2. **Knowledge transfer**: when a senior technician leaves, documented knowledge stays
+3. **Compliance**: regulated industries (healthcare, finance, government) require documented evidence of procedures, changes, and data handling
+4. **Troubleshooting history**: a documented record of past incidents helps identify patterns, recurring failures, and root causes
+5. **Auditing**: management and auditors need to verify what changed, when, and why — documentation is the evidence
+
+## Documentation Types and Purposes
+
+| Document Type | What It Contains | Who Uses It | Primary Purpose |
+|---|---|---|---|
+| Network diagram (logical) | IP addresses, VLANs, device names, routing, firewall rules | Network admins, security team | Understand traffic flow and segmentation |
+| Network diagram (physical) | Cable runs, rack locations, room numbers, patch panel ports | Network techs, facilities | Physical troubleshooting, cabling |
+| Asset inventory / CMDB | Serial numbers, models, purchase dates, warranty, location, assigned user | IT ops, finance, helpdesk | Asset tracking, lifecycle management |
+| Baseline configuration | Documented "known good" state of systems | Admins, security | Detect unauthorized changes |
+| Knowledge base article | Step-by-step solution to a documented problem | Helpdesk, end users | Self-service and consistent resolution |
+| Change log | What changed, when, who, why, how to roll back | Admins, management | Change accountability and rollback reference |
+| Incident record / ticket | Symptoms, troubleshooting steps, resolution, time | Helpdesk, management | Pattern analysis, SLA tracking |
+| SOP (Standard Operating Procedure) | Step-by-step instructions for routine tasks | All technicians | Consistency and onboarding |
+| SLA (Service Level Agreement) | Response and resolution time commitments | IT management, customers | Service accountability |
+| Chain of custody record | Who handled evidence, when, transfer signatures | Security team, legal, law enforcement | Forensic integrity |
+
+## Network Diagrams
+
+Network documentation requires two distinct diagram types because they answer different questions.
+
+**Logical diagrams** show how data flows — they represent the network's logical structure regardless of physical location. A logical diagram shows: IP address schemes and subnets, VLAN assignments, routing paths between segments, firewall zones and rules, and device hostnames. When you're troubleshooting a routing issue or planning a firewall rule change, the logical diagram is what you need.
+
+**Physical diagrams** show where things actually are — rack numbers, room numbers, building names, cable runs between patch panels and switch ports, conduit paths. When a cable is cut or you need to find the physical server in a data center, the physical diagram is what you need.
+
+**Common tools**: Microsoft Visio (industry standard), draw.io (free, web-based), Lucidchart (web-based, collaboration-focused), Netbox (open source, doubles as IPAM), and vendor-specific tools like SolarWinds or Auvik that auto-discover and diagram networks.
+
+<ConceptCallout type="tip">The exam may ask whether a logical or physical diagram is appropriate for a given task. Logical = data flow, IP, VLANs. Physical = cables, racks, rooms, ports.</ConceptCallout>
+
+## Asset Inventory and CMDB
+
+An **asset inventory** tracks every hardware asset in the organization. At minimum, each entry should include:
+- Manufacturer, model, and serial number
+- Purchase date and warranty expiration
+- Physical location (building, room, rack)
+- Assigned user or department
+- Operating system and software installed
+- Patch level and last update date
+
+A **CMDB (Configuration Management Database)** extends the inventory concept to also track relationships between assets — which servers run which services, which switches connect to which, which applications depend on which databases. CMDB is a core concept in **ITIL** (Information Technology Infrastructure Library), the widely adopted IT service management framework. In large organizations, CMDBs are managed in platforms like ServiceNow.
+
+## Baseline Configurations
+
+A baseline is the documented, approved configuration of a system at a specific point in time — the "known good" state. Baselines serve two purposes:
+
+1. **Consistency**: new systems are deployed to match the baseline (using templates, imaging, or configuration management tools)
+2. **Change detection**: comparing the current state to the baseline reveals unauthorized changes, configuration drift, or indicators of compromise
+
+Baselines are created after initial deployment and updated after approved changes. Security tools like CIS Benchmarks provide industry-standard baseline recommendations for Windows, Linux, network devices, and applications.
+
+## Knowledge Base
+
+A **knowledge base (KB)** is a collection of documented solutions to known problems. It can be:
+- **Internal** (technician-facing): solutions to problems the helpdesk encounters repeatedly, documented so any technician can resolve them consistently
+- **External** (user-facing): self-service articles users can read to resolve common issues themselves
+
+Good KB articles follow a consistent format: symptom description, cause, step-by-step resolution, any required tools or permissions, and related articles. Platforms include ServiceNow, Confluence, SharePoint, and open-source wikis.
+
+## Change Log
+
+Every change to a production system should be logged. A change log entry answers: what was changed, when it was changed, who made the change, why it was necessary, and how to reverse it. Change logs are distinct from ticketing — they record the change itself, not the problem that prompted it. They are invaluable when troubleshooting issues that started "right after we did maintenance."
+
+## Ticketing Systems
+
+A **ticketing system** tracks support incidents from report to resolution. Every user contact should generate a ticket.
+
+**Standard ticket lifecycle:**
+
+<ProcessSteps title="Support Ticket Lifecycle" color="blue" steps={[
+  { title: "Open", description: "User reports an issue via phone, email, portal, or chat. Ticket is created with symptom description, user contact info, priority level, and SLA clock starts." },
+  { title: "Assigned", description: "Ticket is routed to the appropriate team or technician based on category, priority, and skill set." },
+  { title: "In Progress", description: "Technician investigates, documents all troubleshooting steps taken, and communicates status to the user." },
+  { title: "Resolved", description: "Issue is fixed. Resolution is documented in detail — not just \"fixed\" but exactly what was done and why it worked." },
+  { title: "Closed", description: "User confirms resolution (or auto-closes after a waiting period). Ticket is closed with final notes. Data is available for reporting and pattern analysis." }
+]} />
+
+**Common ticketing platforms**: ServiceNow (enterprise standard), Jira Service Management (developer-friendly), Zendesk (customer service focus), Freshdesk, and Spiceworks (free, popular in SMBs).
+
+**SLAs (Service Level Agreements)** define the required response and resolution times by priority level. For example: P1 (system down, critical) — 15-minute response, 4-hour resolution. P3 (minor issue) — 4-hour response, next business day resolution. SLAs create accountability and are contractually enforceable in managed service agreements.
+
+<ConceptCallout type="warning">A ticket that says "fixed it" with no details of what was done provides zero value for pattern analysis or future troubleshooting. Every ticket must document: exact symptoms, troubleshooting steps taken (including steps that didn't work), root cause, and resolution. Documentation quality is a measurable indicator of technician professionalism.</ConceptCallout>
+
+## SOPs (Standard Operating Procedures)
+
+An SOP is a documented, step-by-step procedure for a repeatable task. SOPs ensure that:
+- The same task is performed the same way regardless of which technician does it
+- New technicians can be onboarded to standard tasks quickly
+- Nothing is skipped under pressure or fatigue
+- Compliance requirements are consistently met
+
+Examples of tasks that should have SOPs: new employee workstation setup, offboarding (account disable, data backup, equipment return), patch management cycle, backup verification, and data recovery procedures.
+
+## Regulatory Compliance Documentation
+
+In regulated environments, documentation isn't optional — it's a legal requirement.
+
+**Chain of custody**: when handling digital evidence (for legal proceedings or internal investigations), every transfer of evidence must be documented — who had it, when, what they did with it, and who they transferred it to. Any break in the chain can make evidence inadmissible. This is a forensics concept the exam tests.
+
+**Data handling procedures**: organizations subject to HIPAA (healthcare), PCI-DSS (payment cards), GDPR (EU personal data), or SOX (financial) must document how data is stored, transmitted, accessed, and destroyed.
+
+**Audit trails**: system logs must be retained (often for 1-7 years depending on regulation) to demonstrate compliance. Audit trails show who accessed what data and when.
+
+**Security policies**: documented policies (acceptable use, password policy, incident response, data classification) are required for certification under frameworks like ISO 27001 and SOC 2. Policies must be reviewed, approved by management, and acknowledged by employees.

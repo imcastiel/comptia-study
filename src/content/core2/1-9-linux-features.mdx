@@ -1,0 +1,283 @@
+# Linux Client/Desktop OS Features
+
+Linux is a free, open-source operating system kernel with hundreds of distributions built on top of it. The 220-1202 exam tests recognition of common distros, package management, essential terminal commands, the file system hierarchy, and the permissions model. You do not need deep Linux expertise — but you must know which command does what.
+
+## Common Linux Distributions
+
+A **distribution** (distro) bundles the Linux kernel with a package manager, desktop environment, default applications, and configuration to create a complete OS.
+
+| Distribution | Family | Best Known For |
+|---|---|---|
+| Ubuntu | Debian | Most popular desktop Linux; beginner-friendly; large community |
+| Debian | Debian | Extremely stable; conservative release cycle; server and desktop |
+| Linux Mint | Debian/Ubuntu | Windows-like UI; excellent for users migrating from Windows |
+| Fedora | Red Hat | Cutting-edge packages; upstream for RHEL; developer-focused |
+| RHEL (Red Hat Enterprise Linux) | Red Hat | Enterprise server; paid support; long lifecycle |
+| CentOS / AlmaLinux / Rocky Linux | Red Hat | Free RHEL alternatives; popular for servers |
+| Kali Linux | Debian | Pre-loaded penetration testing and security tools |
+| Raspberry Pi OS | Debian | Optimized for Raspberry Pi ARM hardware |
+
+<ConceptCallout type="info">The exam primarily references Ubuntu and Fedora as representative examples. Knowing that Ubuntu uses APT and Fedora/RHEL uses DNF covers the core package management distinction you need.</ConceptCallout>
+
+## Package Managers
+
+A package manager installs, updates, removes, and resolves dependencies for software automatically — equivalent to an app store with command-line control.
+
+<CompareCards
+  title="APT vs DNF Package Managers"
+  left={{ title: "APT (Debian/Ubuntu)", icon: "Package", color: "blue", points: ["Distros: Ubuntu, Debian, Mint, Kali", "apt install <package>", "apt update (refresh package list)", "apt upgrade (install updates)", "apt remove <package>", "apt search <keyword>", "Package files: .deb format"] }}
+  right={{ title: "DNF/YUM (Red Hat/Fedora)", icon: "Package", color: "orange", points: ["Distros: Fedora, RHEL, CentOS, AlmaLinux", "dnf install <package>", "dnf check-update (check for updates)", "dnf upgrade (install updates)", "dnf remove <package>", "dnf search <keyword>", "Package files: .rpm format"] }}
+/>
+
+### Universal Package Formats
+
+| Format | Tool | Notes |
+|---|---|---|
+| Flatpak | `flatpak` | Sandboxed apps; works across all distros; Flathub repository |
+| Snap | `snap` | Canonical's universal format; used heavily on Ubuntu |
+| AppImage | Run directly | Self-contained executable; no installation needed |
+
+<ConceptCallout type="tip">If the exam asks which command installs packages on Ubuntu, the answer is `apt install`. For Fedora or CentOS, the answer is `dnf install` (or `yum install` on older systems). YUM was replaced by DNF but is still tested.</ConceptCallout>
+
+## Essential Terminal Commands
+
+Linux administration is done primarily at the command line. Learn these commands by category.
+
+### Navigation and Directory Commands
+
+| Command | Description | Example |
+|---|---|---|
+| `pwd` | Print working directory (where am I?) | `pwd` → `/home/user/Documents` |
+| `ls` | List directory contents | `ls -la` (all files + details) |
+| `cd` | Change directory | `cd /etc` or `cd ~` (home) or `cd ..` (up one level) |
+| `mkdir` | Make a new directory | `mkdir ProjectFiles` |
+| `rmdir` | Remove an empty directory | `rmdir OldFolder` |
+
+### File Operations
+
+| Command | Description | Example |
+|---|---|---|
+| `cp` | Copy files or directories | `cp file.txt /backup/` or `cp -r dir/ /backup/` |
+| `mv` | Move or rename | `mv oldname.txt newname.txt` |
+| `rm` | Remove files | `rm file.txt` or `rm -rf folder/` (recursive force) |
+| `touch` | Create an empty file (or update timestamp) | `touch newfile.txt` |
+| `cat` | Display file contents | `cat /etc/hosts` |
+| `less` | Page through file contents | `less /var/log/syslog` |
+| `head` | Show first lines of a file | `head -20 logfile.txt` |
+| `tail` | Show last lines (live with -f) | `tail -f /var/log/syslog` |
+
+### Search Commands
+
+| Command | Description | Example |
+|---|---|---|
+| `find` | Search for files in directory tree | `find /home -name "*.log"` |
+| `grep` | Search text within files | `grep -r "error" /var/log/` |
+| `grep -i` | Case-insensitive search | `grep -i "Error" logfile.txt` |
+| `grep -n` | Show line numbers | `grep -n "failed" auth.log` |
+| `grep -r` | Recursive search through directories | `grep -r "password" /etc/` |
+
+### User and Permission Commands
+
+| Command | Description | Example |
+|---|---|---|
+| `sudo` | Run command as root | `sudo apt install vim` |
+| `su` | Switch user | `su username` or `su -` (switch to root) |
+| `whoami` | Show current username | `whoami` |
+| `id` | Show user ID, group ID, and group memberships | `id` |
+| `useradd` | Create a new user | `sudo useradd -m newuser` |
+| `passwd` | Set or change password | `sudo passwd newuser` |
+| `groups` | Show group memberships | `groups username` |
+| `chmod` | Change file permissions | `chmod 755 script.sh` or `chmod +x script.sh` |
+| `chown` | Change file owner | `chown user:group file.txt` |
+| `chgrp` | Change file group | `chgrp staff report.txt` |
+
+### Process Management
+
+| Command | Description | Example |
+|---|---|---|
+| `ps` | List running processes | `ps aux` (all processes, all users) |
+| `top` | Interactive process monitor (like Task Manager) | `top` |
+| `kill` | Send signal to process | `kill 1234` (graceful) or `kill -9 1234` (force) |
+| `killall` | Kill by process name | `killall firefox` |
+| `bg` | Resume job in background | `bg %1` |
+| `fg` | Bring job to foreground | `fg %1` |
+| `jobs` | List background jobs | `jobs` |
+
+<ConceptCallout type="warning">`kill -9` sends SIGKILL — the process is immediately terminated without any cleanup. Use it only when a normal `kill` (SIGTERM, signal 15) fails. SIGTERM gives the process a chance to save data and exit cleanly. The exam may ask which signal number forces an immediate termination: the answer is 9 (SIGKILL).</ConceptCallout>
+
+### Network Commands
+
+| Command | Description | Example |
+|---|---|---|
+| `ip addr` | Show IP addresses (modern) | `ip addr show` |
+| `ifconfig` | Show IP addresses (legacy) | `ifconfig eth0` |
+| `ping` | Test connectivity | `ping google.com` |
+| `ssh` | Secure remote shell | `ssh user@192.168.1.10` |
+| `wget` | Download files from web | `wget https://example.com/file.zip` |
+| `curl` | Transfer data with URLs | `curl -O https://example.com/file` |
+| `netstat` | Network connections (legacy) | `netstat -tuln` |
+| `ss` | Network connections (modern) | `ss -tuln` |
+
+### System Information
+
+| Command | Description | Example |
+|---|---|---|
+| `uname -a` | Full system information | Shows kernel version, hostname, architecture |
+| `df -h` | Disk space usage (human-readable) | Shows free/used space per filesystem |
+| `du -sh` | Directory size | `du -sh /var/log/` |
+| `free -m` | RAM usage in megabytes | Shows total, used, free memory |
+| `uptime` | System uptime and load average | |
+| `history` | Command history | `history | grep ssh` |
+
+### Service Management (systemd)
+
+Modern Linux uses **systemd** for service management. The primary command is `systemctl`.
+
+| Command | Description |
+|---|---|
+| `systemctl start nginx` | Start a service |
+| `systemctl stop nginx` | Stop a service |
+| `systemctl restart nginx` | Restart (stop then start) |
+| `systemctl reload nginx` | Reload config without full restart |
+| `systemctl enable nginx` | Enable service at boot |
+| `systemctl disable nginx` | Disable service at boot |
+| `systemctl status nginx` | Show current status |
+| `systemctl list-units --type=service` | List all services |
+
+<ConceptCallout type="info">The `enable` and `disable` commands control whether a service starts at boot — they do not start/stop the service now. To both enable and start immediately: `systemctl enable --now nginx`.</ConceptCallout>
+
+## Linux Permissions Model
+
+Every file and directory in Linux has three permission sets: **owner**, **group**, and **others**.
+
+### Permission Types
+
+| Symbol | Letter | Octal | Meaning |
+|---|---|---|---|
+| Read | r | 4 | View file contents / list directory |
+| Write | w | 2 | Modify file / create/delete in directory |
+| Execute | x | 1 | Run as program / enter directory |
+| No permission | - | 0 | Access denied |
+
+### Reading Permission Strings
+
+```
+-rwxr-xr--
+```
+
+| Position | Meaning |
+|---|---|
+| `-` (first char) | File type: `-` = file, `d` = directory, `l` = symlink |
+| `rwx` | Owner permissions: read + write + execute |
+| `r-x` | Group permissions: read + execute (no write) |
+| `r--` | Others permissions: read only |
+
+### Octal Permission Notation
+
+Each permission set is a sum of its values: read(4) + write(2) + execute(1)
+
+| Octal | Binary | Permissions |
+|---|---|---|
+| 7 | 111 | rwx (full) |
+| 6 | 110 | rw- (read/write) |
+| 5 | 101 | r-x (read/execute) |
+| 4 | 100 | r-- (read only) |
+| 0 | 000 | --- (none) |
+
+**Common permission patterns:**
+
+| Octal | Meaning | Typical Use |
+|---|---|---|
+| 755 | Owner: rwx, Group: r-x, Others: r-x | Executables, directories |
+| 644 | Owner: rw-, Group: r--, Others: r-- | Regular files |
+| 700 | Owner: rwx, Group: ---, Others: --- | Private scripts |
+| 600 | Owner: rw-, Group: ---, Others: --- | Private config files (SSH keys) |
+| 777 | Everyone: rwx | Avoid — dangerous, world-writable |
+
+<ConceptCallout type="warning">chmod 777 gives everyone full read/write/execute access. This is a security risk and should never be used on production systems. If the exam asks about a "world-writable" file, 777 is the answer — and the follow-up is that it should be fixed.</ConceptCallout>
+
+### Special Permission Bits
+
+| Bit | Name | Effect on Files | Effect on Directories |
+|---|---|---|---|
+| SUID (4000) | Set User ID | Execute as the file's owner | N/A |
+| SGID (2000) | Set Group ID | Execute as the file's group | New files inherit directory's group |
+| Sticky bit (1000) | Sticky | N/A | Only owner can delete their own files |
+
+Sticky bit is commonly set on `/tmp` — multiple users can write files there, but can only delete their own.
+
+## Linux File System Hierarchy Standard (FHS)
+
+The **Filesystem Hierarchy Standard** defines the directory structure used by all Linux distributions.
+
+| Directory | Contents |
+|---|---|
+| `/` | Root of the entire file system |
+| `/bin` | Essential user binaries (ls, cp, mv, bash) |
+| `/sbin` | System binaries for root/admin (fdisk, ifconfig) |
+| `/etc` | System configuration files (passwd, fstab, hosts, ssh/) |
+| `/home` | User home directories (`/home/alice`, `/home/bob`) |
+| `/root` | Home directory for the root user |
+| `/usr` | User programs and data (`/usr/bin`, `/usr/lib`) |
+| `/usr/local` | Locally installed software |
+| `/var` | Variable data — logs, spool, temporary runtime data |
+| `/var/log` | Log files (syslog, auth.log, dpkg.log) |
+| `/tmp` | Temporary files, cleared on reboot |
+| `/dev` | Device files (disks, terminals — everything is a file) |
+| `/proc` | Virtual filesystem with live kernel and process info |
+| `/sys` | Virtual filesystem with hardware/driver information |
+| `/mnt` | Temporary mount point for manually mounted drives |
+| `/media` | Auto-mounted removable media (USB drives, DVDs) |
+| `/boot` | Boot loader files and kernel images |
+| `/lib` | Shared libraries needed by `/bin` and `/sbin` |
+| `/opt` | Optional third-party software |
+
+<ConceptCallout type="tip">For the exam: `/etc` holds configuration files, `/var/log` holds log files, `/home` holds user data, `/tmp` is temporary (cleared on reboot). These four are the most commonly tested directories.</ConceptCallout>
+
+## Text Editors
+
+| Editor | Type | Notes |
+|---|---|---|
+| `nano` | Terminal, easy | Arrow keys navigate, Ctrl+O to save, Ctrl+X to exit. Beginner-friendly. |
+| `vi` / `vim` | Terminal, powerful | Modal editor — press `i` for insert mode, `Esc` then `:wq` to save and quit. Steep learning curve. |
+| `gedit` | GUI (GNOME) | GNOME's graphical text editor, similar to Notepad |
+| `kate` | GUI (KDE) | KDE's graphical editor |
+
+<ConceptCallout type="info">vi/vim is available on virtually every Unix/Linux system — it's the editor you'll have access to even on a minimal server install with no GUI. The exam may test the basic commands: `i` to enter insert mode, `Esc` to leave insert mode, `:wq` to write and quit, `:q!` to quit without saving.</ConceptCallout>
+
+## Desktop Environments
+
+Desktop environments provide the graphical user interface on top of the Linux kernel.
+
+| Environment | Distro Default | Characteristics |
+|---|---|---|
+| GNOME | Ubuntu, Fedora | Modern, touch-friendly, Activities overview |
+| KDE Plasma | Kubuntu, openSUSE | Highly customizable, Windows-like layout |
+| XFCE | Xubuntu | Lightweight, runs well on older hardware |
+| LXDE / LXQt | Lubuntu | Ultra-lightweight, minimal resource use |
+| Cinnamon | Linux Mint | Traditional desktop layout, Windows migrants |
+
+## Linux vs Windows: Command Equivalents
+
+<CompareCards
+  title="Linux vs Windows Command Comparison"
+  left={{ title: "Linux Command", icon: "Server", color: "blue", points: ["ls -la (list files)", "cp -r (copy directory)", "rm -rf (delete recursive)", "chmod/chown (permissions)", "ps aux (list processes)", "apt/dnf install (install software)", "systemctl start (start service)", "ip addr (show IP)", "grep -r (search in files)", "man command (show help)"] }}
+  right={{ title: "Windows Equivalent", icon: "Monitor", color: "orange", points: ["dir (list files)", "xcopy /s (copy directory)", "rmdir /s /q (delete recursive)", "icacls (permissions)", "tasklist (list processes)", "winget install (install software)", "net start (start service)", "ipconfig (show IP)", "findstr (search in files)", "help command or command /? (show help)"] }}
+/>
+
+## Exam Scenario Quick Reference
+
+| Scenario | Answer |
+|---|---|
+| Install a package on Ubuntu | `sudo apt install packagename` |
+| Install a package on Fedora | `sudo dnf install packagename` |
+| Make a script executable | `chmod +x script.sh` or `chmod 755 script.sh` |
+| Find where configuration files live | `/etc` directory |
+| View system logs | `ls /var/log/` or `tail -f /var/log/syslog` |
+| Force kill an unresponsive process (PID 1234) | `kill -9 1234` |
+| Run a command as root without switching users | `sudo command` |
+| Check disk space usage | `df -h` |
+| Start a service and enable it at boot | `systemctl enable --now servicename` |
+| See your current directory | `pwd` |
+| Find a file named "config.txt" anywhere | `find / -name "config.txt"` |
+| Show all running processes | `ps aux` or `top` |

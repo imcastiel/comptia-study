@@ -1,0 +1,155 @@
+# Environmental Impacts and Controls
+
+Environmental factors are responsible for a significant percentage of hardware failures in the real world — and CompTIA expects you to know how to control them. The exam tests both data center best practices and proper disposal regulations.
+
+---
+
+## Temperature and Humidity
+
+Computing equipment generates heat and is sensitive to moisture. Maintaining the right environment extends hardware life and prevents unexpected failures.
+
+### Recommended Ranges
+
+| Parameter | Target Range | Notes |
+|---|---|---|
+| Temperature | 64–80°F (18–27°C) | ASHRAE A1 class for servers |
+| Relative Humidity | 45–55% | Tight band prevents both condensation and static |
+
+### What Goes Wrong
+
+**Too hot:** CPUs and GPUs throttle performance to protect themselves, electrolytic capacitors degrade faster, hard drive platters expand, solder joints fatigue. Sustained overheating causes permanent component failure.
+
+**Too cold:** Air below the dew point causes condensation to form on cold metal surfaces. Condensation = water on circuit boards = shorts. Cold dry air also increases electrostatic discharge (ESD) risk.
+
+**Too humid (above ~60%):** Condensation forms on components and inside connectors. Corrosion accelerates on metal contacts and traces.
+
+**Too dry (below ~40%):** Relative humidity below 40% dramatically increases electrostatic buildup. Touching a component without proper grounding can discharge thousands of volts — far above the threshold that kills chips (as little as 30V for some ICs).
+
+<ConceptCallout type="warning">Low humidity is the primary ESD risk factor. When a question mentions static electricity or ESD, think dry environment. The fix is a humidifier plus ESD mats, wrist straps, and proper grounding.</ConceptCallout>
+
+Use **temperature monitors** and alerting systems in server rooms. Simple USB temperature/humidity loggers can send email or SMS alerts when thresholds are breached. Enterprise environments use DCIM (Data Center Infrastructure Management) software.
+
+---
+
+## HVAC Requirements
+
+### Dedicated Climate Control
+
+Server rooms and data centers must have **dedicated HVAC systems** — never share the building's general HVAC. General HVAC is designed for human comfort, not the precise temperature/humidity ranges and 24/7 uptime that computing equipment requires. If the building HVAC shuts down overnight or on weekends, servers overheat.
+
+Requirements for dedicated computer room HVAC:
+- Precision temperature and humidity control (not just cooling)
+- 24/7/365 operation including holidays
+- Dedicated circuits with UPS backup
+- N+1 redundancy (at least one spare unit that can take over immediately)
+
+### Hot Aisle / Cold Aisle Configuration
+
+This is the standard rack layout for server rooms and is frequently tested.
+
+<ConceptCallout type="info">Hot aisle / cold aisle prevents hot exhaust air from mixing with cold supply air. Mixing wastes cooling capacity and causes localized hot spots that shorten equipment life.</ConceptCallout>
+
+How it works:
+- Server racks are arranged in alternating rows
+- **Cold aisle**: rack fronts face each other, cold air is supplied here (from floor vents or overhead), servers draw intake air from the cold aisle
+- **Hot aisle**: rack rears face each other, servers exhaust hot air into the hot aisle, hot air is returned to HVAC for cooling
+- Hot aisle containment (physical curtains or doors) isolates exhaust air and forces it back to the HVAC return
+
+### Cooling Methods
+
+| Method | Description | Use Case |
+|---|---|---|
+| Computer Room Air Conditioner (CRAC) | Dedicated precision cooling unit, sits on raised floor | Traditional data centers |
+| In-row cooling | Cooling unit fits in the rack row, targets hot aisle directly | High-density deployments |
+| Raised floor cooling | Cold air delivered under a raised floor, exits through perforated tiles | Large data centers |
+| Overhead cooling | Cold air delivered from above | Data centers without raised floors |
+
+---
+
+## Power Conditioning
+
+Power quality directly affects system reliability. The exam requires you to distinguish between different power protection devices.
+
+<CompareCards
+  title="Surge Protector vs UPS"
+  left={{ title: "Surge Protector", icon: "Zap", color: "blue", points: ["Protects against brief voltage spikes", "No battery — no runtime during outage", "Joule rating: higher = better protection", "Metal Oxide Varistors (MOVs) absorb spikes", "Depletes over time — replace after major surge", "Does NOT condition power quality"] }}
+  right={{ title: "UPS (Uninterruptible Power Supply)", icon: "Activity", color: "green", points: ["Battery backup during power outage", "Provides runtime for graceful shutdown", "Also suppresses surges (most models)", "Runtime measured in minutes (not hours)", "Must be sized for load (watts)", "Alerts when battery is low or bad"] }}
+/>
+
+<ConceptCallout type="warning">A surge protector does NOT provide battery backup. If the question asks what keeps a server running during a power outage, the answer is UPS — not a surge protector. A power strip provides neither surge protection nor battery backup.</ConceptCallout>
+
+### UPS Types
+
+| UPS Type | How It Works | Pros | Cons |
+|---|---|---|---|
+| Standby (Offline) | Battery is idle; switches to battery when power fails | Inexpensive, efficient | Brief transfer time (4–8ms) on switchover |
+| Line-Interactive | Regulates voltage with autotransformer; battery activates on full failure | Better than standby for brownouts; common for workstations | Still has switchover time |
+| Online / Double-Conversion | Power always flows through inverter from battery; battery stays fully charged | Zero transfer time, best power quality, protects against all power issues | More expensive, generates more heat |
+
+**Sine wave vs stepped approximation:** Online UPS units produce a true sine wave, which some equipment (especially active PFC power supplies in servers) requires. Standby UPS units often produce a stepped approximation (modified sine wave), which may cause problems with sensitive loads.
+
+### Other Power Protection Devices
+
+**Line conditioner:** Filters electrical noise and voltage fluctuations from the power line. Protects against brownouts and dirty power. Does not provide battery backup.
+
+**Generator:** Provides long-term backup power (hours to days) when utility power fails. Diesel or propane-fueled. Requires a **transfer switch** to safely disconnect from utility power before generator comes online. Auto-transfer switches (ATS) do this automatically in seconds. Generators take 10–30 seconds to start — UPS bridges that gap.
+
+**Power strip:** Extends outlet count only. No surge protection, no battery, no conditioning. Never use a power strip for servers or critical equipment.
+
+### Joule Rating
+
+Surge protectors are rated in joules — the amount of energy they can absorb. Higher joule rating = better protection. A surge protector that has absorbed its rated capacity (after a major spike) is no longer protecting anything, even though it still passes power. Replace after any significant surge event.
+
+---
+
+## Proper Disposal and Environmental Regulations
+
+Electronic waste contains toxic materials. Improper disposal is illegal in many jurisdictions and harmful to the environment.
+
+### Why E-Waste is Regulated
+
+Common toxic materials in electronics:
+- **Lead**: in CRT displays, solder joints, batteries
+- **Mercury**: in fluorescent backlights (older LCD panels), switches
+- **Cadmium**: in nickel-cadmium (NiCd) batteries
+- **Beryllium**: in some chips and connectors
+- **Hexavalent chromium**: in some hardware coatings
+
+### What Must Be Recycled (Never Trash)
+
+| Item | Hazardous Material | Disposal Method |
+|---|---|---|
+| CRT monitors / TVs | Lead (several pounds per unit) | Certified e-waste recycler |
+| LCD monitors | Mercury (fluorescent backlight) | Certified e-waste recycler |
+| Batteries (Li-Ion, Li-Po) | Lithium, flammable | Retail drop-off (Best Buy, Staples, Home Depot) |
+| Batteries (NiCd) | Cadmium | Call2Recycle drop-off locations |
+| Batteries (lead-acid / SLA) | Lead, sulfuric acid | Auto parts stores, recyclers |
+| Toner cartridges | Carbon black, fine particles | Manufacturer programs, retail drop-off |
+| Ink cartridges | Various inks | Manufacturer mail-back, retail drop-off |
+| Mobile phones | Mixed hazardous materials | Manufacturer take-back, carrier programs |
+| Computers / components | Multiple hazardous materials | Certified e-waste recycler or manufacturer program |
+
+<ConceptCallout type="warning">Toner powder is extremely fine and can be inhaled. When replacing or disposing of toner cartridges, avoid shaking them and do not use compressed air to clean spills. Use a toner vacuum (with HEPA filter) or a damp cloth.</ConceptCallout>
+
+### Regulatory Framework
+
+**WEEE Directive (EU):** Waste Electrical and Electronic Equipment — requires manufacturers to take back and recycle products at end of life. Retailers must accept old equipment when selling new equivalents.
+
+**EPA regulations (US):** The EPA regulates certain e-waste components under RCRA (Resource Conservation and Recovery Act). Lead-acid batteries and CRTs are specifically regulated. States may have stricter laws.
+
+**State e-waste laws:** Many US states (California, New York, Texas, etc.) have mandatory e-waste recycling laws. Penalties for non-compliance can be significant for businesses.
+
+**Data destruction before disposal:** Before recycling or donating hardware, all storage media must be wiped or destroyed. See: degaussing, secure erase, physical destruction. This is both a security and compliance requirement.
+
+---
+
+## Airflow Management
+
+Poor airflow management reduces cooling efficiency and creates hot spots even in well-cooled rooms.
+
+Best practices:
+- **Blanking panels**: fill all unused rack unit slots with blanking panels. Empty slots allow hot exhaust air to recirculate to the front of the rack, warming the intake air.
+- **Cable management**: route cables through cable managers, not across airflow paths. Cables blocking the front or rear of equipment restrict airflow.
+- **Proper rack fill**: place heavier/hotter equipment at the bottom; leave some space between high-heat items.
+- **Seal floor penetrations**: in raised-floor data centers, cable cutouts and unsealed openings allow cold air to escape without reaching equipment.
+- **Side-to-side vs front-to-back airflow**: know which direction your equipment moves air and orient accordingly in the rack.

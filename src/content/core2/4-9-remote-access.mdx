@@ -1,0 +1,230 @@
+# Remote Access Technologies
+
+Remote access allows technicians to support systems and users without being physically present. The exam tests your knowledge of the major protocols, their ports, their use cases, and their security implications.
+
+---
+
+## RDP (Remote Desktop Protocol)
+
+RDP provides full graphical desktop access to a remote Windows machine as though you were sitting in front of it.
+
+| Property | Detail |
+|---|---|
+| Protocol | TCP port **3389** |
+| Developed by | Microsoft (proprietary) |
+| Provides | Full GUI desktop of remote system |
+| Host OS requirement | Windows Pro, Enterprise, or Server (Home does not support incoming RDP) |
+| Client | Remote Desktop Connection — `mstsc.exe` — available on all Windows editions |
+
+### Enabling RDP on Windows
+
+1. System Properties → Remote tab → Allow remote connections
+2. Add user accounts to the **Remote Desktop Users** local group
+3. Ensure Windows Firewall allows port 3389
+4. Note the machine's IP address or hostname
+
+### RDP Security
+
+<ConceptCallout type="warning">Exposing RDP directly to the internet on port 3389 is one of the most common attack vectors for ransomware and brute-force attacks. Never open RDP to the public internet without additional protection. Use a VPN or RD Gateway instead.</ConceptCallout>
+
+**Remote Desktop Gateway (RD Gateway):** A Microsoft server role that proxies RDP connections over HTTPS (port 443). Users connect to the RD Gateway over the internet, which then forwards the connection to internal systems. The RDP port (3389) never needs to be exposed to the internet.
+
+**Network Level Authentication (NLA):** Requires the connecting user to authenticate before a full RDP session is established. Reduces attack surface by rejecting unauthorized connection attempts before resources are allocated. Enable NLA on all RDP hosts.
+
+---
+
+## VNC (Virtual Network Computing)
+
+VNC is a cross-platform remote desktop protocol that works across Windows, macOS, and Linux.
+
+| Property | Detail |
+|---|---|
+| Protocol | TCP port **5900** (primary display) |
+| Standard | RFB (Remote Framebuffer) protocol |
+| Developed by | Originally AT&T Labs Cambridge; now multiple open implementations |
+| Provides | Full graphical desktop access |
+| Platform support | Cross-platform (Windows, macOS, Linux) |
+
+### VNC Variants
+
+- **TightVNC:** Open source, Windows-focused, efficient compression
+- **UltraVNC:** Windows, adds file transfer, text chat
+- **RealVNC:** Commercial and free tiers, cross-platform
+- **TigerVNC:** Open source, Linux-focused, good performance
+
+### VNC Security Note
+
+Basic VNC uses minimal or no encryption by default. For any internet-facing VNC use, **tunnel it over SSH** to add encryption:
+
+```bash
+# SSH tunnel for VNC: forward local port 5901 to remote port 5900 over SSH
+ssh -L 5901:localhost:5900 user@remote-host
+# Then connect VNC client to localhost:5901
+```
+
+<CompareCards
+  title="RDP vs VNC"
+  left={{ title: "RDP", icon: "Monitor", color: "blue", points: ["Windows-native, highly optimized", "TCP port 3389", "Transfers rendered display (efficient)", "Requires Windows Pro+ on host", "Built-in encryption (TLS)", "Best performance on Windows-to-Windows"] }}
+  right={{ title: "VNC", icon: "Globe", color: "purple", points: ["Cross-platform (Win/Mac/Linux)", "TCP port 5900", "Transfers raw screen pixels (less efficient)", "Works on any OS with VNC server", "Requires SSH tunnel for encryption", "Best when platform-agnostic access needed"] }}
+/>
+
+---
+
+## SSH (Secure Shell)
+
+SSH provides encrypted terminal (command-line) access to remote systems. It is the standard for Linux and Unix server management, and for network device configuration.
+
+| Property | Detail |
+|---|---|
+| Protocol | TCP port **22** |
+| Provides | Encrypted command-line shell |
+| Primary use | Linux/Unix servers, network devices (switches, routers, firewalls) |
+| Authentication | Password or public/private key pair |
+
+### SSH Key Authentication
+
+Key-based authentication is more secure than password authentication:
+1. Generate a key pair: `ssh-keygen` creates a private key (kept on client) and public key (deployed to server)
+2. Copy public key to server: `ssh-copy-id user@server` appends to `~/.ssh/authorized_keys`
+3. Connect: `ssh user@server` — authenticates without a password using the private key
+
+Disable password authentication on servers once keys are configured to eliminate brute-force risk.
+
+### SSH Tools
+
+- **macOS/Linux:** SSH built into the terminal. `ssh user@hostname`
+- **Windows:** Built-in OpenSSH client available since Windows 10. Also: **PuTTY** (classic Windows SSH client, `.ppk` key format)
+
+### SSH Port Forwarding
+
+SSH can tunnel other protocols securely — useful when a protocol lacks its own encryption:
+
+```bash
+# Local port forwarding: access remote MySQL (port 3306) via local port 3307
+ssh -L 3307:localhost:3306 user@db-server
+
+# Tunnel VNC over SSH (as shown above)
+ssh -L 5901:localhost:5900 user@remote-host
+
+# SOCKS proxy: route all browser traffic through remote server
+ssh -D 1080 user@remote-server
+```
+
+### SFTP
+
+SFTP (SSH File Transfer Protocol) runs over SSH on port 22. Provides encrypted file transfer. Not the same as FTP or FTPS. Use SFTP or SCP (Secure Copy) for file transfers to/from Linux servers.
+
+---
+
+## Remote Support Tools
+
+These tools are designed for ad-hoc remote support and are optimized for ease of use, often working through corporate firewalls without requiring inbound ports.
+
+### TeamViewer
+
+- Cross-platform (Windows, macOS, Linux, iOS, Android)
+- Works through NAT and firewalls via outbound connection to TeamViewer relay servers
+- The remote user runs a small client; you provide them with an ID and password to share
+- Free for personal non-commercial use; licensed for business
+- Session recording, file transfer, chat, unattended access available
+
+### AnyDesk
+
+- Similar to TeamViewer in design and use case
+- Known for low latency and good performance on poor connections
+- Cross-platform
+- Free for personal use
+
+### Windows Quick Assist
+
+- Built into Windows 10 and 11 (Start → Quick Assist)
+- Helper (support tech) generates a 6-digit code; sharer (user) enters the code
+- Works over HTTPS — no port configuration required
+- Remote view or full remote control
+- Session ends automatically when the helper disconnects
+- Requires Microsoft account sign-in for the helper
+
+### Windows Remote Assistance (legacy)
+
+- Older Windows feature replaced by Quick Assist in practice
+- Uses invitation files or email to establish session
+- Requires user to actively accept control transfer
+
+### Screen Sharing in Video Conferencing
+
+Microsoft Teams, Zoom, and similar platforms include screen sharing for demonstrations, walkthroughs, and light support. Not full remote control — the local user must interact with their own machine. Useful for guided troubleshooting where you talk the user through steps.
+
+---
+
+## VPN for Remote Access
+
+A VPN creates an encrypted tunnel between the user's device and the corporate network, giving remote workers access to internal resources as if they were on-site.
+
+<ConceptCallout type="info">VPN is the recommended way to protect RDP access. Rather than exposing port 3389 to the internet, require VPN first, then RDP to the machine's internal IP address. The internet only sees VPN traffic.</ConceptCallout>
+
+### VPN Types
+
+| Type | Port | Notes |
+|---|---|---|
+| SSL VPN | TCP 443 (HTTPS) | Works through nearly all firewalls; web-browser or client-based |
+| IPSec VPN | UDP 500, 4500 | Strong security; may be blocked by some firewalls |
+| IKEv2/IPSec | UDP 500, 4500 | Fast reconnection; preferred for mobile devices |
+| L2TP/IPSec | UDP 1701, 500, 4500 | Legacy; double encapsulation overhead |
+| WireGuard | UDP 51820 | Modern, fast, simple; increasingly common |
+
+### Split Tunnel vs Full Tunnel
+
+**Split tunnel:** Only traffic destined for corporate networks goes through the VPN. Internet traffic goes directly to the internet. Better performance, lower bandwidth cost on corporate side. Security risk: internet traffic is not inspected by corporate security tools.
+
+**Full tunnel:** All traffic — corporate and internet — routes through the VPN. Corporate security tools (web filter, IDS/IPS) inspect all traffic. Higher bandwidth consumption on corporate infrastructure. More secure.
+
+### Always-On VPN
+
+Enterprise deployments (Microsoft Intune, Cisco AnyConnect) can enforce **always-on VPN** so devices are always connected to the corporate VPN when not on the corporate physical network. Ensures security policies are always enforced for managed devices.
+
+---
+
+## RMM (Remote Monitoring and Management)
+
+RMM platforms are enterprise tools used by IT departments and Managed Service Providers (MSPs) to manage large fleets of devices.
+
+Capabilities:
+- Real-time system health monitoring (CPU, memory, disk, services)
+- Automated alerting when thresholds are exceeded
+- Patch management: deploy Windows updates, third-party patches across all managed devices
+- Remote script execution: run PowerShell or Bash scripts on hundreds of machines simultaneously
+- Remote access: integrated remote control for support
+- Asset inventory: hardware and software inventory across all managed endpoints
+- Backup management integration
+
+Common RMM platforms: ConnectWise Automate (LabTech), Datto RMM, NinjaRMM, SolarWinds N-central, Kaseya VSA
+
+---
+
+## Desktop Virtualization and DaaS
+
+**Virtual Desktop Infrastructure (VDI):** Virtual desktops run on servers in the data center or cloud. Users connect remotely and receive a virtual desktop experience. The endpoint device (thin client, laptop) just displays the session — all processing happens on the server.
+
+**DaaS (Desktop as a Service):** Cloud-hosted VDI. Organizations pay per-user per-month. No on-premises VDI infrastructure required.
+
+Common platforms:
+- **Citrix Virtual Apps and Desktops (formerly XenDesktop):** Enterprise VDI, application streaming
+- **VMware Horizon:** Enterprise VDI on-premises and cloud
+- **Microsoft Azure Virtual Desktop (AVD):** Microsoft's cloud DaaS offering; integrates with Microsoft 365 and Intune
+- **Amazon WorkSpaces:** AWS-hosted virtual desktops
+
+Benefits of VDI/DaaS: centralized management, data stays in data center (not on endpoint), easy provisioning, consistent environment across all users, supports thin clients.
+
+---
+
+## Protocol / Port Reference Summary
+
+| Technology | Port | Protocol |
+|---|---|---|
+| RDP | 3389 | TCP |
+| VNC | 5900 | TCP |
+| SSH | 22 | TCP |
+| RD Gateway | 443 | TCP (HTTPS) |
+| SSL VPN | 443 | TCP |
+| IPSec (IKE) | 500, 4500 | UDP |
+| WireGuard | 51820 | UDP |

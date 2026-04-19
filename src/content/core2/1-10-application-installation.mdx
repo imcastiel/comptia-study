@@ -1,0 +1,251 @@
+# Installing Applications
+
+Installing applications correctly — and understanding the implications of each installation method — is a routine technician task. The 220-1202 exam tests your ability to choose the right installation approach, understand 32-bit vs 64-bit compatibility, recognize distribution methods, verify system requirements, and identify the impact an application has on the device.
+
+## 32-Bit vs 64-Bit Applications
+
+The architecture of an application must be compatible with the operating system. Getting this wrong is a common source of installation failures.
+
+### Compatibility Rules
+
+| OS Architecture | Can Run 32-bit Apps? | Can Run 64-bit Apps? |
+|---|---|---|
+| 64-bit OS | Yes (via compatibility layer) | Yes |
+| 32-bit OS | Yes | No |
+
+A 64-bit Windows system runs 32-bit applications through **WOW64** (Windows 32-bit on Windows 64-bit) — a compatibility layer built into Windows that translates 32-bit API calls so they work on a 64-bit OS. The user typically does not notice any difference.
+
+<ConceptCallout type="warning">A 32-bit OS CANNOT run 64-bit applications. If a legacy workstation is running 32-bit Windows 10 and a user tries to install a 64-bit application, it will fail with an error. The solution is to upgrade to a 64-bit OS (if hardware supports it) or find a 32-bit version of the application.</ConceptCallout>
+
+### Installation Paths on Windows
+
+| Application Type | Default Install Location |
+|---|---|
+| 64-bit application | `C:\Program Files\` |
+| 32-bit application on 64-bit OS | `C:\Program Files (x86)\` |
+| 32-bit application on 32-bit OS | `C:\Program Files\` |
+
+The separate `Program Files (x86)` folder allows both 32-bit and 64-bit versions of an application to coexist without conflict.
+
+### Memory Addressing
+
+| Architecture | Maximum RAM Addressable |
+|---|---|
+| 32-bit application | ~4 GB (2^32 bytes) — practical limit often ~2 GB per process |
+| 64-bit application | Theoretically 18.4 exabytes — limited by OS and hardware |
+
+<ConceptCallout type="info">A 32-bit application can only address ~4 GB of RAM regardless of how much RAM the system has. For applications that process large files (video editing, large databases, scientific computing), the 64-bit version is required to use more than ~4 GB of RAM.</ConceptCallout>
+
+### 16-Bit Applications
+
+16-bit applications (written for Windows 3.x, DOS, Windows 95/98) will NOT run on a 64-bit Windows OS at all — WOW64 only supports 32-bit, not 16-bit. If a customer needs to run a 16-bit legacy application, options include:
+- A virtual machine running a 32-bit OS
+- DOSBox (for DOS applications)
+- A physical machine running 32-bit Windows
+
+## Installation Methods
+
+### Local Installer Packages
+
+**MSI (Microsoft Installer)**
+The standard Windows installer format managed by the Windows Installer service. MSI files contain the application and installation rules in a structured database.
+- Supports repair, modify, and remove from Programs and Features
+- Silent install: `msiexec /i package.msi /quiet`
+- Silent uninstall: `msiexec /x package.msi /quiet`
+- Transform files (.mst) customize MSI installations for enterprise deployment
+
+**EXE Installer**
+A self-contained executable that often wraps an MSI or uses a proprietary installer framework (NSIS, InnoSetup, InstallShield). More flexible but less standardized than MSI.
+- Common switches: `/silent`, `/quiet`, `/S`, `/passive` — vary by installer framework
+- May or may not support repair/modify after installation
+
+**Self-Extracting Archives**
+A compressed archive (ZIP, 7z, RAR) that extracts itself when run. May run a setup.exe after extraction or simply drop files to a location. Common for drivers and portable applications.
+
+### Silent and Unattended Installation
+
+Enterprise deployments require software to install without any user interaction:
+
+| Switch | Effect |
+|---|---|
+| `/quiet` | No UI, no prompts (MSI standard) |
+| `/passive` | Minimal UI with progress bar but no prompts |
+| `/norestart` | Suppress automatic restart after installation |
+| `/log logfile.txt` | Write installation log to file |
+
+<ProcessSteps
+  title="Deploying Software Silently via MSI"
+  color="blue"
+  steps={[
+    { title: "Obtain the MSI", description: "Download or extract the MSI file from the vendor. Many EXE installers contain an embedded MSI that can be extracted with 7-Zip or the /extract flag." },
+    { title: "Test the silent install", description: "Run msiexec /i package.msi /quiet /norestart in a test environment. Verify the application installs without prompts." },
+    { title: "Check system requirements", description: "Confirm target machines meet CPU, RAM, storage, and OS version requirements. Verify any prerequisites (.NET, VC++ redistributables) are installed first." },
+    { title: "Deploy via management tool", description: "Use SCCM, Intune, GPO software deployment, or a script to push the installer to target machines." },
+    { title: "Verify and log", description: "Check Windows Event Viewer (Application log) and the MSI log file for installation success or failure codes." }
+  ]}
+/>
+
+### App Stores
+
+App stores provide a curated, sandboxed installation experience with automatic updates.
+
+| Store | Platform | Characteristics |
+|---|---|---|
+| Microsoft Store | Windows 10/11 | Apps run in sandboxed containers (MSIX); auto-update; limited enterprise apps |
+| Mac App Store | macOS | Strict sandboxing; Apple review process; Gatekeeper compliant |
+| Google Play | Android | Most Android apps; also available on some Chromebooks |
+
+Store applications are **sandboxed** — they run with limited permissions and cannot access system resources outside their container without explicit permission. This improves security but limits some functionality.
+
+### Package Managers
+
+Package managers automate downloading, installing, and updating software from trusted repositories:
+
+| Tool | Platform | Example |
+|---|---|---|
+| `winget` | Windows 10/11 (built-in) | `winget install VLC` |
+| Homebrew | macOS | `brew install wget` |
+| `apt` | Ubuntu/Debian Linux | `sudo apt install vlc` |
+| `dnf` | Fedora/RHEL Linux | `sudo dnf install vlc` |
+| Chocolatey | Windows (third-party) | `choco install vlc` |
+
+Package managers are preferred for enterprise scripted deployments because they are repeatable, automatable, and can be scripted into provisioning workflows.
+
+### Web-Based Downloads
+
+Downloading an installer from a vendor's website is the most common consumer installation method. Security considerations apply:
+
+<ConceptCallout type="warning">Before running a downloaded installer, verify its integrity. Check the SHA-256 hash against the vendor's published hash (use `certutil -hashfile installer.exe SHA256` on Windows or `sha256sum installer.exe` on Linux/macOS). A mismatch means the file is corrupt or tampered with.</ConceptCallout>
+
+## Distribution Methods
+
+| Method | Description | When Used |
+|---|---|---|
+| Optical media (CD/DVD) | Physical disc with installer | Legacy software; declining use |
+| USB drive | Portable installer media | OS installations, field deployments |
+| Network share | Installer stored on file server (`\\server\software\`) | Corporate environments |
+| Cloud/web download | Installer downloaded from vendor website | Consumer software, SaaS |
+| Enterprise MDM/deployment | SCCM, Intune, Jamf, PDQ Deploy | Large-scale enterprise |
+| Email/messaging attachment | NOT recommended — phishing risk | Avoid |
+
+## System Requirements
+
+Always verify system requirements before installation. Installing on under-spec hardware causes performance problems and support calls.
+
+### Key Requirements to Check
+
+| Requirement | Notes |
+|---|---|
+| CPU architecture | x86 (32-bit), x64 (64-bit), or ARM. Must match OS/hardware. |
+| Minimum RAM | The minimum for the app to launch. Recommended RAM is what you actually want. |
+| Disk space | Required space for installation plus working data. Check free space with `df -h` (Linux) or Disk Management (Windows). |
+| OS version | Minimum OS version (e.g., Windows 10 1903+, macOS 12+). |
+| Graphics | DirectX version, GPU VRAM — critical for games and video software. |
+| Prerequisites | .NET Framework, Visual C++ Redistributables, Java Runtime, etc. |
+| Internet connection | Some applications require internet access for activation or online-only features. |
+
+### Common Prerequisites on Windows
+
+**Microsoft .NET Framework / .NET**: Many applications require a specific .NET version. Windows 10/11 includes .NET Framework 4.x built-in. Newer .NET 5/6/7/8 must be installed separately.
+
+**Visual C++ Redistributables**: Libraries required by applications compiled with Microsoft Visual C++. Multiple versions can coexist (2010, 2015, 2017, 2019, 2022). A missing VC++ redistributable causes a "missing DLL" error on application launch.
+
+**Java Runtime Environment (JRE)**: Required for Java-based applications. The application's documentation will specify the required Java version.
+
+## Impact on the Device
+
+Every installed application has an ongoing impact on the system, not just at installation time.
+
+### Disk Space
+
+Applications consume disk space both during and after installation — database files, log files, cache, and user data grow over time. Monitor with Disk Cleanup (Windows) or `df -h`/`du -sh` (Linux).
+
+### RAM Usage
+
+Applications consume RAM while running. Background services consume RAM even when the main application is closed. Use Task Manager (Windows) or Activity Monitor (macOS) to identify high-memory processes.
+
+### Startup Programs
+
+Many applications add themselves to the startup sequence — they launch automatically when Windows starts, increasing boot time and using RAM before the user even opens them.
+
+- **Windows 10/11**: Task Manager > Startup tab. Disable unnecessary startup items.
+- **Legacy**: `msconfig` > Startup tab (Windows 7/8).
+- **Run keys**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run` and `HKCU\...\Run` in the registry.
+
+### Background Services
+
+Applications that run as Windows Services continue running in the background even when no user is logged in. Antivirus, backup agents, database servers, and remote management tools all use services. View and manage via `services.msc`.
+
+### System Tray Items
+
+Many applications place an icon in the system tray (notification area) indicating a background process is running. Excessive tray items indicate too many background programs.
+
+### Browser Extensions
+
+Applications may install browser extensions (toolbars, ad-ons, helper objects) without clear disclosure. These can degrade browser performance and create privacy/security concerns. Always review browser extension installations.
+
+## Application Compatibility
+
+### Windows Compatibility Mode
+
+If an application was designed for an older Windows version and fails on a modern OS, try compatibility mode:
+
+Right-click the application's EXE > **Properties** > **Compatibility** tab > Check "Run this program in compatibility mode for:" and select the Windows version.
+
+Available compatibility modes: Windows XP (SP2/SP3), Windows Vista, Windows 7, Windows 8.
+
+<ConceptCallout type="tip">Compatibility mode applies shims — the OS translates API calls the legacy application makes to their modern equivalents. It does not actually run the old OS; it only mimics certain behaviors. Not all applications can be fixed this way.</ConceptCallout>
+
+### Application Shimming
+
+**Shims** are small compatibility fixes applied by the Windows Application Compatibility Toolkit. They intercept API calls from legacy applications and redirect them to the correct modern behavior. Managed via the Compatibility Administrator tool.
+
+### 32-Bit App on 64-Bit OS
+
+Most 32-bit applications work fine on 64-bit Windows via WOW64. Exceptions:
+- **Kernel-mode drivers**: 32-bit drivers will NOT run on 64-bit Windows. Driver must be 64-bit.
+- **16-bit applications**: Not supported at all on 64-bit Windows.
+- **Anti-cheat / low-level software**: May require a 64-bit version.
+
+## Security Considerations
+
+<ConceptCallout type="warning">Every application installation is a potential security risk. Verify the source, check the digital signature, and watch for UAC prompts requesting unnecessary permissions before proceeding.</ConceptCallout>
+
+### Digital Signatures / Code Signing
+
+Legitimate software vendors sign their installers with a digital certificate. Windows checks this signature and displays publisher information in the UAC prompt. An unsigned application triggers a "Unknown Publisher" warning — not automatic malware, but a reason for extra caution.
+
+Verify a file's signature: Right-click > Properties > **Digital Signatures** tab.
+
+### UAC Prompts
+
+User Account Control (UAC) prompts appear when an application requests elevated privileges (administrator access). The prompt shows the publisher name (if signed) or "Unknown Publisher" (if unsigned).
+
+- Blue shield prompt: Application is signed by a trusted publisher
+- Orange/yellow shield prompt: Application is unsigned or unrecognized — use extra caution
+
+### Source Verification
+
+| Source | Risk Level |
+|---|---|
+| Official vendor website | Low |
+| Microsoft Store / Mac App Store | Low (curated) |
+| Reputable download sites (ninite.com, etc.) | Low-Medium |
+| Third-party download aggregators | Medium — may bundle adware |
+| Torrents / cracked software sites | High — very likely malware |
+| Email attachments | High — primary malware delivery vector |
+
+## Exam Scenario Quick Reference
+
+| Scenario | Answer |
+|---|---|
+| 64-bit OS, trying to install 32-bit app | Works — WOW64 compatibility layer handles it |
+| 32-bit OS, trying to install 64-bit app | Will NOT work — OS must be 64-bit |
+| 32-bit app installs to which folder? | `C:\Program Files (x86)\` |
+| Silent MSI install switch | `/quiet` |
+| App crashes with "missing DLL" error | Install the required Visual C++ Redistributable |
+| Legacy app won't run on Windows 11 | Try Compatibility Mode (right-click > Properties > Compatibility) |
+| 16-bit app on 64-bit Windows | Won't run — use a VM with 32-bit OS instead |
+| Verify downloaded installer integrity | Check SHA-256 hash with certutil or sha256sum |
+| App slows boot time | Disable via Task Manager > Startup tab |
+| Unknown publisher UAC prompt | Use extra caution — application is unsigned |

@@ -1,0 +1,327 @@
+# Cloud Computing Concepts
+
+## What Is Cloud Computing?
+
+Cloud computing is the delivery of computing services — servers, storage, databases, networking, software, analytics, and intelligence — over the internet ("the cloud") with pay-as-you-go pricing.
+
+The **NIST definition** (which the CompTIA A+ exam aligns with) defines cloud computing by five essential characteristics:
+
+| Characteristic | Description |
+|---|---|
+| On-demand self-service | Users can provision resources without requiring human interaction with each service provider |
+| Broad network access | Resources are accessible over the network from heterogeneous client devices (phones, tablets, laptops) |
+| Resource pooling | Provider's resources are pooled to serve multiple consumers (multi-tenant model) |
+| Rapid elasticity | Resources can be elastically provisioned and released, sometimes automatically |
+| Measured service | Cloud systems automatically control and optimize resource use; usage is monitored, controlled, and reported |
+
+<ConceptCallout type="info">
+The five NIST characteristics are directly tested on the CompTIA A+ exam. Memorize them. The key distinguishing ideas are: **self-service** (no help desk to call), **elasticity** (scales up and down automatically), and **measured** (you pay for what you use).
+</ConceptCallout>
+
+---
+
+## Cloud Service Models
+
+### IaaS — Infrastructure as a Service
+
+The cloud provider delivers virtualized computing resources: servers, storage, and networking. You manage the OS, middleware, applications, and data. The provider manages the physical hardware, virtualization layer, and data center.
+
+**Analogy:** Renting a bare apartment — you bring your own furniture and set everything up.
+
+**You manage:** Operating system, runtime, middleware, applications, data
+**Provider manages:** Virtualization, servers, storage, networking, data center
+
+**Examples:** Amazon EC2, Microsoft Azure Virtual Machines, Google Compute Engine, DigitalOcean Droplets
+
+**Use cases:**
+- Run custom enterprise applications
+- Host websites with specific OS requirements
+- Development and test environments
+- Migrate existing on-premise workloads ("lift and shift")
+
+### PaaS — Platform as a Service
+
+The provider delivers a platform — OS, runtime, middleware — on top of the infrastructure. You deploy and manage your application and data. You do not manage the OS or underlying infrastructure.
+
+**Analogy:** Renting a furnished apartment — the furniture is there, you just bring your personal items.
+
+**You manage:** Applications, data
+**Provider manages:** Runtime, middleware, OS, virtualization, servers, storage, networking
+
+**Examples:** AWS Elastic Beanstalk, Google App Engine, Microsoft Azure App Service, Heroku, Salesforce Platform
+
+**Use cases:**
+- Application development without infrastructure management
+- Rapid development and deployment
+- Teams that want to focus on code, not servers
+
+### SaaS — Software as a Service
+
+The provider delivers a complete, ready-to-use application over the internet. You simply use the software through a web browser or app. You manage nothing except your data and user access settings.
+
+**Analogy:** Staying in a hotel room — everything is provided and managed for you.
+
+**You manage:** User settings, your data
+**Provider manages:** Everything else
+
+**Examples:** Microsoft 365 (Word/Excel/Outlook via browser), Google Workspace (Gmail, Docs, Sheets), Salesforce CRM, Dropbox, Zoom, Slack, GitHub
+
+**Use cases:**
+- Email and productivity apps
+- CRM and business software
+- Collaboration tools
+
+### Service Model Comparison
+
+| Aspect | IaaS | PaaS | SaaS |
+|---|---|---|---|
+| OS control | You manage | Provider manages | Provider manages |
+| App deployment | You install | You deploy code | Pre-built, ready to use |
+| Scaling | You configure | Platform handles | Fully automatic |
+| Flexibility | Maximum | Moderate | Minimal |
+| Management burden | High | Medium | Low |
+| Example | AWS EC2 | Heroku | Microsoft 365 |
+
+<ConceptCallout type="tip">
+The exam loves to give a scenario and ask which service model it describes. Key differentiator: if you're managing the OS, it's **IaaS**. If you're just deploying code without touching the OS, it's **PaaS**. If you're just logging in and using an app with no deployment, it's **SaaS**.
+</ConceptCallout>
+
+---
+
+## Cloud Deployment Models
+
+### Public Cloud
+
+Infrastructure is owned and operated by a cloud provider and shared among multiple tenants (customers). Resources are delivered over the public internet.
+
+- **Examples:** Amazon Web Services (AWS), Microsoft Azure, Google Cloud Platform (GCP)
+- **Benefits:** No capital expense, infinite apparent scale, geographic distribution
+- **Concerns:** Data resides on shared infrastructure; regulatory/compliance requirements may prohibit certain data
+
+### Private Cloud
+
+Cloud infrastructure is provisioned for exclusive use by a single organization. It may be managed by the organization or a third party, located on-premise or off-premise.
+
+- **Examples:** VMware Private Cloud, OpenStack on-premise deployment, Azure Stack
+- **Benefits:** Full control over data, hardware, and security; can meet strict compliance requirements
+- **Concerns:** Higher capital and operational cost; organization is responsible for scaling
+
+### Hybrid Cloud
+
+A combination of public and private cloud infrastructure that remains distinct but are bound together by technology for data and application portability.
+
+- **Examples:** Running production workloads on-premise but bursting to AWS during peak demand; DR (disaster recovery) in public cloud while production is on-premise
+- **Benefits:** Flexibility to run sensitive workloads on private, non-sensitive workloads on public; cost optimization
+- **Concerns:** More complex to manage; requires network connectivity between environments
+
+### Community Cloud
+
+Cloud infrastructure is shared by several organizations that have shared concerns (e.g., security requirements, compliance requirements, mission, or policy). Managed by one of the organizations or a third party.
+
+- **Examples:** Government cloud (FedRAMP-compliant), healthcare cloud (HIPAA-compliant for multiple providers), financial services cloud
+- **Benefits:** Cost sharing among community members; shared compliance and security posture
+- **Concerns:** Less common than public/private/hybrid; less flexibility
+
+| Model | Owned By | Access | Cost | Control |
+|---|---|---|---|---|
+| Public | Cloud provider | Anyone (multi-tenant) | Pay-per-use | Low |
+| Private | One organization | One org only | High CapEx | High |
+| Hybrid | Mix | Controlled mix | Moderate | Moderate |
+| Community | Shared org | Community members | Shared | Moderate |
+
+---
+
+## Common Cloud Services
+
+### File Storage and Sync
+
+| Service | Provider | Free Tier | Platform Focus |
+|---|---|---|---|
+| iCloud Drive | Apple | 5 GB | iOS/macOS |
+| OneDrive | Microsoft | 5 GB (15 GB with M365) | Windows/Microsoft 365 |
+| Google Drive | Google | 15 GB | Android/Google Workspace |
+| Dropbox | Dropbox Inc. | 2 GB | Cross-platform |
+| Box | Box Inc. | 10 GB | Enterprise |
+
+All of these sync selected folders to the local device and upload changes to the cloud. Files can be accessed via web browser from any device.
+
+### Virtual Machines (IaaS Compute)
+
+| Service | Provider | Notes |
+|---|---|---|
+| EC2 (Elastic Compute Cloud) | Amazon AWS | Widest range of instance types |
+| Azure Virtual Machines | Microsoft | Tight Windows Server integration |
+| Compute Engine | Google Cloud | Custom machine types |
+| Droplets | DigitalOcean | Simple, developer-friendly |
+| Lightsail | Amazon AWS | Simplified VPS for beginners |
+
+### Office and Productivity Applications (SaaS)
+
+| Service | Provider | Key Apps |
+|---|---|---|
+| Microsoft 365 | Microsoft | Word, Excel, PowerPoint, Outlook, Teams |
+| Google Workspace | Google | Docs, Sheets, Slides, Gmail, Meet |
+| iWork | Apple | Pages, Numbers, Keynote (iCloud) |
+
+<ConceptCallout type="info">
+**Microsoft 365** (formerly Office 365) provides cloud-based versions of traditional Office apps accessible from any browser plus installable desktop versions. It includes 1 TB of OneDrive storage per user. For enterprises, it also includes Exchange Online (email), SharePoint, and Teams.
+</ConceptCallout>
+
+---
+
+## Cloud Connectivity
+
+### VPN to Cloud
+
+Organizations connect their on-premise networks to cloud environments via an **IPsec VPN tunnel** over the public internet.
+
+- **AWS Site-to-Site VPN:** Connects on-premise network to an AWS VPC
+- **Azure VPN Gateway:** Connects on-premise network to an Azure Virtual Network
+- Encrypted in transit; latency depends on internet routing
+
+### Direct Connect / ExpressRoute
+
+Dedicated private network connections from the organization's data center directly to the cloud provider's infrastructure, bypassing the public internet.
+
+| Service | Provider | Notes |
+|---|---|---|
+| AWS Direct Connect | Amazon | 1 Gbps or 10 Gbps dedicated circuit |
+| Azure ExpressRoute | Microsoft | 50 Mbps to 10 Gbps |
+| Google Cloud Interconnect | Google | Dedicated or partner interconnect |
+
+**Benefits over VPN:**
+- More consistent latency
+- Higher bandwidth
+- No shared public internet path
+- Better for large data transfers and latency-sensitive applications
+
+### VPC — Virtual Private Cloud
+
+A **VPC** is an isolated virtual network within a public cloud where you control IP address ranges, subnets, route tables, and network gateways. It is the networking foundation for cloud resources.
+
+- Resources within a VPC can communicate with each other privately
+- Internet access is controlled via internet gateways and NAT gateways
+- Connectivity between VPCs is possible via VPC peering
+
+---
+
+## Cloud Security: Shared Responsibility Model
+
+The shared responsibility model defines which security tasks are handled by the cloud provider and which are the customer's responsibility.
+
+| Security Area | IaaS | PaaS | SaaS |
+|---|---|---|---|
+| Physical data center | Provider | Provider | Provider |
+| Network infrastructure | Provider | Provider | Provider |
+| Hypervisor / virtualization | Provider | Provider | Provider |
+| Operating system | **Customer** | Provider | Provider |
+| Application | **Customer** | **Customer** | Provider |
+| Data | **Customer** | **Customer** | **Customer** |
+| Identity & Access Management | **Shared** | **Shared** | **Shared** |
+
+<ConceptCallout type="warning">
+The shared responsibility model is a critical concept. A common misconception is that moving to the cloud means the provider is responsible for all security. **Data classification and protection, user identity management, and application security are always the customer's responsibility**, regardless of the cloud model.
+</ConceptCallout>
+
+**Common customer misconfigurations that lead to cloud breaches:**
+- S3 buckets set to public (customer misconfigured access policy)
+- Weak IAM credentials or no MFA on admin accounts
+- Unpatched OS on IaaS virtual machines (customer manages the OS)
+- Unencrypted data stored in the cloud (customer responsibility to encrypt)
+
+---
+
+## Cloud vs On-Premise Cost Comparison
+
+| Factor | On-Premise | Cloud |
+|---|---|---|
+| Upfront cost (CapEx) | High (hardware purchase) | Low to none |
+| Ongoing cost (OpEx) | Power, cooling, staff | Monthly usage fees |
+| Scaling up | Buy new hardware (weeks/months) | Provision in minutes |
+| Scaling down | Hardware sits idle | Stop paying for unused resources |
+| Maintenance | IT staff maintains hardware | Provider maintains hardware |
+| Depreciation | Hardware depreciates over 3–5 years | No owned assets |
+| Predictability | Fixed cost after initial purchase | Variable; can be unpredictable |
+
+**TCO (Total Cost of Ownership)** analysis is required to determine which is cheaper for a given workload. Cloud can be more expensive for steady-state predictable workloads but much cheaper for variable or short-term needs.
+
+---
+
+## Latency and Bandwidth Requirements
+
+### Latency
+
+Cloud applications require adequate network latency. Applications that have real-time requirements (VoIP, video conferencing, database transactions) are sensitive to latency.
+
+- **Typical internet latency to cloud region:** 5–50 ms depending on geography
+- **Direct Connect/ExpressRoute:** 2–10 ms (consistent, not variable)
+- High latency in cloud applications: check geographic region selection, use edge locations/CDN
+
+### Bandwidth Requirements
+
+| Use Case | Approximate Bandwidth Needed |
+|---|---|
+| Email and web browsing | 1–5 Mbps per user |
+| Video conferencing (HD) | 2–4 Mbps per user |
+| VDI (virtual desktop) | 2–15 Mbps per user |
+| Large file sync (initial) | As much as available |
+| Streaming media (4K) | 20–25 Mbps |
+
+<ConceptCallout type="tip">
+A common exam scenario: users complain that cloud applications are slow. Troubleshooting steps:
+1. Check available bandwidth at the site (run a speed test)
+2. Check latency to the cloud provider's region
+3. Check if the organization is in the correct geographic region for the cloud service
+4. Check for proxy/firewall inspection adding overhead
+5. Consider Direct Connect/ExpressRoute for consistent performance
+</ConceptCallout>
+
+---
+
+## Cloud Synchronization
+
+### What Syncs Locally vs. Stays in the Cloud
+
+Most cloud file services offer two modes:
+
+**Always Available (Synced locally):**
+- Files are downloaded to the local device
+- Changes sync to the cloud automatically
+- Accessible offline
+
+**On-Demand / Online-Only:**
+- Files exist only in the cloud
+- A placeholder/shortcut appears in the file system
+- Downloaded only when opened
+- Saves local storage space
+
+**Synchronization conflicts** occur when the same file is edited on two devices before syncing. Most services resolve this by keeping both versions with a note in the filename (e.g., "document (John's MacBook's conflicted copy).docx").
+
+---
+
+## CDN — Content Delivery Network
+
+A **CDN** is a geographically distributed network of servers that cache and deliver content (web pages, images, videos, scripts) from locations closer to the end user.
+
+### How CDN Works
+
+1. Website uploads content to the CDN's origin server
+2. CDN replicates content to edge servers worldwide (points of presence — PoPs)
+3. When a user requests content, the CDN routes the request to the nearest edge server
+4. Edge server delivers content with lower latency than the distant origin server
+
+### CDN Benefits
+
+| Benefit | Description |
+|---|---|
+| Lower latency | Content served from nearby edge server |
+| Reduced origin load | Edge servers handle most requests |
+| DDoS mitigation | Distributed infrastructure absorbs attack traffic |
+| High availability | Content available even if origin server is down |
+| Bandwidth cost reduction | CDN providers often have cheaper bandwidth |
+
+**CDN Examples:** Cloudflare, AWS CloudFront, Azure CDN, Akamai, Fastly
+
+<ConceptCallout type="info">
+For the A+ exam, understand that a CDN improves performance for content delivery to geographically distributed users by caching at edge locations. If a user reports a website loads fast for them but slow for users across the country, a CDN could resolve this. If a user reports seeing stale/outdated content on a website, the CDN cache may not have been purged after an update.
+</ConceptCallout>
