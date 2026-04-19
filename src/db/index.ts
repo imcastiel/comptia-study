@@ -3,8 +3,9 @@ import { drizzle } from 'drizzle-orm/libsql'
 import * as schema from './schema'
 
 const DATABASE_URL = process.env.DATABASE_URL ?? 'file:./comptia.db'
+const DATABASE_AUTH_TOKEN = process.env.DATABASE_AUTH_TOKEN
 
-const client = createClient({ url: DATABASE_URL })
+const client = createClient({ url: DATABASE_URL, authToken: DATABASE_AUTH_TOKEN })
 
 export const db = drizzle(client, { schema })
 export type DB = typeof db
