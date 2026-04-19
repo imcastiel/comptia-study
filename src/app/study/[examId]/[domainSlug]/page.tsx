@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import Link from 'next/link'
 import { ChevronRight, Lock } from 'lucide-react'
 import { notFound } from 'next/navigation'
