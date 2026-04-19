@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Lock } from 'lucide-react'
 
 function LoginForm() {
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -33,13 +34,23 @@ function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3" autoComplete="on">
+      <input
+        type="text"
+        name="username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        placeholder="Username"
+        autoComplete="username"
+        className="w-full px-4 py-3 rounded-[12px] bg-[var(--apple-fill)] border border-[var(--apple-separator)] text-[15px] outline-none focus:border-[var(--apple-blue)] transition-colors"
+      />
       <input
         type="password"
+        name="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         placeholder="Password"
-        autoFocus
+        autoComplete="current-password"
         className="w-full px-4 py-3 rounded-[12px] bg-[var(--apple-fill)] border border-[var(--apple-separator)] text-[15px] outline-none focus:border-[var(--apple-blue)] transition-colors"
       />
       {error && (
