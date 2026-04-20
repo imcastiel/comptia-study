@@ -1,12 +1,13 @@
 export const dynamic = 'force-dynamic'
 
 import Link from 'next/link'
-import { BookOpen, Layers, Trophy, ChevronRight, Target, Clock, CheckCircle2, TrendingUp } from 'lucide-react'
+import { BookOpen, Layers, Trophy, ChevronRight, Target, Clock, CheckCircle2, TrendingUp, Terminal } from 'lucide-react'
 import { db } from '@/db'
 import { examAttempts, questionAttempts, questions as questionsTable, topics, domains, flashcardReviews, studyProgress } from '@/db/schema'
 import { eq, lte, desc, sql, count } from 'drizzle-orm'
 import { cn } from '@/lib/utils'
 import { ActivityHeatmap } from '@/components/home/activity-heatmap'
+import { WeakSpots } from '@/components/home/weak-spots'
 
 // ─── Data fetching ─────────────────────────────────────────────────────────────
 
@@ -247,7 +248,7 @@ export default async function HomePage() {
         <h2 className="text-[12px] font-semibold text-[var(--apple-label-secondary)] uppercase tracking-wider mb-3">
           Quick Start
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
           {[
             {
               icon: BookOpen,
@@ -262,6 +263,13 @@ export default async function HomePage() {
               description: dueCount > 0 ? `${dueCount} card${dueCount !== 1 ? 's' : ''} due for review` : 'All cards reviewed',
               href: '/flashcards',
               color: dueCount > 0 ? 'var(--apple-orange)' : 'var(--apple-green)',
+            },
+            {
+              icon: Terminal,
+              title: 'PBQ Labs',
+              description: '13 hands-on simulations',
+              href: '/labs',
+              color: 'var(--apple-purple)',
             },
             {
               icon: Trophy,
@@ -388,6 +396,9 @@ export default async function HomePage() {
             )}
           </div>
         </section>
+
+        {/* Focus Areas — weak spot tracking from quiz results */}
+        <WeakSpots />
 
         {/* Domain Performance */}
         <section className="animate-fade-up" style={{ animationDelay: '200ms' }}>

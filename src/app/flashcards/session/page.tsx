@@ -47,19 +47,26 @@ function FlashcardSessionInner() {
     const card = cards[currentIndex]
     if (!card) return
 
-    // Update stats
     const labelMap: Record<number, keyof typeof sessionStats> = { 1: 'again', 3: 'hard', 4: 'good', 5: 'easy' }
     setSessionStats((s) => ({ ...s, [labelMap[quality]]: s[labelMap[quality]] + 1 }))
 
-    // Save review
     await fetch('/api/flashcards/review', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ flashcardId: card.id, quality }),
     }).catch(() => {})
 
-    // Advance
-    if (currentIndex + 1 >= cards.length) {
+    if (quality === 1) {
+      // Move card to end so it comes back this session
+      setCards((prev) => {
+        const next = [...prev]
+        next.splice(currentIndex, 1)
+        next.push(card)
+        return next
+      })
+      // If this was the only card left, we're done
+      if (cards.length === 1) setDone(true)
+    } else if (currentIndex + 1 >= cards.length) {
       setDone(true)
     } else {
       setCurrentIndex((i) => i + 1)

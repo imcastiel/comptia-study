@@ -4,6 +4,7 @@ import { TopNav } from '@/components/layout/top-nav'
 import { Sidebar } from '@/components/layout/sidebar'
 import { AiTutor } from '@/components/ai/ai-tutor'
 import { PomodoroProvider } from '@/contexts/pomodoro-context'
+import { SidebarProvider } from '@/contexts/sidebar-context'
 
 export const metadata: Metadata = {
   title: 'CompTIA A+ Study',
@@ -19,14 +20,16 @@ export default function RootLayout({
     <html lang="en" className="h-full antialiased">
       <body className="h-full bg-[var(--apple-bg-primary)]">
         <PomodoroProvider>
-          <TopNav />
-          <div className="flex pt-14 min-h-screen">
-            <Sidebar />
-            <main className="flex-1 ml-[260px] min-h-[calc(100vh-3.5rem)] overflow-x-hidden">
-              {children}
-            </main>
-          </div>
-          <AiTutor />
+          <SidebarProvider>
+            <TopNav />
+            <div className="flex pt-14 min-h-screen">
+              <Sidebar />
+              <main className="flex-1 md:ml-[260px] min-h-[calc(100vh-3.5rem)] overflow-x-hidden">
+                {children}
+              </main>
+            </div>
+            <AiTutor />
+          </SidebarProvider>
         </PomodoroProvider>
       </body>
     </html>

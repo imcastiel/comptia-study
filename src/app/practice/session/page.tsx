@@ -3,13 +3,14 @@
 import { useEffect, useState, useCallback, useRef, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { ExamTimer } from '@/components/practice/exam-timer'
-import { Flag, ChevronLeft, ChevronRight, Send } from 'lucide-react'
+import { Flag, ChevronLeft, ChevronRight, Send, CheckCircle2, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
 interface Choice {
   id: string
   text: string
+  isCorrect?: boolean
 }
 
 interface Question {
@@ -17,6 +18,7 @@ interface Question {
   type: 'single_choice' | 'multiple_choice' | 'fill_blank' | 'ordered_list' | 'drag_drop'
   stem: string
   choices: Choice[]
+  explanation?: string
   objectiveId: string
   topicTitle: string
 }
@@ -42,13 +44,19 @@ function ExamSessionInner() {
   const router = useRouter()
   const mode = (searchParams.get('mode') ?? 'quick') as keyof typeof MODE_CONFIG
   const config = MODE_CONFIG[mode] ?? MODE_CONFIG.quick
+  const exam = searchParams.get('exam') ?? ''
+  const retryIds = searchParams.get('retryIds') ?? ''
 
   const [session, setSession] = useState<SessionState | null>(null)
   const [loading, setLoading] = useState(true)
+  const [revealed, setRevealed] = useState<Set<string>>(new Set())
+  const [correctAnswers, setCorrectAnswers] = useState<Set<string>>(new Set())
   const questionStartRef = useRef<number>(Date.now())
+  const showFeedback = mode !== 'simulation'
 
   useEffect(() => {
-    fetch(`/api/practice/questions?count=${config.count}`)
+    const url = `/api/practice/questions?count=${config.count}${showFeedback ? '&study=true' : ''}${exam ? `&exam=${exam}` : ''}${retryIds ? `&retryIds=${retryIds}` : ''}`
+    fetch(url)
       .then((r) => r.json())
       .then((data) => {
         setSession({
@@ -63,11 +71,15 @@ function ExamSessionInner() {
         setLoading(false)
       })
       .catch(() => setLoading(false))
-  }, [config.count])
+  }, [config.count, showFeedback, exam, retryIds])
 
-  const handleAnswer = useCallback((questionId: string, value: string | string[]) => {
+  const handleAnswer = useCallback((questionId: string, value: string | string[], isCorrect?: boolean) => {
     setSession((s) => s ? { ...s, answers: { ...s.answers, [questionId]: value } } : s)
-  }, [])
+    if (showFeedback) {
+      setRevealed((prev) => new Set(prev).add(questionId))
+      if (isCorrect) setCorrectAnswers((prev) => new Set(prev).add(questionId))
+    }
+  }, [showFeedback])
 
   const handleFlag = useCallback((questionId: string) => {
     setSession((s) => {
@@ -94,6 +106,8 @@ function ExamSessionInner() {
 
   const handleSubmit = useCallback(async () => {
     if (!session) return
+    const unanswered = session.questions.length - Object.keys(session.answers).length
+    if (unanswered > 0 && !window.confirm(`You have ${unanswered} unanswered question${unanswered > 1 ? 's' : ''}. Submit anyway?`)) return
     const res = await fetch('/api/practice/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -101,6 +115,7 @@ function ExamSessionInner() {
         questions: session.questions,
         answers: session.answers,
         timeSpent: session.timeSpent,
+        flagged: Array.from(session.flagged),
         mode,
         totalTimeSeconds: Math.round((Date.now() - session.startTime) / 1000),
       }),
@@ -189,51 +204,92 @@ function ExamSessionInner() {
         <p className="text-[16px] leading-relaxed text-foreground font-medium mb-6">{q.stem}</p>
 
         {/* Choices */}
-        {(q.type === 'single_choice' || q.type === 'multiple_choice') && (
-          <div className="flex flex-col gap-2">
-            {q.choices.map((choice) => {
-              const isSelected = q.type === 'multiple_choice'
-                ? Array.isArray(currentAnswer) && currentAnswer.includes(choice.id)
-                : currentAnswer === choice.id
+        {(q.type === 'single_choice' || q.type === 'multiple_choice') && (() => {
+          const isRevealed = showFeedback && revealed.has(q.id)
+          return (
+            <div className="flex flex-col gap-2">
+              {q.choices.map((choice) => {
+                const isSelected = q.type === 'multiple_choice'
+                  ? Array.isArray(currentAnswer) && currentAnswer.includes(choice.id)
+                  : currentAnswer === choice.id
 
-              return (
-                <button
-                  key={choice.id}
-                  onClick={() => {
-                    if (q.type === 'multiple_choice') {
-                      const prev = Array.isArray(currentAnswer) ? currentAnswer : []
-                      const next = prev.includes(choice.id)
-                        ? prev.filter((id) => id !== choice.id)
-                        : [...prev, choice.id]
-                      handleAnswer(q.id, next)
-                    } else {
-                      handleAnswer(q.id, choice.id)
-                    }
-                  }}
-                  className={cn(
-                    'flex items-center gap-3 p-3.5 rounded-[12px] border text-left transition-all duration-150',
-                    isSelected
-                      ? 'bg-[var(--apple-blue)]/10 border-[var(--apple-blue)]/40 text-foreground'
-                      : 'bg-[var(--apple-fill)] border-transparent hover:border-[var(--apple-separator)] text-foreground'
-                  )}
-                >
-                  <span
-                    className={cn(
-                      'w-5 h-5 shrink-0 flex items-center justify-center text-[11px] font-bold',
-                      q.type === 'multiple_choice' ? 'rounded-[4px]' : 'rounded-full',
-                      isSelected
-                        ? 'bg-[var(--apple-blue)] text-white'
-                        : 'border border-[var(--apple-label-tertiary)] text-[var(--apple-label-tertiary)]'
-                    )}
+                let className = 'flex items-center gap-3 p-3.5 rounded-[12px] border text-left transition-all duration-150 '
+                let style: React.CSSProperties = {}
+
+                if (isRevealed) {
+                  if (choice.isCorrect) {
+                    style = { borderColor: 'var(--apple-green)', backgroundColor: 'rgba(52,199,89,0.08)', color: 'var(--apple-green)' }
+                  } else if (isSelected) {
+                    style = { borderColor: 'var(--apple-red)', backgroundColor: 'rgba(255,59,48,0.08)', color: 'var(--apple-red)' }
+                  } else {
+                    className += 'border-transparent bg-[var(--apple-fill)] opacity-50 cursor-default'
+                  }
+                } else {
+                  className += isSelected
+                    ? 'bg-[var(--apple-blue)]/10 border-[var(--apple-blue)]/40 text-foreground'
+                    : 'bg-[var(--apple-fill)] border-transparent hover:border-[var(--apple-separator)] text-foreground'
+                }
+
+                return (
+                  <button
+                    key={choice.id}
+                    disabled={isRevealed}
+                    onClick={() => {
+                      if (isRevealed) return
+                      if (q.type === 'multiple_choice') {
+                        const prev = Array.isArray(currentAnswer) ? currentAnswer : []
+                        const next = prev.includes(choice.id)
+                          ? prev.filter((id) => id !== choice.id)
+                          : [...prev, choice.id]
+                        handleAnswer(q.id, next)
+                      } else {
+                        handleAnswer(q.id, choice.id, !!choice.isCorrect)
+                      }
+                    }}
+                    className={className}
+                    style={style}
                   >
-                    {isSelected ? '✓' : String.fromCharCode(65 + q.choices.indexOf(choice))}
-                  </span>
-                  <span className="text-[14px] leading-snug">{choice.text}</span>
-                </button>
-              )
-            })}
-          </div>
-        )}
+                    {isRevealed && choice.isCorrect && <CheckCircle2 className="w-4 h-4 shrink-0 text-[var(--apple-green)]" />}
+                    {isRevealed && !choice.isCorrect && isSelected && <XCircle className="w-4 h-4 shrink-0 text-[var(--apple-red)]" />}
+                    {(!isRevealed || (!choice.isCorrect && !isSelected)) && (
+                      <span
+                        className={cn(
+                          'w-5 h-5 shrink-0 flex items-center justify-center text-[11px] font-bold',
+                          q.type === 'multiple_choice' ? 'rounded-[4px]' : 'rounded-full',
+                          isSelected && !isRevealed
+                            ? 'bg-[var(--apple-blue)] text-white'
+                            : 'border border-[var(--apple-label-tertiary)] text-[var(--apple-label-tertiary)]'
+                        )}
+                      >
+                        {isSelected && !isRevealed ? '✓' : String.fromCharCode(65 + q.choices.indexOf(choice))}
+                      </span>
+                    )}
+                    <span className="text-[14px] leading-snug">{choice.text}</span>
+                  </button>
+                )
+              })}
+
+              {/* Explanation */}
+              {isRevealed && q.explanation && (
+                <div
+                  className="mt-2 rounded-[12px] p-4 border animate-fade-up"
+                  style={{
+                    borderColor: q.choices.find((c) => c.isCorrect)?.id === currentAnswer ? 'var(--apple-green)' : 'var(--apple-red)',
+                    backgroundColor: q.choices.find((c) => c.isCorrect)?.id === currentAnswer ? 'rgba(52,199,89,0.06)' : 'rgba(255,59,48,0.06)',
+                  }}
+                >
+                  <p
+                    className="text-[12px] font-semibold mb-1"
+                    style={{ color: q.choices.find((c) => c.isCorrect)?.id === currentAnswer ? 'var(--apple-green)' : 'var(--apple-red)' }}
+                  >
+                    {q.choices.find((c) => c.isCorrect)?.id === currentAnswer ? '✓ Correct' : `✗ Incorrect — correct: "${q.choices.find((c) => c.isCorrect)?.text}"`}
+                  </p>
+                  <p className="text-[13px] text-foreground leading-relaxed">{q.explanation}</p>
+                </div>
+              )}
+            </div>
+          )
+        })()}
 
         {q.type === 'fill_blank' && (
           <div>
@@ -275,6 +331,10 @@ function ExamSessionInner() {
                   : session.answers[q2.id]
                   ? session.flagged.has(q2.id)
                     ? 'bg-[var(--apple-orange)]/20 text-[var(--apple-orange)]'
+                    : showFeedback && revealed.has(q2.id)
+                    ? correctAnswers.has(q2.id)
+                      ? 'bg-[var(--apple-green)]/15 text-[var(--apple-green)]'
+                      : 'bg-[var(--apple-red)]/15 text-[var(--apple-red)]'
                     : 'bg-[var(--apple-green)]/15 text-[var(--apple-green)]'
                   : session.flagged.has(q2.id)
                   ? 'bg-[var(--apple-orange)]/10 text-[var(--apple-orange)]'

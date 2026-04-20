@@ -3,8 +3,9 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { ChevronRight, BookOpen, Wifi, Cpu, Cloud, Wrench, Monitor, Shield, Bug, ClipboardList, Layers, Trophy, Terminal } from 'lucide-react'
+import { ChevronRight, BookOpen, Wifi, Cpu, Cloud, Wrench, Monitor, Shield, Bug, ClipboardList, Layers, Trophy, Terminal, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useSidebar } from '@/contexts/sidebar-context'
 
 interface Topic {
   id: string
@@ -176,6 +177,7 @@ const STATIC_EXAMS: Exam[] = [
 
 function DomainItem({ domain, examRouteId }: { domain: Domain; examRouteId: string }) {
   const pathname = usePathname()
+  const { close } = useSidebar()
   const [open, setOpen] = useState(() =>
     domain.topics.some((t) => pathname?.includes(t.slug))
   )
@@ -208,6 +210,7 @@ function DomainItem({ domain, examRouteId }: { domain: Domain; examRouteId: stri
               <Link
                 key={topic.id}
                 href={href}
+                onClick={close}
                 className={cn(
                   'flex items-center gap-2 px-2 py-[5px] rounded-[8px] text-[12px] transition-colors duration-150 group',
                   isActive
@@ -234,18 +237,25 @@ function DomainItem({ domain, examRouteId }: { domain: Domain; examRouteId: stri
   )
 }
 
-export function Sidebar() {
+function SidebarContent() {
   const pathname = usePathname()
+  const { close } = useSidebar()
   const defaultExam = pathname?.includes('/study/core2') ? 'exam-core2' : 'exam-core1'
   const [activeExam, setActiveExam] = useState<string>(defaultExam)
 
-  // Sync active exam tab when navigating via URL
   useEffect(() => {
     setActiveExam(pathname?.includes('/study/core2') ? 'exam-core2' : 'exam-core1')
   }, [pathname])
 
+  const NAV_LINKS = [
+    { href: '/study', icon: BookOpen, label: 'Study', color: 'var(--apple-blue)' },
+    { href: '/flashcards', icon: Layers, label: 'Flashcards', color: 'var(--apple-green)' },
+    { href: '/practice', icon: Trophy, label: 'Practice Tests', color: 'var(--apple-orange)' },
+    { href: '/labs', icon: Terminal, label: 'PBQ Labs', color: 'var(--apple-purple)' },
+  ]
+
   return (
-    <aside className="w-[260px] shrink-0 fixed left-0 top-14 bottom-0 bg-card border-r border-[var(--apple-separator)] overflow-y-auto">
+    <>
       {/* Exam tabs */}
       <div className="p-2 border-b border-[var(--apple-separator)]">
         <div className="flex gap-1 bg-[var(--apple-fill)] rounded-[10px] p-0.5">
@@ -267,7 +277,7 @@ export function Sidebar() {
       </div>
 
       {/* Domain/topic tree */}
-      <div className="p-2 flex flex-col gap-0.5">
+      <div className="p-2 flex flex-col gap-0.5 flex-1 overflow-y-auto">
         {STATIC_EXAMS.find((e) => e.id === activeExam)?.domains.map((domain) => {
           const exam = STATIC_EXAMS.find((e) => e.id === activeExam)!
           const examRouteId = exam.code === '220-1201' ? 'core1' : 'core2'
@@ -278,17 +288,14 @@ export function Sidebar() {
       </div>
 
       {/* Bottom nav */}
-      <div className="p-2 border-t border-[var(--apple-separator)] mt-2">
-        {[
-          { href: '/flashcards', icon: Layers, label: 'Flashcards', color: 'var(--apple-green)' },
-          { href: '/practice', icon: Trophy, label: 'Practice Tests', color: 'var(--apple-orange)' },
-          { href: '/labs', icon: Terminal, label: 'PBQ Labs', color: 'var(--apple-purple)' },
-        ].map(({ href, icon: Icon, label, color }) => {
+      <div className="p-2 border-t border-[var(--apple-separator)]">
+        {NAV_LINKS.map(({ href, icon: Icon, label, color }) => {
           const isActive = pathname?.startsWith(href)
           return (
             <Link
               key={href}
               href={href}
+              onClick={close}
               className={cn(
                 'flex items-center gap-2.5 px-3 py-[7px] rounded-[10px] text-[13px] font-medium transition-colors duration-150',
                 isActive
@@ -305,6 +312,46 @@ export function Sidebar() {
           )
         })}
       </div>
-    </aside>
+    </>
+  )
+}
+
+export function Sidebar() {
+  const { isOpen, close } = useSidebar()
+
+  return (
+    <>
+      {/* Desktop: always-visible fixed sidebar */}
+      <aside className="hidden md:flex md:flex-col w-[260px] shrink-0 fixed left-0 top-14 bottom-0 bg-card border-r border-[var(--apple-separator)] overflow-hidden">
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile: backdrop + slide-in drawer */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          onClick={close}
+          aria-hidden="true"
+        />
+      )}
+      <aside
+        className={cn(
+          'fixed top-14 left-0 bottom-0 z-50 flex flex-col w-[280px] bg-card border-r border-[var(--apple-separator)] overflow-hidden transition-transform duration-300 md:hidden',
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--apple-separator)]">
+          <span className="text-[13px] font-semibold text-foreground">Menu</span>
+          <button
+            onClick={close}
+            className="w-8 h-8 flex items-center justify-center rounded-[8px] text-[var(--apple-label-secondary)] hover:bg-[var(--apple-fill)]"
+            aria-label="Close menu"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <SidebarContent />
+      </aside>
+    </>
   )
 }

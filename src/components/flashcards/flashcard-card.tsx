@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
@@ -30,6 +30,24 @@ export function FlashcardCard({ front, back, onRate, className }: FlashcardCardP
     onRate?.(quality)
   }
 
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault()
+        setFlipped((f) => !f)
+      }
+      if (flipped) {
+        if (e.key === '1') handleRate(1)
+        else if (e.key === '2') handleRate(3)
+        else if (e.key === '3') handleRate(4)
+        else if (e.key === '4') handleRate(5)
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [flipped])
+
   return (
     <div className={cn('flex flex-col items-center gap-6', className)}>
       {/* Card */}
@@ -55,7 +73,7 @@ export function FlashcardCard({ front, back, onRate, className }: FlashcardCardP
           >
             <p className="text-[11px] font-semibold text-[var(--apple-label-tertiary)] uppercase tracking-wide mb-4">Question</p>
             <p className="text-[18px] font-semibold text-foreground leading-snug">{front}</p>
-            <p className="text-[12px] text-[var(--apple-label-tertiary)] mt-6">Tap to reveal answer</p>
+            <p className="text-[12px] text-[var(--apple-label-tertiary)] mt-6">Tap or press Space to reveal</p>
           </div>
 
           {/* Back */}
@@ -77,7 +95,7 @@ export function FlashcardCard({ front, back, onRate, className }: FlashcardCardP
         transition={{ duration: 0.2 }}
         style={{ pointerEvents: flipped ? 'auto' : 'none' }}
       >
-        {QUALITY_BUTTONS.map((btn) => (
+        {QUALITY_BUTTONS.map((btn, i) => (
           <button
             key={btn.label}
             onClick={(e) => { e.stopPropagation(); handleRate(btn.value) }}
@@ -88,6 +106,7 @@ export function FlashcardCard({ front, back, onRate, className }: FlashcardCardP
           >
             <span className={cn('text-[14px] font-semibold', btn.text)}>{btn.label}</span>
             <span className="text-[10px] text-[var(--apple-label-tertiary)]">{btn.description}</span>
+            <span className="text-[9px] text-[var(--apple-label-tertiary)] opacity-50 font-mono mt-0.5">{i + 1}</span>
           </button>
         ))}
       </motion.div>

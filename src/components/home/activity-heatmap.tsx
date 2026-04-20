@@ -9,11 +9,11 @@ interface ActivityDay {
 }
 
 function getCellStyle(minutes: number): React.CSSProperties {
-  if (minutes === 0) return { background: '#1a1a1f', border: '1px solid rgba(255,255,255,0.06)' }
-  if (minutes <= 15) return { background: 'rgba(99,102,241,0.2)' }
-  if (minutes <= 30) return { background: 'rgba(99,102,241,0.4)' }
-  if (minutes <= 59) return { background: 'rgba(99,102,241,0.65)' }
-  return { background: '#6366f1' }
+  if (minutes === 0) return { background: '#161b22', border: '1px solid rgba(255,255,255,0.06)' }
+  if (minutes <= 15) return { background: '#0e4429' }
+  if (minutes <= 30) return { background: '#006d32' }
+  if (minutes <= 59) return { background: '#26a641' }
+  return { background: '#39d353' }
 }
 
 function formatTooltip(date: string, minutes: number, topics: number): string {
@@ -111,7 +111,7 @@ export function ActivityHeatmap() {
               <div key={wi} style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 {week.map((cell) => {
                   const inRange = cell.date <= endDate.toISOString().slice(0, 10)
-                  const style = inRange && !loading ? getCellStyle(cell.minutes) : { background: '#1a1a1f', border: '1px solid rgba(255,255,255,0.06)' }
+                  const style = inRange && !loading ? getCellStyle(cell.minutes) : { background: '#161b22', border: '1px solid rgba(255,255,255,0.06)' }
                   return (
                     <div
                       key={cell.date}
@@ -130,11 +130,11 @@ export function ActivityHeatmap() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '8px', justifyContent: 'flex-end' }}>
         <span style={{ fontSize: '9px', color: '#444' }}>Less</span>
         {[
-          { background: '#1a1a1f', border: '1px solid rgba(255,255,255,0.06)' },
-          { background: 'rgba(99,102,241,0.2)' },
-          { background: 'rgba(99,102,241,0.4)' },
-          { background: 'rgba(99,102,241,0.65)' },
-          { background: '#6366f1' },
+          { background: '#161b22', border: '1px solid rgba(255,255,255,0.06)' },
+          { background: '#0e4429' },
+          { background: '#006d32' },
+          { background: '#26a641' },
+          { background: '#39d353' },
         ].map((s, i) => (
           <div key={i} style={{ width: '9px', height: '9px', borderRadius: '2px', ...s }} />
         ))}

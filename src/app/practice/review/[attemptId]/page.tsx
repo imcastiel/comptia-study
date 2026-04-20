@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { db } from '@/db'
-import { examAttempts, questionAttempts, questions, topics, domains } from '@/db/schema'
+import { examAttempts, questionAttempts, questions, topics, domains, exams } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import { cn } from '@/lib/utils'
 import { CheckCircle2, XCircle, Clock, Trophy, ChevronRight, Flag } from 'lucide-react'
@@ -27,6 +27,9 @@ export default async function ReviewPage({ params }: { params: Promise<Params> }
     .where(eq(examAttempts.id, attemptId))
 
   if (!attempt) notFound()
+
+  const [exam] = await db.select({ passingScore: exams.passingScore, code: exams.code })
+    .from(exams).where(eq(exams.id, attempt.examId))
 
   const reviewRows = await db
     .select({
@@ -63,7 +66,8 @@ export default async function ReviewPage({ params }: { params: Promise<Params> }
 
   const scorePercent = attempt.scorePercent ?? 0
   const scaledScore = Math.round((scorePercent / 100) * 900)
-  const passed = scorePercent >= 75
+  const passingScore = exam?.passingScore ?? 675
+  const passed = scaledScore >= passingScore
   const total = attempt.totalQuestions
   const correct = attempt.correctCount ?? 0
 
@@ -94,7 +98,7 @@ export default async function ReviewPage({ params }: { params: Promise<Params> }
         <p className="text-[16px] text-[var(--apple-label-secondary)] mb-6">
           Scaled score: <span className="font-semibold text-foreground">{scaledScore}</span>/900
           <span className="mx-2 text-[var(--apple-separator-opaque)]">·</span>
-          Pass threshold: 675/900
+          Pass threshold: {passingScore}/900
         </p>
 
         <div className="flex items-center justify-center gap-8">
@@ -317,13 +321,24 @@ export default async function ReviewPage({ params }: { params: Promise<Params> }
         >
           ← Back to Practice
         </Link>
-        <Link
-          href="/practice/session?mode=quick"
-          className="flex items-center gap-2 bg-[var(--apple-blue)] text-white text-[13px] font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity"
-        >
-          <Trophy className="w-3.5 h-3.5" />
-          Try Again
-        </Link>
+        <div className="flex items-center gap-2">
+          {reviewRows.some((r) => !r.qa_isCorrect) && (
+            <Link
+              href={`/practice/session?mode=study&retryIds=${reviewRows.filter((r) => !r.qa_isCorrect).map((r) => r.q_id).join(',')}`}
+              className="flex items-center gap-2 bg-[var(--apple-red)]/10 text-[var(--apple-red)] text-[13px] font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity"
+            >
+              <XCircle className="w-3.5 h-3.5" />
+              Retry Wrong ({reviewRows.filter((r) => !r.qa_isCorrect).length})
+            </Link>
+          )}
+          <Link
+            href="/practice/session?mode=quick"
+            className="flex items-center gap-2 bg-[var(--apple-blue)] text-white text-[13px] font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity"
+          >
+            <Trophy className="w-3.5 h-3.5" />
+            New Test
+          </Link>
+        </div>
       </div>
     </div>
   )

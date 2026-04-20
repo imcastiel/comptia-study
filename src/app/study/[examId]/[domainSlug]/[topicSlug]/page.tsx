@@ -13,6 +13,7 @@ import { CompleteButton } from '@/components/study/complete-button'
 import { ReadingProgress } from '@/components/study/reading-progress'
 import { ActivityTracker } from '@/components/study/activity-tracker'
 import { ArticleWrapper } from '@/components/study/article-wrapper'
+import { TopicQuiz } from '@/components/study/topic-quiz'
 import { db } from '@/db'
 import { domains, topics, exams, studyProgress } from '@/db/schema'
 import { eq, and } from 'drizzle-orm'
@@ -132,6 +133,15 @@ export default async function TopicPage({ params }: { params: Promise<Params> })
           </div>
         )}
       </ArticleWrapper>
+
+      {/* Knowledge Check quiz — retrieval practice after reading */}
+      <TopicQuiz
+        topicId={topic.id}
+        topicTitle={topic.title}
+        topicSlug={topicSlug}
+        domainSlug={domainSlug}
+        examId={examId}
+      />
 
       {/* Prev / Next navigation */}
       <div className="flex items-center justify-between mt-10 pt-6 border-t border-[var(--apple-separator)]">

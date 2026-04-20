@@ -1,5 +1,9 @@
+'use client'
+
 import Link from 'next/link'
-import { Clock, Layers, Trophy, Zap } from 'lucide-react'
+import { useState } from 'react'
+import { Layers, Trophy, Zap } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 const EXAM_MODES = [
   {
@@ -8,7 +12,6 @@ const EXAM_MODES = [
     description: '90 questions · 90 minutes · Exact exam conditions',
     icon: Trophy,
     color: 'var(--apple-orange)',
-    href: '/practice/session?mode=simulation',
   },
   {
     id: 'quick',
@@ -16,7 +19,6 @@ const EXAM_MODES = [
     description: '20 questions · 20 minutes · Focused practice',
     icon: Zap,
     color: 'var(--apple-blue)',
-    href: '/practice/session?mode=quick',
   },
   {
     id: 'study',
@@ -24,11 +26,24 @@ const EXAM_MODES = [
     description: 'Untimed · Instant feedback after each answer',
     icon: Layers,
     color: 'var(--apple-green)',
-    href: '/practice/session?mode=study',
   },
 ]
 
+const EXAMS = [
+  { key: 'all', label: 'Both Exams' },
+  { key: 'core1', label: 'Core 1 · 220-1201' },
+  { key: 'core2', label: 'Core 2 · 220-1202' },
+]
+
 export default function PracticePage() {
+  const [selectedExam, setSelectedExam] = useState<'all' | 'core1' | 'core2'>('all')
+
+  function buildHref(modeId: string) {
+    const params = new URLSearchParams({ mode: modeId })
+    if (selectedExam !== 'all') params.set('exam', selectedExam)
+    return `/practice/session?${params}`
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-6 py-8">
       <div className="mb-7">
@@ -38,6 +53,24 @@ export default function PracticePage() {
         </p>
       </div>
 
+      {/* Exam selector */}
+      <div className="flex gap-1 mb-5 p-1 bg-[var(--apple-fill)] rounded-[12px]">
+        {EXAMS.map((e) => (
+          <button
+            key={e.key}
+            onClick={() => setSelectedExam(e.key as typeof selectedExam)}
+            className={cn(
+              'flex-1 py-2 px-3 rounded-[9px] text-[12px] font-semibold transition-all',
+              selectedExam === e.key
+                ? 'bg-card text-foreground shadow-sm'
+                : 'text-[var(--apple-label-secondary)] hover:text-foreground'
+            )}
+          >
+            {e.label}
+          </button>
+        ))}
+      </div>
+
       {/* Mode cards */}
       <div className="flex flex-col gap-3 mb-8">
         {EXAM_MODES.map((mode) => {
@@ -45,7 +78,7 @@ export default function PracticePage() {
           return (
             <Link
               key={mode.id}
-              href={mode.href}
+              href={buildHref(mode.id)}
               className="flex items-center gap-4 bg-card rounded-[16px] p-4 border border-[var(--apple-separator)] card-lift shadow-sm"
             >
               <div
@@ -82,7 +115,6 @@ export default function PracticePage() {
         </div>
       </div>
 
-      {/* PBQ info */}
       <div className="mt-4 bg-[var(--apple-blue)]/5 border border-[var(--apple-blue)]/20 rounded-[14px] p-4">
         <p className="text-[12px] font-semibold text-[var(--apple-blue)] mb-1">Performance-Based Questions (PBQs)</p>
         <p className="text-[13px] text-[var(--apple-label-secondary)]">

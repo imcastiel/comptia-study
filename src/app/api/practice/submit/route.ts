@@ -15,13 +15,15 @@ function scoreAnswer(userAnswer: string | string[] | null | undefined, correctAn
 
 export async function POST(req: NextRequest) {
   try {
-    const { questions, answers, timeSpent, mode, totalTimeSeconds } = await req.json() as {
+    const { questions, answers, timeSpent, flagged, mode, totalTimeSeconds } = await req.json() as {
       questions: Array<{ id: string }>
       answers: Record<string, string | string[]>
       timeSpent: Record<string, number>
+      flagged: string[]
       mode: string
       totalTimeSeconds: number
     }
+    const flaggedSet = new Set(flagged ?? [])
 
     const questionIds = questions.map((q) => q.id)
     if (questionIds.length === 0) {
@@ -66,7 +68,7 @@ export async function POST(req: NextRequest) {
         selectedAnswer: JSON.stringify(userAnswer),
         isCorrect,
         timeSpentSeconds: timeSpent[dbQ.id] ?? null,
-        isFlagged: false,
+        isFlagged: flaggedSet.has(dbQ.id),
       }
     })
 

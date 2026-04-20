@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { Shield, Search, Sun, Moon } from 'lucide-react'
+import { Shield, Search, Sun, Moon, Menu } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { CommandPalette } from '@/components/search/command-palette'
 import { usePomodoroContext } from '@/contexts/pomodoro-context'
+import { useSidebar } from '@/contexts/sidebar-context'
 
 function PomodoroTimerPill() {
   const { phase, secondsLeft, pomodoroActive, start, pause, reset, skipBreak } = usePomodoroContext()
@@ -105,6 +106,7 @@ function PomodoroTimerPill() {
 export function TopNav() {
   const [isDark, setIsDark] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const { toggle } = useSidebar()
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
@@ -134,6 +136,15 @@ export function TopNav() {
     <>
       <header className="fixed top-0 left-0 right-0 z-50 h-14 glass border-b border-[var(--apple-separator)]">
         <div className="flex h-full items-center px-4 gap-3">
+          {/* Hamburger — mobile only */}
+          <button
+            onClick={toggle}
+            className="md:hidden w-9 h-9 rounded-[10px] flex items-center justify-center text-[var(--apple-label-secondary)] hover:bg-[var(--apple-fill)] transition-colors"
+            aria-label="Toggle menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+
           {/* Logo */}
           <Link
             href="/"
