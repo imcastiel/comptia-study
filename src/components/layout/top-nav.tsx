@@ -109,8 +109,11 @@ export function TopNav() {
   const { toggle } = useSidebar()
 
   useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    setIsDark(document.documentElement.classList.contains('dark') || mq.matches)
+    const saved = localStorage.getItem('theme')
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const dark = saved ? saved === 'dark' : prefersDark
+    document.documentElement.classList.toggle('dark', dark)
+    setIsDark(dark)
   }, [])
 
   // Global ⌘K / Ctrl+K shortcut
@@ -129,6 +132,7 @@ export function TopNav() {
     const html = document.documentElement
     const next = !html.classList.contains('dark')
     html.classList.toggle('dark', next)
+    localStorage.setItem('theme', next ? 'dark' : 'light')
     setIsDark(next)
   }
 
