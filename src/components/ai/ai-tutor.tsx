@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { Sparkles, X, Send, RotateCcw, Minimize2, Layers, Terminal, Zap } from 'lucide-react'
+import { Sparkles, X, Send, RotateCcw, Layers, Terminal, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
@@ -402,16 +402,25 @@ export function AiTutor() {
 
       {/* Chat panel */}
       {open && (
+        <>
+          {/* Mobile backdrop — tap outside to close */}
+          <div
+            className="fixed inset-0 z-40 bg-black/40 md:hidden"
+            onClick={() => setOpen(false)}
+          />
         <div
           className={cn(
-            'fixed bottom-4 right-4 z-50',
-            'w-[380px] max-w-[calc(100vw-2rem)]',
-            'bg-card border border-[var(--apple-separator)] rounded-[20px] shadow-2xl',
-            'flex flex-col overflow-hidden',
-            'transition-all duration-300'
+            'fixed z-50 flex flex-col overflow-hidden',
+            'bg-card border border-[var(--apple-separator)] shadow-2xl',
+            'bottom-0 left-0 right-0 rounded-t-[24px]',
+            'md:left-auto md:bottom-4 md:right-4 md:w-[380px] md:rounded-[20px]',
           )}
-          style={{ height: 'min(560px, calc(100vh - 100px))' }}
+          style={{ height: 'min(92vh, 560px)' }}
         >
+          {/* Drag handle — mobile only */}
+          <div className="md:hidden flex justify-center pt-2.5 pb-0 shrink-0">
+            <div className="w-10 h-1 rounded-full bg-[var(--apple-separator-opaque)]" />
+          </div>
           {/* Header */}
           <div className="flex items-center gap-2.5 px-4 py-3 border-b border-[var(--apple-separator)] bg-[var(--apple-fill)] shrink-0">
             <div className="w-7 h-7 rounded-full bg-[var(--apple-purple)] flex items-center justify-center">
@@ -434,12 +443,7 @@ export function AiTutor() {
               <button
                 onClick={() => setOpen(false)}
                 className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--apple-label-tertiary)] hover:bg-[var(--apple-separator)] transition-colors"
-              >
-                <Minimize2 className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={() => setOpen(false)}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--apple-label-tertiary)] hover:bg-[var(--apple-separator)] transition-colors"
+                aria-label="Close"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -567,6 +571,7 @@ export function AiTutor() {
             </p>
           </div>
         </div>
+        </>
       )}
     </>
   )
