@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { CheckCircle2, XCircle, CornerDownLeft } from 'lucide-react'
+import { CheckCircle2, XCircle, CornerDownLeft, Lightbulb, Eye } from 'lucide-react'
 import { type PBQStepTerminal, type TerminalCommand } from '@/data/pbq-scenarios'
 import { cn } from '@/lib/utils'
 
@@ -17,6 +17,7 @@ interface HistoryEntry {
 }
 
 const PROMPT = 'C:\\Users\\user> '
+const REVEAL_AFTER_MISSES = 2
 
 function matchCommand(input: string, commands: TerminalCommand[]): TerminalCommand | null {
   const normalized = input.trim().toLowerCase().replace(/\s+/g, ' ')
@@ -34,8 +35,12 @@ export function TerminalStep({ step, onComplete }: Props) {
   const [inputValue, setInputValue] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [pendingCommand, setPendingCommand] = useState<TerminalCommand | null>(null)
+  const [missCount, setMissCount] = useState(0)
+  const [answerRevealed, setAnswerRevealed] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
+
+  const correctCommand = step.commands.find((c) => c.isCorrect)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -55,6 +60,8 @@ export function TerminalStep({ step, onComplete }: Props) {
 
     if (matched) {
       setPendingCommand(matched)
+    } else {
+      setMissCount((n) => n + 1)
     }
   }, [inputValue, step.commands, step.defaultOutput])
 
@@ -67,6 +74,15 @@ export function TerminalStep({ step, onComplete }: Props) {
     setSubmitted(true)
     onComplete(pendingCommand.isCorrect, `Ran: ${pendingCommand.command}`)
   }, [pendingCommand, onComplete])
+
+  const handleReveal = useCallback(() => {
+    if (!correctCommand) return
+    setAnswerRevealed(true)
+    setInputValue(correctCommand.command)
+    inputRef.current?.focus()
+  }, [correctCommand])
+
+  const canReveal = missCount >= REVEAL_AFTER_MISSES && !submitted && !pendingCommand && !answerRevealed
 
   return (
     <div>
@@ -194,10 +210,23 @@ export function TerminalStep({ step, onComplete }: Props) {
         </div>
       )}
 
-      {step.hint && !submitted && history.length === 0 && (
-        <p className="text-[12px] text-[var(--apple-label-tertiary)] italic text-center">
-          Hint: {step.hint}
-        </p>
+      {/* Hint — always visible while unsolved */}
+      {step.hint && !submitted && (
+        <div className="flex items-start gap-2 px-3 py-2.5 rounded-[10px] bg-[var(--apple-fill)] mb-3">
+          <Lightbulb className="w-3.5 h-3.5 text-[var(--apple-label-tertiary)] shrink-0 mt-[1px]" />
+          <p className="text-[12px] text-[var(--apple-label-secondary)] leading-relaxed">{step.hint}</p>
+        </div>
+      )}
+
+      {/* Show answer — appears after REVEAL_AFTER_MISSES unrecognized commands */}
+      {canReveal && correctCommand && (
+        <button
+          onClick={handleReveal}
+          className="w-full flex items-center justify-center gap-2 py-2 rounded-[10px] text-[12px] text-[var(--apple-label-tertiary)] hover:text-foreground border border-dashed border-[var(--apple-separator)] hover:border-[var(--apple-label-tertiary)] transition-colors"
+        >
+          <Eye className="w-3.5 h-3.5" />
+          Show me the answer
+        </button>
       )}
     </div>
   )

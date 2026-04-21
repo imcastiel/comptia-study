@@ -1,48 +1,36 @@
 'use client'
 
 import Link from 'next/link'
-import { Shield, Search, Sun, Moon, Menu } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { Shield, Search, Sun, Moon, Menu, RotateCcw } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { CommandPalette } from '@/components/search/command-palette'
 import { usePomodoroContext } from '@/contexts/pomodoro-context'
 import { useSidebar } from '@/contexts/sidebar-context'
 
+function ResetButton({ reset }: { reset: () => void }) {
+  return (
+    <button
+      onClick={reset}
+      className="w-5 h-5 rounded-full flex items-center justify-center text-[var(--apple-label-tertiary)] hover:bg-[var(--apple-fill)] hover:text-foreground transition-colors"
+      aria-label="Reset timer"
+      title="Reset timer"
+    >
+      <RotateCcw className="w-3 h-3" />
+    </button>
+  )
+}
+
 function PomodoroTimerPill() {
   const { phase, secondsLeft, pomodoroActive, start, pause, reset, skipBreak } = usePomodoroContext()
-  const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const didLongPressRef = useRef(false)
 
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, '0')
   const ss = String(secondsLeft % 60).padStart(2, '0')
   const time = `${mm}:${ss}`
 
-  function handleClick() {
-    if (didLongPressRef.current) return
-    if (phase === 'idle') { start(); return }
-    if (phase === 'work' && pomodoroActive) { pause(); return }
-    if (phase === 'work' && !pomodoroActive) { start(); return }
-    if (phase === 'break') { skipBreak() }
-  }
-
-  function handleMouseDown() {
-    didLongPressRef.current = false
-    longPressRef.current = setTimeout(() => {
-      didLongPressRef.current = true
-      reset()
-    }, 500)
-  }
-
-  function handleMouseUp() {
-    if (longPressRef.current) { clearTimeout(longPressRef.current); longPressRef.current = null }
-  }
-
   if (phase === 'idle') {
     return (
       <button
-        onClick={handleClick}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onClick={start}
         className="flex items-center gap-[5px] bg-transparent border-none cursor-pointer px-2 py-1 rounded-[6px] hover:bg-[var(--apple-fill)] transition-colors"
         aria-label="Start pomodoro timer"
       >
@@ -52,54 +40,40 @@ function PomodoroTimerPill() {
     )
   }
 
-  if (phase === 'work' && pomodoroActive) {
+  if (phase === 'work') {
     return (
-      <button
-        onClick={handleClick}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        className="flex items-center gap-[5px] cursor-pointer px-[10px] py-1 rounded-[6px]"
-        style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)' }}
-        aria-label="Pause pomodoro timer"
-      >
-        <span className="w-[6px] h-[6px] bg-[#6366f1] rounded-full inline-block animate-pulse" />
-        <span className="text-[12px] font-medium tracking-[0.5px] text-[#c7d2fe]" style={{ fontVariantNumeric: 'tabular-nums' }}>{time}</span>
-      </button>
-    )
-  }
-
-  if (phase === 'work' && !pomodoroActive) {
-    return (
-      <button
-        onClick={handleClick}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        className="flex items-center gap-[5px] cursor-pointer px-[10px] py-1 rounded-[6px]"
-        style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)' }}
-        aria-label="Resume pomodoro timer"
-      >
-        <span className="text-[10px] text-[#6366f1]">⏸</span>
-        <span className="text-[12px] font-medium tracking-[0.5px] text-[#c7d2fe]" style={{ fontVariantNumeric: 'tabular-nums' }}>{time}</span>
-      </button>
+      <div className="flex items-center gap-1">
+        <button
+          onClick={pomodoroActive ? pause : start}
+          className="flex items-center gap-[5px] cursor-pointer px-[10px] py-1 rounded-[6px]"
+          style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)' }}
+          aria-label={pomodoroActive ? 'Pause pomodoro timer' : 'Resume pomodoro timer'}
+        >
+          {pomodoroActive
+            ? <span className="w-[6px] h-[6px] bg-[#6366f1] rounded-full inline-block animate-pulse" />
+            : <span className="text-[10px] text-[#6366f1]">⏸</span>
+          }
+          <span className="text-[12px] font-medium tracking-[0.5px] text-[#c7d2fe]" style={{ fontVariantNumeric: 'tabular-nums' }}>{time}</span>
+        </button>
+        <ResetButton reset={reset} />
+      </div>
     )
   }
 
   // Break phase
   return (
-    <button
-      onClick={handleClick}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      className="flex items-center gap-[5px] cursor-pointer px-[10px] py-1 rounded-[6px]"
-      style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)' }}
-      aria-label="Skip break"
-    >
-      <span className="text-[12px] font-medium tracking-[0.5px] text-[#6ee7b7]" style={{ fontVariantNumeric: 'tabular-nums' }}>{time}</span>
-      <span className="text-[10px] text-[#6ee7b7]">break</span>
-    </button>
+    <div className="flex items-center gap-1">
+      <button
+        onClick={skipBreak}
+        className="flex items-center gap-[5px] cursor-pointer px-[10px] py-1 rounded-[6px]"
+        style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)' }}
+        aria-label="Skip break"
+      >
+        <span className="text-[12px] font-medium tracking-[0.5px] text-[#6ee7b7]" style={{ fontVariantNumeric: 'tabular-nums' }}>{time}</span>
+        <span className="text-[10px] text-[#6ee7b7]">break</span>
+      </button>
+      <ResetButton reset={reset} />
+    </div>
   )
 }
 
