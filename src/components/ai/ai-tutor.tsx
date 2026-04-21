@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { Sparkles, X, Send, RotateCcw, Layers, Terminal, Zap } from 'lucide-react'
+import { Sparkles, X, Send, Layers, Terminal, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
@@ -434,10 +434,9 @@ export function AiTutor() {
               {messages.length > 0 && (
                 <button
                   onClick={handleClear}
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--apple-label-tertiary)] hover:bg-[var(--apple-separator)] transition-colors"
-                  title="Clear conversation"
+                  className="text-[11px] font-medium text-[var(--apple-label-tertiary)] hover:text-foreground px-2 py-1 rounded-[6px] hover:bg-[var(--apple-fill)] transition-colors"
                 >
-                  <RotateCcw className="w-3.5 h-3.5" />
+                  New chat
                 </button>
               )}
               <button
