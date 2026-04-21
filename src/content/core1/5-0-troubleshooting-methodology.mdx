@@ -1,0 +1,190 @@
+# Troubleshooting Methodology
+
+CompTIA defines a **6-step troubleshooting methodology** that applies to every hardware and software problem. You must know the exact steps, their exact order, and what each one means — this appears on both Core 1 and Core 2 exams.
+
+<ConceptCallout type="warning">
+The exam tests the ORDER of these steps, not just the names. Memorize the sequence: Identify → Theory → Test → Plan → Verify → Document. "Document" is always last. "Identify" is always first.
+</ConceptCallout>
+
+---
+
+## The 6 Steps
+
+| Step | Name | What You Do |
+|------|------|-------------|
+| 1 | **Identify the problem** | Gather information, question the user, reproduce the issue |
+| 2 | **Establish a theory of probable cause** | Form a hypothesis — start with the most obvious/likely cause |
+| 3 | **Test the theory** | Confirm or eliminate your hypothesis |
+| 4 | **Establish a plan of action and implement** | Determine the fix, get approvals if needed, execute |
+| 5 | **Verify full system functionality** | Confirm the problem is resolved AND nothing else broke |
+| 6 | **Document findings, actions, and outcomes** | Write it up in the ticketing system or log |
+
+---
+
+## Step 1: Identify the Problem
+
+This is the information-gathering phase. You are not guessing yet — you are collecting facts.
+
+**Actions:**
+- Ask the user open-ended questions: "What were you doing when it happened?"
+- Ask what changed recently: "Did anything change — new software, updates, new hardware?"
+- Reproduce the problem yourself if possible
+- Check error messages, logs, and indicators
+- Ask if others are experiencing the same issue (scope the problem)
+- Conduct external or internal research based on symptoms
+
+<ConceptCallout type="tip">
+The exam often asks: "What should a technician do FIRST?" When a user reports a problem, the answer is almost always some form of "ask the user questions" or "gather more information" — that is Step 1.
+</ConceptCallout>
+
+---
+
+## Step 2: Establish a Theory of Probable Cause
+
+Form a hypothesis based on the information gathered. Start simple — think of the most common, most likely causes first.
+
+**Approach:**
+- List possible causes ordered by likelihood
+- Consider simple things first (cable unplugged, power off, user error)
+- Use your knowledge of how systems work to narrow down the cause
+- If needed, research online or in a knowledge base
+
+**Divide and conquer:** For complex problems, work from the middle — rule out half the possibilities at once rather than testing one by one from the start.
+
+<ConceptCallout type="info">
+"Question the obvious" is part of this step. Before assuming a motherboard failure, check if the monitor is powered on, if cables are connected, if the surge protector is switched on.
+</ConceptCallout>
+
+---
+
+## Step 3: Test the Theory
+
+Test your hypothesis to determine if it is the actual cause.
+
+- **Theory confirmed:** Move to Step 4.
+- **Theory NOT confirmed:** Form a new theory (return to Step 2), or escalate if you've exhausted your ideas.
+
+**Test techniques:**
+- Swap components with known-good parts
+- Boot from external media to isolate OS from hardware
+- Use diagnostic tools (POST codes, SMART data, Event Viewer)
+- Isolate variables — change one thing at a time
+
+<ConceptCallout type="warning">
+Only change ONE variable at a time when testing. If you change multiple things simultaneously, you cannot identify which change fixed the issue.
+</ConceptCallout>
+
+---
+
+## Step 4: Establish a Plan of Action and Implement
+
+Once the cause is confirmed, determine the fix and execute it.
+
+**Planning includes:**
+- What specifically needs to be done (driver update, replace hardware, reinstall OS)
+- Whether a **backup** is needed before proceeding
+- Whether **approval** is required (corporate change management)
+- Whether a **rollback plan** exists if the fix makes things worse
+- Scheduling: when is the least disruptive time for downtime?
+
+<ConceptCallout type="tip">
+Always back up data before making significant changes. If an exam question asks what to do before replacing a hard drive or reinstalling Windows, the answer involves backing up user data first.
+</ConceptCallout>
+
+---
+
+## Step 5: Verify Full System Functionality and Implement Preventive Measures
+
+After applying the fix, confirm two things:
+1. The original problem is resolved
+2. You haven't introduced a new problem
+
+**Verification:**
+- Have the user confirm the issue is gone
+- Test all related functions (e.g., after fixing printing, verify scanning still works on an MFD)
+- Monitor for recurrence
+
+**Preventive measures:**
+- Apply OS updates or firmware updates
+- Update antivirus definitions
+- Educate the user on avoiding the same issue
+- Document any configuration changes as permanent settings
+
+<ConceptCallout type="info">
+"Verify full system functionality" means more than confirming the fix works — you must check that nothing else broke. A repair that fixes the printer but breaks the network is not a complete repair.
+</ConceptCallout>
+
+---
+
+## Step 6: Document Findings, Actions, and Outcomes
+
+The final step is always documentation — never before Step 5.
+
+**Document:**
+- What the problem was (symptoms, error messages)
+- What the root cause was
+- What steps were taken to resolve it
+- What the outcome was
+- Any follow-up needed
+
+**Why it matters:**
+- Creates a knowledge base for future technicians
+- Supports warranty and liability requirements
+- Provides an audit trail for compliance
+- Helps identify recurring problems across the organization
+
+<ConceptCallout type="warning">
+On the exam, "document findings" always comes LAST — after verification. Never document before verifying the fix works.
+</ConceptCallout>
+
+---
+
+## Applied Example
+
+**Scenario:** A user calls and says their computer won't connect to the internet.
+
+| Step | Action |
+|------|--------|
+| 1. Identify | Ask: "When did it stop? What changed? Are others affected?" Run `ipconfig` — APIPA address (169.254.x.x) |
+| 2. Theory | DHCP server is not responding — most likely cause: router issue |
+| 3. Test | `ipconfig /release` then `/renew` fails. Ping 192.168.1.1 — no response. Router is down |
+| 4. Plan & Implement | Restart the router. Computer receives valid 192.168.1.x address |
+| 5. Verify | User confirms internet works. Test browsing and email |
+| 6. Document | "APIPA address indicated DHCP failure. Router restart resolved issue." |
+
+---
+
+## Common Exam Questions
+
+**Q: What should a technician do FIRST when a user reports a problem?**
+A: Identify the problem — ask the user questions, gather information.
+
+**Q: After confirming a theory, what is the next step?**
+A: Establish a plan of action (Step 4).
+
+**Q: A technician fixes a printer. What should they do before closing the ticket?**
+A: Verify full system functionality AND document findings.
+
+**Q: What is the LAST step of the troubleshooting methodology?**
+A: Document findings, actions, and outcomes.
+
+**Q: A technician replaced a NIC and the network works, but now sound is gone. Which step was skipped?**
+A: Step 5 — Verify full system functionality.
+
+<ConceptCallout type="tip">
+Mnemonic for the order: **"I Take The Problem Very Directly"** → Identify, Theory, Test, Plan, Verify, Document.
+</ConceptCallout>
+
+---
+
+## When to Escalate
+
+Escalation happens during Step 3 (cannot confirm a theory) or Step 4 (fix is beyond your authorization).
+
+**Escalate when:**
+- Problem is beyond your technical skill level
+- Fix requires access or authorization you don't have
+- Multiple theories have failed
+- Critical systems require specialist involvement
+
+Always document what you've already tried before escalating so the next technician doesn't repeat your steps.

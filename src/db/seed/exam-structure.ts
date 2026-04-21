@@ -312,7 +312,26 @@ export const SEED_TOPICS = [
     description: 'IaaS, PaaS, SaaS, Public/Private/Hybrid/Community cloud, cloud characteristics (on-demand, scalability, elasticity, metered), shared responsibility model.',
     orderIndex: 2,
   },
+  // Core 1 — Domain 1: Mobile Devices (objective 1.4 — display components)
+  {
+    id: 'topic-c1-1-4',
+    domainId: 'domain-c1-1',
+    objectiveId: '1.4',
+    title: 'Compare and contrast mobile device display components',
+    slug: '1-4-mobile-display-components',
+    description: 'LCD vs OLED vs AMOLED, digitizer types (capacitive vs resistive), display layers, resolution, PPI, burn-in, common failures.',
+    orderIndex: 4,
+  },
   // Core 1 — Domain 5: Hardware and Network Troubleshooting
+  {
+    id: 'topic-c1-5-0',
+    domainId: 'domain-c1-5',
+    objectiveId: '5.0',
+    title: 'Apply the best practice methodology to resolve problems',
+    slug: '5-0-troubleshooting-methodology',
+    description: "CompTIA's 6-step troubleshooting methodology: identify, theory, test, plan, verify, document. Applied to real scenarios.",
+    orderIndex: 0,
+  },
   {
     id: 'topic-c1-5-1',
     domainId: 'domain-c1-5',

@@ -1,0 +1,175 @@
+# Mobile Device Display Components
+
+Mobile device displays are layered assemblies — not single pieces of glass. Understanding what each layer does helps you diagnose display failures accurately and replace only the broken component.
+
+---
+
+## Display Layer Stack
+
+A smartphone or tablet display is made of several layers bonded together:
+
+| Layer (top to bottom) | Component | Function |
+|---|---|---|
+| 1 | Protective glass (e.g., Gorilla Glass) | Scratch and impact resistance |
+| 2 | Digitizer | Detects touch input |
+| 3 | LCD or OLED panel | Produces the image |
+| 4 | Backlight (LCD only) | Illuminates the LCD panel from behind |
+| 5 | Frame/chassis | Structural support |
+
+On most modern phones, layers 1–3 are **fused together** as a single assembly. On budget devices, the layers may be separate and individually replaceable.
+
+<ConceptCallout type="tip">
+The exam may ask what component is responsible for touch not working when the image is fine, or image not working when touch is fine. Those are separate layers — digitizer vs LCD/OLED panel.
+</ConceptCallout>
+
+---
+
+## Display Technologies
+
+### LCD (Liquid Crystal Display)
+
+LCD panels require a **backlight** because liquid crystals do not produce their own light — they only block or pass light from behind.
+
+| LCD Sub-type | Notes |
+|---|---|
+| TN (Twisted Nematic) | Older budget devices, narrow viewing angles, fast response |
+| IPS (In-Plane Switching) | Wide viewing angles, accurate color — common in mid-range phones/tablets |
+| VA (Vertical Alignment) | High contrast, rare in mobile |
+
+A failed LCD backlight leaves the screen dark, but the image may still be faintly visible when a flashlight is held close.
+
+### OLED (Organic Light-Emitting Diode)
+
+OLED pixels produce their own light — there is **no backlight**. Each pixel individually turns on and off.
+
+**Advantages over LCD:**
+- True blacks (pixel is fully off — zero light leakage)
+- Infinite contrast ratio
+- Thinner panel (no backlight layer needed)
+- Lower power when displaying dark content
+
+**Disadvantages:**
+- **Burn-in:** static images displayed long-term can permanently etch into the organic material
+- Blue sub-pixels degrade faster than red/green over time
+- More expensive to manufacture
+
+### AMOLED and Super AMOLED
+
+**AMOLED** (Active Matrix OLED) adds an active matrix of thin-film transistors to control each pixel individually — this is how all modern smartphone OLEDs work.
+
+**Super AMOLED** (Samsung's term) integrates the digitizer directly into the display panel rather than as a separate layer on top, making the display thinner and improving outdoor visibility.
+
+<ConceptCallout type="info">
+For exam purposes: OLED = self-lit pixels, no backlight, true blacks. LCD = requires backlight. AMOLED = OLED with active matrix (used in all current flagship phones). Super AMOLED = thinner because the digitizer layer is integrated.
+</ConceptCallout>
+
+---
+
+## The Digitizer
+
+The digitizer translates physical touch into digital (x, y) coordinates the OS can use.
+
+### Capacitive Digitizer
+
+Used in virtually all modern smartphones and tablets.
+
+- Detects the **electrical capacitance** of a finger or conductive stylus
+- Works with **bare fingers only** — a non-conductive stylus or gloved finger will not register
+- Supports **multi-touch** (multiple simultaneous touch points)
+- Does not require pressure — a light touch is enough
+
+**Active stylus:** Devices like Apple Pencil or Samsung S Pen use a powered stylus that communicates with the digitizer electronically. These detect **pressure sensitivity** and **tilt**.
+
+### Resistive Digitizer
+
+Older technology, now mainly found in industrial and medical devices.
+
+- Two conductive layers that physically press together under pressure
+- Works with **any object** — gloved hand, fingernail, regular stylus
+- **Single-touch only**
+- Used where gloved operation is required
+
+<ConceptCallout type="tip">
+Key distinction: **capacitive** = requires conductive touch, multi-touch supported. **Resistive** = works with any object, single-touch only. A user whose touchscreen won't respond to gloved fingers has a capacitive screen — that is expected behavior, not a defect.
+</ConceptCallout>
+
+---
+
+## Resolution and Pixel Density
+
+### Common Mobile Resolutions
+
+| Name | Resolution | Common Use |
+|---|---|---|
+| HD | 1280 × 720 | Budget phones |
+| FHD (Full HD) | 1920 × 1080 | Mid-range phones, most tablets |
+| QHD (2K) | 2560 × 1440 | Flagship phones |
+| UHD (4K) | 3840 × 2160 | High-end tablets, some flagships |
+
+### PPI (Pixels Per Inch)
+
+PPI measures pixel density — how many pixels fit in one inch of screen. Higher PPI = sharper image at the same viewing distance.
+
+- **~300 PPI** is the approximate threshold where individual pixels become indistinguishable at normal viewing distance
+- A 5-inch FHD phone has ~441 PPI — well above threshold
+- A 10-inch FHD tablet has ~220 PPI — visibly less sharp at close range
+
+<ConceptCallout type="info">
+Smaller screen + same resolution = higher PPI = sharper image. Two phones with identical resolution but different screen sizes will look noticeably different in sharpness.
+</ConceptCallout>
+
+---
+
+## Common Display Failures and Diagnosis
+
+| Symptom | Likely Cause |
+|---|---|
+| No image, touch still works | LCD/OLED panel failed, or backlight failed (LCD) |
+| Image visible, touch unresponsive | Digitizer failed or connector disconnected |
+| Dim image, washed-out colors | Backlight failing (LCD only) |
+| Dark screen, image faintly visible with flashlight | Backlight completely failed (LCD) |
+| Flickering or color bands | Loose or damaged ribbon cable |
+| Dead pixels (black or white spots) | OLED pixel failure or LCD damage |
+| Ghost touch (phantom input) | Digitizer damaged — often from impact or moisture |
+| Burn-in (permanent ghost image) | OLED burn-in from prolonged static content |
+| Touch registers in wrong location | Digitizer calibration issue after replacement |
+
+<ConceptCallout type="warning">
+After replacing a display assembly, always verify multi-touch works at all corners of the screen. An incorrectly seated digitizer cable causes offset touch — taps register a few millimeters away from where the user actually touched.
+</ConceptCallout>
+
+---
+
+## Screen Replacement Considerations
+
+### Fused vs Separate Assemblies
+
+- **Fused (most modern devices):** Glass + digitizer + LCD/OLED sold as one unit. More expensive but straightforward — swap the whole assembly.
+- **Separate layers (older/budget devices):** Glass can be replaced independently. Requires a heat gun and suction cups; breakage rate is high.
+
+### OEM vs Aftermarket Panels
+
+| Type | Pros | Cons |
+|---|---|---|
+| OEM (original manufacturer) | Color accuracy, all features work (True Tone, Face ID alignment) | Most expensive |
+| High-quality aftermarket (INCELL) | Lower cost, acceptable quality | May not support True Tone or trigger "non-genuine" warnings |
+| Budget aftermarket | Cheapest | Poor color, shorter lifespan, touch sensitivity problems |
+
+<ConceptCallout type="tip">
+On iPhone replacements: non-OEM displays may disable True Tone and show a "Non-genuine display" alert. Always inform the customer before using aftermarket parts.
+</ConceptCallout>
+
+---
+
+## Sensors Associated with the Display
+
+| Sensor | Location | Function |
+|---|---|---|
+| Ambient light sensor | Front bezel | Adjusts screen brightness automatically |
+| Proximity sensor | Front bezel | Turns off screen during calls to prevent cheek touches |
+| Face ID / facial recognition | Front camera array | IR dot projector + camera for biometric unlock |
+| Under-screen fingerprint (optical) | Under OLED panel | Uses OLED pixel light to illuminate the fingerprint |
+
+<ConceptCallout type="info">
+Under-screen optical fingerprint sensors only work with OLED displays — they use the panel's own light to illuminate the finger. LCD displays cannot support this; they require a side-mounted or rear-mounted fingerprint sensor instead.
+</ConceptCallout>
