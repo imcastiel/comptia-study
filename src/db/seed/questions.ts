@@ -19,6 +19,7 @@ import { BATCH14A_QUESTIONS } from './questions-batch14a'
 import { BATCH14B_QUESTIONS } from './questions-batch14b'
 import { BATCH15_QUESTIONS } from './questions-batch15'
 import { BATCH16_QUESTIONS } from './questions-batch16'
+import { BATCH17_QUESTIONS } from './questions-batch17'
 
 const NOW = new Date().toISOString()
 
@@ -1296,4 +1297,5 @@ export const SEED_QUESTIONS = [
   ...BATCH14B_QUESTIONS,
   ...BATCH15_QUESTIONS,
   ...BATCH16_QUESTIONS,
+  ...BATCH17_QUESTIONS,
 ]
