@@ -1099,4 +1099,302 @@ operable program or batch file.`,
       } as PBQStepTerminal,
     ],
   },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // HARDWARE: DISPLAY COMPONENT DIAGNOSIS
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    id: 'hw-display-diagnosis',
+    title: 'Diagnose Display Component Failures',
+    category: 'hardware',
+    difficulty: 2,
+    estimatedMinutes: 7,
+    objectives: ['1.4'],
+    examCode: '220-1201',
+    summary: 'Match display failure symptoms to the broken component — digitizer, backlight, OLED panel, or protective glass.',
+    context: `A repair shop has received four smartphones with different screen problems. You need to identify which display layer has failed in each case so you can order the correct replacement part.
+
+Understanding the display layer stack is critical: Protective glass → Digitizer → LCD/OLED panel → Backlight (LCD only) → Frame.`,
+    steps: [
+      {
+        type: 'drag_match',
+        id: 's1',
+        prompt: 'Match each failure symptom to the display component that has MOST LIKELY failed.',
+        items: [
+          { id: 'digitizer', label: 'Digitizer' },
+          { id: 'backlight', label: 'LCD Backlight' },
+          { id: 'oled',      label: 'OLED Panel' },
+          { id: 'glass',     label: 'Protective Glass' },
+        ],
+        targets: [
+          { id: 't1', label: 'Screen image is fine but touch is completely unresponsive', correctItemId: 'digitizer' },
+          { id: 't2', label: 'Screen is dark; image faintly visible when flashlight held close', correctItemId: 'backlight' },
+          { id: 't3', label: 'Permanent ghost image of navigation bar visible on white backgrounds', correctItemId: 'oled' },
+          { id: 't4', label: 'Visible cracks on outer surface; display and touch still function normally', correctItemId: 'glass' },
+        ],
+        feedback: {
+          correct: 'Perfect diagnosis! Digitizer = touch layer (image OK, touch fails). Backlight failure on LCD = dark screen, faint image visible with a light source. OLED burn-in = permanent ghost from static content. Cracked outer glass = cosmetic damage only if digitizer and panel are undamaged.',
+          incorrect: 'Remember the layer order: Glass → Digitizer → LCD/OLED → Backlight. Each layer can fail independently. The flashlight test (faint image visible = backlight failed, panel OK) is a classic exam question.',
+        },
+        hint: 'Ask: is the image affected or just touch? Is the screen dark or just dim? The flashlight test reveals backlight failure.',
+      } as PBQStepDragMatch,
+      {
+        id: 's2',
+        prompt: 'A technician replaces a cracked iPhone screen with an aftermarket INCELL panel. The customer reports the screen looks slightly yellowish and brightness changes unpredictably. What is the MOST likely cause?',
+        choices: [
+          { id: 'a', text: 'The replacement panel is OLED instead of LCD, causing color shift', isCorrect: false, feedback: 'INCELL is a type of LCD — not OLED. The issue is not a panel technology mismatch.' },
+          { id: 'b', text: 'The aftermarket panel lacks True Tone support, causing color temperature and auto-brightness inconsistencies', isCorrect: true, feedback: 'Correct. True Tone reads ambient light color temperature and adjusts the display. Non-OEM panels lack the calibration data for True Tone, causing the display to look warmer or cooler and auto-brightness to behave erratically. Always inform customers before using non-OEM parts.' },
+          { id: 'c', text: 'The digitizer cable was not fully seated during reassembly', isCorrect: false, feedback: 'A loose digitizer cable causes touch issues, not color shift or brightness problems.' },
+          { id: 'd', text: 'INCELL panels are incompatible with iPhones', isCorrect: false, feedback: 'INCELL panels do function in iPhones. The trade-off is loss of True Tone and color accuracy differences — not incompatibility.' },
+        ],
+      },
+      {
+        id: 's3',
+        prompt: 'After replacing a display assembly, taps register about 5mm below where the user actually touched. What should the technician do FIRST?',
+        choices: [
+          { id: 'a', text: 'Replace the digitizer with an OEM part', isCorrect: false, feedback: 'The part may be fine — seating is the more likely culprit before declaring the part defective.' },
+          { id: 'b', text: 'Reseat the digitizer ribbon cable and verify it is fully locked into the connector', isCorrect: true, feedback: 'Correct. Consistent touch offset is the classic symptom of an incorrectly seated digitizer ribbon cable. Re-seating resolves this in most cases.' },
+          { id: 'c', text: 'Run a factory reset to clear digitizer calibration data', isCorrect: false, feedback: 'A factory reset will not fix a physical connector seating issue.' },
+          { id: 'd', text: 'Replace the protective glass layer only', isCorrect: false, feedback: 'The protective glass does not process touch input — that is the digitizer\'s job.' },
+        ],
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // HARDWARE: CABLE & CONNECTOR IDENTIFICATION
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    id: 'hw-cable-connectors',
+    title: 'Identify Cable and Connector Types',
+    category: 'hardware',
+    difficulty: 1,
+    estimatedMinutes: 6,
+    objectives: ['3.1'],
+    examCode: '220-1201',
+    summary: 'Match display and storage cable types to their correct descriptions — a common CompTIA hardware identification question.',
+    context: `Technicians must identify cable types by specification. The A+ exam tests video connectors, storage interfaces, and peripheral cables. Match each cable or connector to its defining characteristic.`,
+    steps: [
+      {
+        type: 'drag_match',
+        id: 's1',
+        prompt: 'Match each video connector type to its key characteristic.',
+        items: [
+          { id: 'hdmi', label: 'HDMI' },
+          { id: 'dp',   label: 'DisplayPort' },
+          { id: 'vga',  label: 'VGA' },
+          { id: 'dvi',  label: 'DVI' },
+        ],
+        targets: [
+          { id: 't1', label: 'Analog-only signal; 15-pin trapezoid connector; no digital support', correctItemId: 'vga' },
+          { id: 't2', label: 'Carries audio + video; standard on consumer TVs and monitors', correctItemId: 'hdmi' },
+          { id: 't3', label: 'Preferred on professional monitors; supports daisy-chaining multiple displays', correctItemId: 'dp' },
+          { id: 't4', label: 'Carries digital and/or analog video; no audio; common on older monitors', correctItemId: 'dvi' },
+        ],
+        feedback: {
+          correct: 'Excellent! VGA = legacy analog only. HDMI = audio + video, consumer standard. DisplayPort = professional, daisy-chain capable. DVI = digital/analog video, no audio.',
+          incorrect: 'Key distinctions: VGA is the only purely analog connector. HDMI carries audio too. DisplayPort supports multi-monitor daisy-chaining. DVI is digital but carries no audio.',
+        },
+        hint: 'VGA is the oldest and only analog one. HDMI is what plugs into a TV. DisplayPort is common on gaming monitors and workstations.',
+      } as PBQStepDragMatch,
+      {
+        type: 'drag_match',
+        id: 's2',
+        prompt: 'Match each storage interface to its defining characteristic.',
+        items: [
+          { id: 'sata', label: 'SATA III' },
+          { id: 'nvme', label: 'NVMe (M.2)' },
+          { id: 'ide',  label: 'IDE / PATA' },
+          { id: 'usb',  label: 'USB 3.0' },
+        ],
+        targets: [
+          { id: 't1', label: 'Legacy wide ribbon cable; 40 or 80 conductors; replaced by SATA', correctItemId: 'ide' },
+          { id: 't2', label: 'Current mainstream internal drive interface; thin L-shaped data cable; ~600 MB/s max', correctItemId: 'sata' },
+          { id: 't3', label: 'PCIe-based M.2 interface; 3,500+ MB/s sequential read speeds', correctItemId: 'nvme' },
+          { id: 't4', label: 'External interface; blue port = 5 Gbps; used for external drives and flash drives', correctItemId: 'usb' },
+        ],
+        feedback: {
+          correct: 'Correct! IDE = wide ribbon cable (legacy). SATA III = standard internal HDD/SSD at ~600 MB/s. NVMe M.2 = fastest at 3,500+ MB/s via PCIe. USB 3.0 (blue) = 5 Gbps external.',
+          incorrect: 'Key speeds: SATA III ≈ 600 MB/s, NVMe = 3,500+ MB/s, USB 3.0 = 5 Gbps. IDE is the legacy wide ribbon cable from the pre-SATA era.',
+        },
+        hint: 'NVMe is the fastest — it uses the PCIe bus, not SATA. The blue USB port is always USB 3.0.',
+      } as PBQStepDragMatch,
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // HARDWARE: LAPTOP BATTERY REPLACEMENT — DRAG ORDER
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    id: 'hw-battery-replacement',
+    title: 'Laptop Battery Replacement Procedure',
+    category: 'hardware',
+    difficulty: 1,
+    estimatedMinutes: 5,
+    objectives: ['1.1'],
+    examCode: '220-1201',
+    summary: 'Put the steps for safely replacing a laptop battery in the correct order — safety and ESD procedures tested.',
+    context: `A customer's laptop battery no longer holds a charge. You will replace the internal battery. The correct order matters — skipping safety steps can damage components or injure you.`,
+    steps: [
+      {
+        type: 'drag_order',
+        id: 's1',
+        prompt: 'Place these laptop battery replacement steps in the correct order (1 = first, 7 = last).',
+        items: [
+          { id: 'power_off',   label: 'Shut down the laptop completely (not sleep/hibernate)' },
+          { id: 'disconnect',  label: 'Unplug the AC adapter from the laptop' },
+          { id: 'esd',         label: 'Put on an anti-static wrist strap and attach it to a grounded surface' },
+          { id: 'open',        label: 'Remove the bottom panel screws and lift off the cover' },
+          { id: 'remove_bat',  label: 'Disconnect the battery connector and remove the old battery' },
+          { id: 'install_bat', label: 'Seat the new battery and reconnect the battery connector' },
+          { id: 'test',        label: 'Reassemble, power on, and verify the battery charges correctly' },
+        ],
+        correctOrder: ['power_off', 'disconnect', 'esd', 'open', 'remove_bat', 'install_bat', 'test'],
+        feedback: {
+          correct: 'Perfect! (1) Shut down fully → (2) Unplug AC → (3) ESD protection → (4) Open chassis → (5) Remove old battery → (6) Install new battery → (7) Reassemble and test. Never skip ESD or work on a plugged-in device.',
+          incorrect: 'Key safety rules: fully power off AND unplug the AC adapter BEFORE opening the chassis. ESD protection goes on before you touch any internal components.',
+        },
+        hint: 'Safety first: power off → unplug → ESD strap → then open. ESD comes BEFORE you touch anything inside.',
+      } as PBQStepDragOrder,
+      {
+        id: 's2',
+        prompt: 'While replacing the battery, you touch the motherboard without wearing an ESD wrist strap. What is the GREATEST risk?',
+        choices: [
+          { id: 'a', text: 'The battery may not charge correctly after installation', isCorrect: false, feedback: 'Charging behavior is not related to ESD during installation.' },
+          { id: 'b', text: 'Static electricity from your body can damage sensitive components on the motherboard', isCorrect: true, feedback: 'Correct. Electrostatic discharge (ESD) can permanently damage semiconductors — capacitors, CPU, RAM — even at voltages too low to feel. ESD wrist straps divert this charge safely to ground.' },
+          { id: 'c', text: 'The chassis screws may strip due to improper grounding', isCorrect: false, feedback: 'ESD has no effect on mechanical fasteners.' },
+          { id: 'd', text: 'The battery may short-circuit when reconnected', isCorrect: false, feedback: 'A short circuit is caused by a conductive object bridging battery terminals — not ESD from skin contact with the motherboard.' },
+        ],
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // OS: WINDOWS USER MANAGEMENT TERMINAL
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    id: 'os-user-management',
+    title: 'Windows User Account Management',
+    category: 'os',
+    difficulty: 2,
+    estimatedMinutes: 10,
+    objectives: ['1.6'],
+    examCode: '220-1202',
+    summary: 'Use net user and net localgroup commands to create accounts, set passwords, and manage group membership.',
+    context: `A new employee named "jsmith" needs a Windows local account on their workstation. You will create the account, set a password, and add them to the appropriate local group using command-line tools.
+
+Open a Command Prompt running as Administrator to begin.`,
+    steps: [
+      {
+        type: 'terminal',
+        id: 's1',
+        prompt: 'Create a new local user account named "jsmith" with the password "Temp@1234".',
+        toolOutput: {
+          label: 'Context',
+          content: 'You are at an elevated Command Prompt (Run as Administrator) on a Windows 11 workstation.',
+        },
+        commands: [
+          {
+            command: 'net user jsmith Temp@1234 /add',
+            aliases: [
+              'net user "jsmith" Temp@1234 /add',
+              'net user jsmith "Temp@1234" /add',
+              'net user "jsmith" "Temp@1234" /add',
+            ],
+            output: 'The command completed successfully.',
+            isCorrect: true,
+            feedback: 'Correct! "net user <username> <password> /add" creates a new local user account. This account will appear in Local Users and Groups (lusrmgr.msc) and can be used to log into Windows.',
+          },
+          {
+            command: 'net user',
+            aliases: [],
+            output: '\\\\WORKSTATION01\n\n-------------------------------------------------------------------------------\nAdministrator            DefaultAccount           Guest\nWDAGUtilityAccount\nThe command completed successfully.',
+            isCorrect: false,
+            feedback: 'This lists existing users but does not create an account. Add the username, password, and /add flag.',
+          },
+          {
+            command: 'net localgroup',
+            aliases: [],
+            output: 'Aliases for \\\\WORKSTATION01\n\n-------------------------------------------------------------------------------\n*Administrators\n*Backup Operators\n*Guests\n*Remote Desktop Users\n*Users\nThe command completed successfully.',
+            isCorrect: false,
+            feedback: 'This lists local groups — useful later. First create the user: net user jsmith Temp@1234 /add',
+          },
+        ],
+        defaultOutput: 'The syntax of this command is:\n\nNET USER\n[username [password | *] [options]] [/DOMAIN]\n         username {password | *} /ADD [options] [/DOMAIN]',
+        hint: 'net user jsmith Temp@1234 /add',
+      } as PBQStepTerminal,
+      {
+        type: 'terminal',
+        id: 's2',
+        prompt: 'Add jsmith to the local "Users" group so they can log in with standard permissions.',
+        commands: [
+          {
+            command: 'net localgroup Users jsmith /add',
+            aliases: [
+              'net localgroup "Users" jsmith /add',
+              'net localgroup users jsmith /add',
+              'net localgroup Users "jsmith" /add',
+              'net localgroup "Users" "jsmith" /add',
+            ],
+            output: 'The command completed successfully.',
+            isCorrect: true,
+            feedback: 'Correct! "net localgroup <group> <username> /add" adds a user to a local group. The "Users" group provides standard (non-admin) login rights — always apply the principle of least privilege.',
+          },
+          {
+            command: 'net localgroup Administrators jsmith /add',
+            aliases: [
+              'net localgroup "Administrators" jsmith /add',
+              'net localgroup administrators jsmith /add',
+            ],
+            output: 'The command completed successfully.',
+            isCorrect: false,
+            feedback: 'This grants Administrator rights — more privilege than a standard employee needs. Principle of least privilege: use the "Users" group for standard accounts.',
+          },
+          {
+            command: 'net user jsmith',
+            aliases: [],
+            output: 'User name                    jsmith\nAccount active               Yes\nPassword last set            4/22/2026 9:00:00 AM\n\nLocal Group Memberships      (none)\nThe command completed successfully.',
+            isCorrect: false,
+            feedback: 'This shows account details — jsmith exists but has no group membership yet. Add to Users group: net localgroup Users jsmith /add',
+          },
+        ],
+        defaultOutput: 'The syntax of this command is:\n\nNET LOCALGROUP\n[groupname [/COMMENT:"text"]] [/DOMAIN]\ngroupname name [...] {/ADD | /DELETE} [/DOMAIN]',
+        hint: 'net localgroup Users jsmith /add',
+      } as PBQStepTerminal,
+      {
+        type: 'terminal',
+        id: 's3',
+        prompt: 'jsmith forgot their temporary password before logging in. Reset it to "NewPass@5678".',
+        commands: [
+          {
+            command: 'net user jsmith NewPass@5678',
+            aliases: [
+              'net user "jsmith" NewPass@5678',
+              'net user jsmith "NewPass@5678"',
+              'net user "jsmith" "NewPass@5678"',
+            ],
+            output: 'The command completed successfully.',
+            isCorrect: true,
+            feedback: 'Correct! To reset a password on an existing account, use "net user <username> <newpassword>" without /add. This immediately changes the password.',
+          },
+          {
+            command: 'net user jsmith NewPass@5678 /add',
+            aliases: [],
+            output: 'The account already exists.',
+            isCorrect: false,
+            feedback: '/add is only for creating new accounts. Omit it to reset the password: net user jsmith NewPass@5678',
+          },
+          {
+            command: 'net user jsmith *',
+            aliases: [],
+            output: 'Type a password for the user:\nRetype the password to confirm:\n(Interactive password entry — not available in this simulation)',
+            isCorrect: false,
+            feedback: 'The * flag prompts for interactive password entry. Provide the password directly in the command: net user jsmith NewPass@5678',
+          },
+        ],
+        defaultOutput: 'The syntax of this command is:\n\nNET USER\n[username [password | *] [options]] [/DOMAIN]',
+        hint: 'net user jsmith <newpassword>  — no /add needed, just username and new password',
+      } as PBQStepTerminal,
+    ],
+  },
 ]
