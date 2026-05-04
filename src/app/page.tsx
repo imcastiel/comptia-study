@@ -1,11 +1,12 @@
 export const dynamic = 'force-dynamic'
 
 import Link from 'next/link'
-import { BookOpen, Layers, Trophy, ChevronRight, Target, Clock, CheckCircle2, TrendingUp, Terminal } from 'lucide-react'
+import { BookOpen, Layers, Trophy, ChevronRight, Target, Clock, CheckCircle2, TrendingUp, Terminal, BookMarked } from 'lucide-react'
 import { db } from '@/db'
 import { examAttempts, questionAttempts, questions as questionsTable, topics, domains, flashcardReviews, studyProgress } from '@/db/schema'
 import { eq, lte, desc, sql, count } from 'drizzle-orm'
 import { cn } from '@/lib/utils'
+import { CHEAT_SHEETS } from '@/data/cheat-sheets'
 import { ActivityHeatmap } from '@/components/home/activity-heatmap'
 import { WeakSpots } from '@/components/home/weak-spots'
 
@@ -277,6 +278,13 @@ export default async function HomePage() {
               description: 'Timed simulation · 90 min',
               href: '/practice',
               color: 'var(--apple-orange)',
+            },
+            {
+              icon: BookMarked,
+              title: 'Cheat Sheets',
+              description: `${CHEAT_SHEETS.length} quick-reference sheets`,
+              href: '/cheat-sheets',
+              color: 'var(--apple-indigo)',
             },
           ].map((item) => (
             <Link

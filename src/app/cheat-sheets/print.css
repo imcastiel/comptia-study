@@ -1,0 +1,48 @@
+@media print {
+  /* Hide all navigation chrome */
+  header,
+  nav,
+  aside,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Remove sidebar offset so content fills the page */
+  main {
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Strip card chrome — let content breathe on paper */
+  .bg-card {
+    background: white !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Tables: allow rows to flow across pages */
+  table {
+    page-break-inside: auto;
+  }
+  tr {
+    page-break-inside: avoid;
+  }
+
+  /* Keep step number + label together */
+  li {
+    page-break-inside: avoid;
+  }
+
+  /* Never orphan a section heading at the bottom of a page */
+  h1,
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+
+  /* Preserve Apple accent colors in print */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

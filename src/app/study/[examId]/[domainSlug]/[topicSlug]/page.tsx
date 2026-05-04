@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronRight, ChevronLeft, Clock, Layers } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Clock, Layers, BookMarked } from 'lucide-react'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import remarkGfm from 'remark-gfm'
 import { rehypeGlossary } from '@/lib/rehype-glossary'
@@ -14,6 +14,7 @@ import { ReadingProgress } from '@/components/study/reading-progress'
 import { ActivityTracker } from '@/components/study/activity-tracker'
 import { ArticleWrapper } from '@/components/study/article-wrapper'
 import { TopicQuiz } from '@/components/study/topic-quiz'
+import { hasCheatSheet } from '@/data/cheat-sheets'
 import { db } from '@/db'
 import { domains, topics, exams, studyProgress } from '@/db/schema'
 import { eq, and } from 'drizzle-orm'
@@ -103,12 +104,21 @@ export default async function TopicPage({ params }: { params: Promise<Params> })
         )}
       </div>
 
-      {/* Complete button */}
+      {/* Complete button + cheat sheet link */}
       <div className="flex items-center justify-between mb-6 pb-5 border-b border-[var(--apple-separator)]">
         <CompleteButton
           topicId={topic.id}
           initialStatus={(progress?.status ?? 'not_started') as 'not_started' | 'in_progress' | 'completed' | 'needs_review'}
         />
+        {hasCheatSheet(topicSlug) && (
+          <Link
+            href={`/cheat-sheets/${topicSlug}`}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-medium bg-[var(--apple-indigo)]/10 text-[var(--apple-indigo)] hover:bg-[var(--apple-indigo)]/20 transition-colors"
+          >
+            <BookMarked className="w-3.5 h-3.5" />
+            Cheat Sheet
+          </Link>
+        )}
       </div>
 
       {/* MDX Content */}

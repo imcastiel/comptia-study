@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { ChevronRight, BookOpen, Wifi, Cpu, Cloud, Wrench, Monitor, Shield, Bug, ClipboardList, Layers, Trophy, Terminal, X } from 'lucide-react'
+import { ChevronRight, BookOpen, Wifi, Cpu, Cloud, Wrench, Monitor, Shield, Bug, ClipboardList, Layers, Trophy, Terminal, X, BookMarked } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useSidebar } from '@/contexts/sidebar-context'
 
@@ -252,6 +252,7 @@ function SidebarContent() {
     { href: '/flashcards', icon: Layers, label: 'Flashcards', color: 'var(--apple-green)' },
     { href: '/practice', icon: Trophy, label: 'Practice Tests', color: 'var(--apple-orange)' },
     { href: '/labs', icon: Terminal, label: 'PBQ Labs', color: 'var(--apple-purple)' },
+    { href: '/cheat-sheets', icon: BookMarked, label: 'Cheat Sheets', color: 'var(--apple-indigo)' },
   ]
 
   return (
