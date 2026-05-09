@@ -896,7 +896,7 @@ Network:  <1%  (normal)`,
     objectives: ['5.5', '2.1'],
     examCode: '220-1201',
     summary: 'Type the actual commands to diagnose a network problem — tests command recall, not just recognition.',
-    context: `A user calls: "I can ping my router (192.168.1.1) but can't reach any websites. DNS might be the issue." You have remote terminal access. Work through the diagnosis by typing the appropriate commands.`,
+    context: `A user calls: "I can ping my router (192.168.1.1) but can't reach any websites." You have remote terminal access. Work through the diagnosis by typing the appropriate commands.`,
     steps: [
       {
         type: 'terminal',
@@ -999,7 +999,7 @@ operable program or batch file.`,
       {
         type: 'terminal',
         id: 's3',
-        prompt: 'DNS lookup is failing via the router. The router\'s DNS may be down. Test whether DNS works using Google\'s public DNS server (8.8.8.8) directly.',
+        prompt: 'The router\'s DNS is not responding. You want to determine whether the problem is isolated to the router or affects all DNS. How do you test this?',
         commands: [
           {
             command: 'nslookup google.com 8.8.8.8',
@@ -1030,7 +1030,7 @@ Address:  142.250.80.46`,
             command: 'nslookup google.com',
             aliases: ['NSLOOKUP GOOGLE.COM'],
             isCorrect: false,
-            feedback: 'Without specifying a DNS server, nslookup defaults to 192.168.1.1 (the router) — which you already know is failing. You need to test an alternate DNS server (like 8.8.8.8) to determine if the problem is the router\'s DNS specifically.',
+            feedback: 'Without specifying a DNS server, nslookup defaults to 192.168.1.1 (the router) — which you already know is failing. Specify a different DNS server as a second argument to test whether the problem is specific to the router.',
             output: `Server:  router.home
 Address:  192.168.1.1
 
@@ -1044,7 +1044,7 @@ operable program or batch file.`,
       {
         type: 'terminal',
         id: 's4',
-        prompt: 'Google DNS resolves correctly. The router\'s DNS forwarding is broken. Set the DNS server on the network adapter to use 8.8.8.8 as a workaround. Type the netsh command to set the DNS server.',
+        prompt: 'Querying a public DNS server directly returned a valid result, but the router\'s DNS is still failing. Apply a command-line fix to restore name resolution on this adapter without touching the router.',
         commands: [
           {
             command: 'netsh interface ip set dns "Wi-Fi" static 8.8.8.8',
@@ -1076,7 +1076,7 @@ C:\\Users\\user>`,
             command: 'ipconfig /flushdns',
             aliases: ['IPCONFIG /FLUSHDNS', 'ipconfig/flushdns'],
             isCorrect: false,
-            feedback: '`ipconfig /flushdns` clears the local DNS cache — useful for stale records, but it doesn\'t change which DNS server is used. The problem is the DNS server itself (router) is failing, so you need to switch to a working server like 8.8.8.8.',
+            feedback: '`ipconfig /flushdns` clears the local DNS cache — useful for stale records, but it doesn\'t change which DNS server is used. The router\'s DNS is still broken, so clearing the cache won\'t restore name resolution.',
             output: `Windows IP Configuration
 
 Successfully flushed the DNS Resolver Cache.`,
@@ -1085,7 +1085,7 @@ Successfully flushed the DNS Resolver Cache.`,
             command: 'ipconfig /registerdns',
             aliases: ['IPCONFIG /REGISTERDNS'],
             isCorrect: false,
-            feedback: '`ipconfig /registerdns` re-registers the computer\'s DNS records with a domain DNS server — used in Active Directory environments, not relevant here. You need to change the DNS server to 8.8.8.8.',
+            feedback: '`ipconfig /registerdns` re-registers the computer\'s DNS records with a domain DNS server — used in Active Directory environments, not relevant here. The goal is to change which DNS server this adapter uses at the command line.',
             output: `Windows IP Configuration
 
 Registration of the DNS resource records for all adapters of this computer
@@ -1280,15 +1280,15 @@ Understanding the display layer stack is critical: Protective glass → Digitize
     estimatedMinutes: 10,
     objectives: ['1.6'],
     examCode: '220-1202',
-    summary: 'Use net user and net localgroup commands to create accounts, set passwords, and manage group membership.',
-    context: `A new employee named "jsmith" needs a Windows local account on their workstation. You will create the account, set a password, and add them to the appropriate local group using command-line tools.
+    summary: 'Create a local user account, assign group membership, and reset a password using command-line tools.',
+    context: `A new employee named "jsmith" needs a Windows local account on their workstation. You will provision the account and configure it so they can log in with standard permissions.
 
 Open a Command Prompt running as Administrator to begin.`,
     steps: [
       {
         type: 'terminal',
         id: 's1',
-        prompt: 'Create a new local user account named "jsmith" with the password "Temp@1234".',
+        prompt: 'Create a new local user account for "jsmith" with an initial password of "Temp@1234".',
         toolOutput: {
           label: 'Context',
           content: 'You are at an elevated Command Prompt (Run as Administrator) on a Windows 11 workstation.',
@@ -1317,7 +1317,7 @@ Open a Command Prompt running as Administrator to begin.`,
             aliases: [],
             output: 'Aliases for \\\\WORKSTATION01\n\n-------------------------------------------------------------------------------\n*Administrators\n*Backup Operators\n*Guests\n*Remote Desktop Users\n*Users\nThe command completed successfully.',
             isCorrect: false,
-            feedback: 'This lists local groups — useful later. First create the user: net user jsmith Temp@1234 /add',
+            feedback: 'This lists local groups — useful later. You need to create the user account first before managing group membership.',
           },
         ],
         defaultOutput: 'The syntax of this command is:\n\nNET USER\n[username [password | *] [options]] [/DOMAIN]\n         username {password | *} /ADD [options] [/DOMAIN]',
@@ -1326,7 +1326,7 @@ Open a Command Prompt running as Administrator to begin.`,
       {
         type: 'terminal',
         id: 's2',
-        prompt: 'Add jsmith to the local "Users" group so they can log in with standard permissions.',
+        prompt: 'jsmith can log in but currently has no group membership. Assign them the appropriate local group for a standard employee.',
         commands: [
           {
             command: 'net localgroup Users jsmith /add',
@@ -1348,14 +1348,14 @@ Open a Command Prompt running as Administrator to begin.`,
             ],
             output: 'The command completed successfully.',
             isCorrect: false,
-            feedback: 'This grants Administrator rights — more privilege than a standard employee needs. Principle of least privilege: use the "Users" group for standard accounts.',
+            feedback: 'This grants Administrator rights — more privilege than a standard employee needs. Apply the principle of least privilege and assign only the access level required for the role.',
           },
           {
             command: 'net user jsmith',
             aliases: [],
             output: 'User name                    jsmith\nAccount active               Yes\nPassword last set            4/22/2026 9:00:00 AM\n\nLocal Group Memberships      (none)\nThe command completed successfully.',
             isCorrect: false,
-            feedback: 'This shows account details — jsmith exists but has no group membership yet. Add to Users group: net localgroup Users jsmith /add',
+            feedback: 'This shows account details — jsmith exists but has no group membership yet. You need to add them to the appropriate group.',
           },
         ],
         defaultOutput: 'The syntax of this command is:\n\nNET LOCALGROUP\n[groupname [/COMMENT:"text"]] [/DOMAIN]\ngroupname name [...] {/ADD | /DELETE} [/DOMAIN]',
@@ -1364,7 +1364,7 @@ Open a Command Prompt running as Administrator to begin.`,
       {
         type: 'terminal',
         id: 's3',
-        prompt: 'jsmith forgot their temporary password before logging in. Reset it to "NewPass@5678".',
+        prompt: 'jsmith never logged in and has forgotten their temporary password. Reset it to "NewPass@5678" without removing the account.',
         commands: [
           {
             command: 'net user jsmith NewPass@5678',
@@ -1382,14 +1382,14 @@ Open a Command Prompt running as Administrator to begin.`,
             aliases: [],
             output: 'The account already exists.',
             isCorrect: false,
-            feedback: '/add is only for creating new accounts. Omit it to reset the password: net user jsmith NewPass@5678',
+            feedback: '/add is only used when creating new accounts. To change the password on an existing account, omit /add.',
           },
           {
             command: 'net user jsmith *',
             aliases: [],
             output: 'Type a password for the user:\nRetype the password to confirm:\n(Interactive password entry — not available in this simulation)',
             isCorrect: false,
-            feedback: 'The * flag prompts for interactive password entry. Provide the password directly in the command: net user jsmith NewPass@5678',
+            feedback: 'The * flag prompts for interactive password entry, which is not available here. Provide the new password as a direct argument in the command instead.',
           },
         ],
         defaultOutput: 'The syntax of this command is:\n\nNET USER\n[username [password | *] [options]] [/DOMAIN]',

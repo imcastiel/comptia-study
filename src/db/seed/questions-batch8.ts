@@ -1693,7 +1693,7 @@ export const BATCH8_QUESTIONS = [
     id: 'q-c1-1-3-17',
     topicId: 'topic-c1-1-3',
     type: 'single_choice' as const,
-    stem: 'A corporate MDM policy requires that lost devices be wipeable remotely. Which MDM capability satisfies this requirement?',
+    stem: 'A corporate smartphone is reported stolen at an airport. The IT administrator needs to ensure all company data is erased from the device before the thief can access it. Which MDM capability should be used?',
     choices: ch(
       'Remote Wipe',
       'Geofencing',

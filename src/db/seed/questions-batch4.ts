@@ -648,7 +648,7 @@ export const BATCH4_QUESTIONS = [
     id: 'q-c2-1-11-03',
     topicId: 'topic-c2-1-11',
     type: 'single_choice',
-    stem: 'Which email protocol keeps messages on the server, syncs folder structure across multiple devices, and uses port 993 with SSL encryption?',
+    stem: 'A mobile user checks email on a phone, laptop, and tablet. Messages marked as read on one device immediately appear read on all others, and custom folders are visible everywhere. The connection uses port 993. Which protocol is in use?',
     choices: ch(
       'POP3 over SSL',
       'SMTP with STARTTLS',

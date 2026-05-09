@@ -177,7 +177,7 @@ export const BATCH1_QUESTIONS = [
     id: 'q-c1-1-2-01',
     topicId: 'topic-c1-1-2',
     type: 'single_choice',
-    stem: 'A technician needs to connect a laptop to a docking station that adds DisplayPort outputs, Gigabit Ethernet, and additional USB ports — capabilities the laptop does not have on its own. What type of device is this?',
+    stem: 'A technician connects a laptop to an external device that provides DisplayPort outputs, Gigabit Ethernet, and additional USB ports not built into the laptop. What type of device is this?',
     choices: ch(
       'Port replicator',
       'KVM switch',
@@ -266,7 +266,7 @@ export const BATCH1_QUESTIONS = [
     choices: ch(
       'HID (Human Interface Device Profile)',
       'OPP (Object Push Profile)',
-      'HFP (Hands-Free Profile) instead of A2DP',
+      'HFP (Hands-Free Profile)',
       'PAN (Personal Area Network)'
     , 'c'),
     correctAnswer: ca('c'),
@@ -279,7 +279,7 @@ export const BATCH1_QUESTIONS = [
     id: 'q-c1-1-2-07',
     topicId: 'topic-c1-1-2',
     type: 'single_choice',
-    stem: 'Which cloud storage service provides 15 GB of free storage and is the primary sync solution for Android devices using Google accounts?',
+    stem: 'A user signs into a new Android phone with their existing account and notices that Gmail, Docs, and Photos are all backed up to the same storage quota. Which cloud storage service is providing this shared storage?',
     choices: ch(
       'iCloud — 5 GB free, Apple ecosystem',
       'OneDrive — 5 GB free, Microsoft integration',
@@ -401,7 +401,7 @@ export const BATCH1_QUESTIONS = [
     id: 'q-c1-1-3-06',
     topicId: 'topic-c1-1-3',
     type: 'single_choice',
-    stem: 'Which email retrieval protocol keeps messages stored on the server, syncs read/unread status across all devices, and is the correct choice for a user accessing email from multiple devices?',
+    stem: 'A sales team accesses email from phones, laptops, and office desktops. They need messages marked as read on one device to show as read everywhere else, and deleted messages to disappear from all devices. Which mail protocol should be configured?',
     choices: ch(
       'POP3 on port 110 — downloads mail to one device',
       'SMTP on port 25 — sends outgoing mail',
@@ -459,7 +459,7 @@ export const BATCH1_QUESTIONS = [
     choices: ch(
       'FTP on port 21 — standard file transfer',
       'Telnet on port 23 — remote terminal access',
-      'SSH/SFTP on port 22 — encrypted file transfer over SSH',
+      'SSH/SFTP on port 22',
       'HTTP on port 80 — web-based file upload'
     , 'c'),
     correctAnswer: ca('c'),
@@ -492,7 +492,7 @@ export const BATCH1_QUESTIONS = [
     stem: 'A workstation displays the IP address 169.254.45.100. What does this indicate, and what should the technician check first?',
     choices: ch(
       'The device has a statically assigned RFC 1918 private address — no action needed',
-      'The device self-assigned an APIPA address because it could not contact a DHCP server',
+      'The device self-assigned an APIPA address — check DHCP server availability and network connectivity',
       'The device is on an IPv6 link-local subnet and needs a gateway configured',
       'The device received a duplicate IP address from a misconfigured DHCP scope'
     , 'b'),
@@ -560,7 +560,7 @@ export const BATCH1_QUESTIONS = [
     stem: 'An FTP client behind a NAT router fails to receive directory listings in active mode but works in passive mode. What explains this behavior?',
     choices: ch(
       'Passive mode uses port 21, which NAT does not block',
-      'In active mode, the server initiates the data connection back to the client — this is blocked by NAT; passive mode has the client initiate all connections',
+      'In active mode, the server initiates the data connection to the client; passive mode has the client initiate all connections',
       'Active mode requires UDP which NAT does not support for FTP',
       'Passive mode uses SSL encryption which bypasses the firewall'
     , 'b'),
@@ -579,7 +579,7 @@ export const BATCH1_QUESTIONS = [
       'SSH on port 22 — text-only terminal access',
       'Telnet on port 23 — insecure terminal access',
       'SMB on port 445 — file sharing, not remote desktop',
-      'RDP on port 3389 — full graphical remote desktop for Windows'
+      'RDP on port 3389 — Windows native remote administration protocol'
     , 'd'),
     correctAnswer: ca('d'),
     explanation: 'RDP (Remote Desktop Protocol) on TCP port 3389 provides full graphical remote desktop access to Windows systems. It is the standard protocol for IT remote support and server management. SSH provides encrypted terminal (text) access but not a full GUI by default. Telnet is text-only and unencrypted. SMB on port 445 is for file and printer sharing, not remote desktop control.',
@@ -784,7 +784,7 @@ export const BATCH1_QUESTIONS = [
     id: 'q-c1-2-3-04',
     topicId: 'topic-c1-2-3',
     type: 'single_choice',
-    stem: 'Which type of proxy server sits in front of web servers, receives client requests, and forwards them to backend servers — providing load balancing and SSL termination?',
+    stem: 'An enterprise places a network device between internet clients and its internal web servers. The device terminates HTTPS, distributes requests across multiple servers, and hides internal server addresses from clients. What type of device is this?',
     choices: ch(
       'Forward proxy — clients send requests through it to reach the internet',
       'Transparent proxy — intercepts traffic without client configuration',
@@ -818,7 +818,7 @@ export const BATCH1_QUESTIONS = [
     id: 'q-c1-2-3-06',
     topicId: 'topic-c1-2-3',
     type: 'single_choice',
-    stem: 'A DNS A record, AAAA record, and CNAME record are all types of DNS resource records. Which record maps a hostname to an IPv6 address?',
+    stem: 'A DNS administrator needs to add a record so that a hostname resolves to an IPv6 address. Which DNS resource record type should be created?',
     choices: ch(
       'A record — maps hostname to IPv4 address',
       'AAAA record — maps hostname to IPv6 address',
@@ -835,7 +835,7 @@ export const BATCH1_QUESTIONS = [
     id: 'q-c1-2-3-07',
     topicId: 'topic-c1-2-3',
     type: 'single_choice',
-    stem: 'A Syslog severity level of 0 is defined as Emergency. What does a lower Syslog severity number indicate?',
+    stem: 'Syslog uses numbered severity levels from 0 to 7. What does a lower severity number indicate about the event being logged?',
     choices: ch(
       'Lower priority — level 0 is informational',
       'Higher severity — level 0 is the most critical (Emergency)',
@@ -876,7 +876,7 @@ export const BATCH1_QUESTIONS = [
     choices: ch(
       'Send the packet directly to 10.0.0.5 since all RFC 1918 addresses are on the same network',
       'Drop the packet because 10.x.x.x addresses are public internet addresses',
-      'Forward the packet to its default gateway because 10.0.0.5 is outside the 192.168.10.0/24 subnet',
+      'Forward the packet to its default gateway',
       'Use ARP to resolve 10.0.0.5 directly on the local subnet'
     , 'c'),
     correctAnswer: ca('c'),
@@ -1096,7 +1096,7 @@ export const BATCH1_QUESTIONS = [
     id: 'q-c1-2-5-06',
     topicId: 'topic-c1-2-5',
     type: 'single_choice',
-    stem: 'In a data center, which device serves as a passive termination point where permanent cable runs end, making it easy to reconfigure connections with short patch cables?',
+    stem: 'A data center technician needs to move a server from one switch port to another without touching the cables running through the walls and ceiling. Which device in the wiring closet makes this reconfiguration possible using only a short cable swap?',
     choices: ch(
       'Switch — provides active Layer 2 forwarding',
       'Patch panel — passive termination point for permanent cable runs',
@@ -1130,7 +1130,7 @@ export const BATCH1_QUESTIONS = [
     id: 'q-c1-2-5-08',
     topicId: 'topic-c1-2-5',
     type: 'single_choice',
-    stem: 'Which Ethernet cable type uses STP (Shielded Twisted Pair) and is appropriate for high-EMI industrial environments?',
+    stem: 'A factory floor has significant electromagnetic interference from motors and welding equipment. Which type of Ethernet cable is most appropriate for permanent runs in this environment?',
     choices: ch(
       'Cat 5e UTP — unshielded, standard office use',
       'Cat 6 UTP — unshielded, improved crosstalk performance',

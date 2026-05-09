@@ -183,7 +183,7 @@ export const BATCH11_QUESTIONS = [
     choices: ch(
       'An emulator is faster than a hypervisor',
       'A hypervisor simulates different hardware architectures while an emulator does not',
-      'An emulator translates instructions for a different CPU architecture while a hypervisor runs the same architecture natively',
+      'An emulator translates instructions across CPU architectures; a hypervisor runs the same architecture natively',
       'There is no difference; the terms are interchangeable',
       'c'
     ),
@@ -1235,7 +1235,7 @@ export const BATCH11_QUESTIONS = [
     type: 'single_choice' as const,
     stem: 'What type of cloud service is DaaS (Desktop as a Service)?',
     choices: ch(
-      'A cloud-hosted virtual desktop environment delivered over the internet',
+      'A virtual desktop environment hosted and streamed from the cloud',
       'A physical desktop computer leased from a cloud provider',
       'A cloud-based disk drive storage solution',
       'A SaaS application for database management',

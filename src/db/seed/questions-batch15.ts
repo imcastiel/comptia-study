@@ -1001,7 +1001,7 @@ export const BATCH15_QUESTIONS = [
 
   { id: 'q-c2-3-4-43', topicId: 'topic-c2-3-4', type: 'single_choice' as const, difficulty: 3,
     stem: 'A security analyst finds that malware on a workstation modified the Master Boot Record (MBR). Why is this particularly dangerous?',
-    choices: ch('It prevents Windows from receiving updates', 'The malware loads before the OS and AV, allowing it to control the boot process and hide itself', 'It only affects the display driver', 'It prevents users from changing their passwords', 'b'),
+    choices: ch('It prevents Windows from receiving updates', 'The malware loads before the OS and the antivirus scanner', 'It only affects the display driver', 'It prevents users from changing their passwords', 'b'),
     correctAnswer: ca('b'), tags: null, createdAt: NOW,
     explanation: 'MBR-level malware (bootkits) executes before Windows loads, giving it control before any security software starts. It can intercept OS calls to hide its presence (making it invisible to AV running inside Windows). Remediation typically requires booting from external media and using MBR repair tools (bootrec /fixmbr) or reimaging. Update mechanisms, display, and passwords are unaffected.' },
 

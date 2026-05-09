@@ -117,7 +117,7 @@ export const BATCH7_QUESTIONS = [
     stem: 'A ticketing system shows a closed ticket with the resolution note "fixed it." Why is this problematic from a documentation standpoint?',
     choices: ch(
       'The ticket should have been escalated before closing',
-      'The resolution provides zero value for pattern analysis or future troubleshooting because it lacks exact symptoms, troubleshooting steps, root cause, and resolution details',
+      'The resolution note is too vague to support pattern analysis, recurring issue detection, or future troubleshooting by another technician',
       'Tickets can only be closed by the original reporter',
       'The SLA clock should be stopped before closing',
       'b'
@@ -1125,7 +1125,7 @@ export const BATCH7_QUESTIONS = [
     id: 'q-c2-4-8-05',
     topicId: 'topic-c2-4-8',
     type: 'single_choice',
-    stem: 'Which scripting language uses the file extension .vbs and is considered a legacy Windows automation language largely replaced by PowerShell on modern systems?',
+    stem: 'A technician finds legacy login scripts on a Windows domain with files ending in an extension associated with a deprecated Windows scripting engine. The scripts use Windows Script Host and predate modern management tools. Which scripting language are these scripts written in?',
     choices: ch(
       'Python',
       'Bash',
@@ -1423,7 +1423,7 @@ export const BATCH7_QUESTIONS = [
     choices: ch(
       'LLM-based text generation',
       'AI hallucination detection',
-      'ML-based behavioral analysis that identifies malware behavior patterns rather than relying on known signatures',
+      'ML-based behavioral analysis',
       'Supervised learning with static signature databases',
       'c'
     ),

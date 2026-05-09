@@ -1788,7 +1788,7 @@ export const BATCH13A_QUESTIONS = [
     stem: 'A company is choosing between MAK and KMS activation for 500 Windows 11 Enterprise machines on a corporate network. Which activation method is MOST appropriate?',
     choices: ch(
       'MAK, because it requires less infrastructure',
-      'KMS, because it can automatically activate machines on the network without individual internet access',
+      'KMS, because it scales to large deployments through a local activation host',
       'Retail activation for each machine',
       'OEM activation through the hardware vendor',
       'b'

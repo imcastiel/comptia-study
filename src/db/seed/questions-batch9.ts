@@ -306,7 +306,7 @@ export const BATCH9_QUESTIONS = [
     stem: 'Why does DNS typically use UDP for standard queries rather than TCP?',
     choices: ch(
       'UDP provides encryption that TCP does not',
-      'UDP is faster because it has no connection overhead — ideal for small, single-packet queries',
+      'UDP is connectionless, avoiding the overhead of TCP\'s three-way handshake',
       'TCP cannot carry DNS packets',
       'UDP ensures reliable delivery of DNS records',
       'b'
@@ -361,7 +361,7 @@ export const BATCH9_QUESTIONS = [
     choices: ch(
       'UDP encrypts audio data while TCP does not',
       'UDP is connection-oriented and guarantees voice quality',
-      'UDP has lower latency because it does not retransmit lost packets, which would cause delays in real-time audio',
+      'UDP does not retransmit lost packets, keeping latency low for real-time audio streams',
       'UDP supports larger packet sizes than TCP',
       'c'
     ),
@@ -1064,7 +1064,7 @@ export const BATCH9_QUESTIONS = [
     stem: 'WPS (Wi-Fi Protected Setup) is designed to simplify connecting devices to Wi-Fi. Why is it considered a security risk?',
     choices: ch(
       'WPS disables WPA2 encryption when activated',
-      'WPS uses an 8-digit PIN that is vulnerable to brute-force attacks — the PIN is checked in two halves, reducing the keyspace dramatically',
+      'WPS uses an 8-digit PIN that is vulnerable to brute-force attacks',
       'WPS transmits the SSID in plaintext to all nearby devices',
       'WPS requires disabling the firewall on the access point',
       'b'

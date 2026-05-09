@@ -2149,7 +2149,7 @@ export const BATCH10_QUESTIONS = [
     choices: ch(
       'The drive capacity in GB',
       'The maximum speed in MB/s',
-      'The physical dimensions: 22mm wide by 80mm long',
+      'The physical dimensions (width x length in mm)',
       'The PCIe generation and lane count',
       'c'
     ),
@@ -2507,7 +2507,7 @@ export const BATCH10_QUESTIONS = [
     type: 'single_choice' as const,
     stem: 'A SATA SSD and an NVMe SSD can both connect via M.2 slots. What is the maximum speed of the SATA SSD regardless of the slot type?',
     choices: ch(
-      '~550 MB/s (limited by SATA III protocol)',
+      '~550 MB/s',
       '~3,500 MB/s',
       '~7,000 MB/s',
       'The speed depends only on the M.2 slot',
@@ -4149,7 +4149,7 @@ export const BATCH10_QUESTIONS = [
     id: 'q-c1-3-7-18',
     topicId: 'topic-c1-3-7',
     type: 'single_choice' as const,
-    stem: 'Which type of printer can print on multi-part (NCR/carbon copy) forms because it uses physical impact?',
+    stem: 'A warehouse manager needs to print shipping receipts on NCR multi-part forms that produce simultaneous copies on all layers. Which printer type can accommodate this requirement?',
     choices: ch(
       'Laser printer',
       'Inkjet printer',
@@ -4187,7 +4187,7 @@ export const BATCH10_QUESTIONS = [
     type: 'single_choice' as const,
     stem: 'What differentiates a thermal transfer printer from a direct thermal printer?',
     choices: ch(
-      'Thermal transfer uses a wax/resin ribbon to transfer ink onto paper, producing more durable output',
+      'Thermal transfer melts ink from a wax/resin ribbon onto the media',
       'Thermal transfer is faster but lower quality',
       'Direct thermal uses a ribbon while thermal transfer does not',
       'There is no difference — they are the same technology',
@@ -4349,7 +4349,7 @@ export const BATCH10_QUESTIONS = [
     type: 'single_choice' as const,
     stem: 'Automatic duplex printing means the printer can:',
     choices: ch(
-      'Print on both sides of the paper automatically without user intervention',
+      'Print on both sides of the paper without manual intervention',
       'Print two pages per sheet (2-up printing)',
       'Print on two different paper sizes simultaneously',
       'Print in both color and grayscale in the same job',

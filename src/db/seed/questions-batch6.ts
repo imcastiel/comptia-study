@@ -928,7 +928,7 @@ export const BATCH6_QUESTIONS = [
     stem: 'A customer calls and says their Android phone "suddenly started talking" and now every tap requires two taps to open anything, and the phone reads the name of everything she touches out loud. What accessibility feature was most likely accidentally enabled?',
     choices: ch(
       'Magnification (Zoom) was enabled via triple-tap',
-      'TalkBack was enabled, which is a screen reader that reads UI elements aloud and changes the interaction model to tap-to-select and double-tap-to-activate',
+      'TalkBack was enabled',
       'Switch Control was enabled via the accessibility shortcut',
       'High Contrast mode was turned on, which alters how the phone reads color values',
       'b'
@@ -1018,7 +1018,7 @@ export const BATCH6_QUESTIONS = [
     stem: 'An iPhone displays "Cannot Connect to Server" errors for all apps, including email and browser, despite showing full Wi-Fi signal. What should a technician check FIRST?',
     choices: ch(
       'Reset all network settings on the iPhone',
-      'Check if the device\'s date and time are set correctly — incorrect system time breaks HTTPS certificate validation and causes connection failures across all apps',
+      'Check if the device\'s date and time are set correctly',
       'Remove the phone from MDM enrollment and re-enroll',
       'Forget the Wi-Fi network and reconnect',
       'b'

@@ -156,7 +156,7 @@ export const BATCH16_QUESTIONS = [
 
   { id: 'q-c2-4-1-26', topicId: 'topic-c2-4-1', type: 'single_choice' as const,
     stem: 'A closed incident ticket contains only the note "fixed it." Why is this inadequate documentation?',
-    choices: ch('Tickets should never be closed by the technician', 'It provides no value for pattern analysis, future troubleshooting, or onboarding because it lacks symptoms, steps, root cause, and resolution', 'Only P1 tickets require detailed resolution notes', 'The user should have written the resolution, not the technician', 'b'),
+    choices: ch('Tickets should never be closed by the technician', 'It contains insufficient detail for pattern analysis, future troubleshooting, or onboarding', 'Only P1 tickets require detailed resolution notes', 'The user should have written the resolution, not the technician', 'b'),
     correctAnswer: ca('b'),
     explanation: '"Fixed it" tells no one what was wrong, what was tried, or what worked. Future technicians facing the same issue cannot learn from it, pattern analysis is impossible, and SLA verification cannot be done. Every ticket must document symptoms, troubleshooting steps, root cause, and exact resolution.',
     difficulty: 2, tags: null, createdAt: NOW },
@@ -629,7 +629,7 @@ export const BATCH16_QUESTIONS = [
 
   { id: 'q-c2-4-3-09', topicId: 'topic-c2-4-3', type: 'single_choice' as const,
     stem: 'A differential backup does NOT clear the archive bit after completion. What is the practical consequence of this behavior?',
-    choices: ch('Each differential backup grows smaller over the week', 'Each differential backup grows larger over the week because it captures all changes since the last full backup', 'Differential backups cannot be used to restore individual files', 'Differential backups automatically become full backups after 7 days', 'b'),
+    choices: ch('Each differential backup grows smaller over the week', 'Each differential backup is cumulatively larger than the previous one', 'Differential backups cannot be used to restore individual files', 'Differential backups automatically become full backups after 7 days', 'b'),
     correctAnswer: ca('b'),
     explanation: 'Because differential backups do not clear the archive bit, each successive differential captures ALL changes since the last full backup (not just since the last differential). By Friday, the differential contains Mon+Tue+Wed+Thu changes — growing progressively larger. This makes backup slower but restore faster (full + one differential only).',
     difficulty: 1, tags: null, createdAt: NOW },
@@ -881,14 +881,14 @@ export const BATCH16_QUESTIONS = [
 
   { id: 'q-c2-4-3-45', topicId: 'topic-c2-4-3', type: 'multiple_choice' as const,
     stem: 'Which TWO characteristics make synthetic full backups superior to traditional full backups in terms of operational impact? (Select TWO)',
-    choices: chMulti('Synthetic fulls do not require reading the source data again, reducing production system load', 'Synthetic fulls provide faster restore than incremental sets because they produce a single complete backup', 'Synthetic fulls eliminate the need for a rollback plan', 'Synthetic fulls store data in a proprietary format inaccessible to standard tools', ['a', 'b']),
+    choices: chMulti('Synthetic fulls do not require reading the source data again, reducing production system load', 'Synthetic fulls enable faster, simpler restores compared to incremental chain recovery', 'Synthetic fulls eliminate the need for a rollback plan', 'Synthetic fulls store data in a proprietary format inaccessible to standard tools', ['a', 'b']),
     correctAnswer: cam('a', 'b'),
     explanation: 'Synthetic fulls eliminate source re-reads (constructed from existing backup data), minimizing production I/O impact, and provide a single complete restore target (simpler than incremental chain restore). They do not affect rollback planning or use proprietary-only formats.',
     difficulty: 3, tags: null, createdAt: NOW },
 
   { id: 'q-c2-4-3-46', topicId: 'topic-c2-4-3', type: 'single_choice' as const,
     stem: 'An organization\'s backup verification revealed that a critical database backup was corrupted and cannot be restored. The last successful verified backup is from 3 days ago. What is the immediate priority?',
-    choices: ch('Continue using the corrupted backup since it may partially restore', 'Identify and fix the root cause of the corruption, then immediately take a new verified backup', 'Change the backup schedule to weekly to reduce corruption risk', 'Replace the backup software without investigating the cause', 'b'),
+    choices: ch('Continue using the corrupted backup since it may partially restore', 'Diagnose the root cause of the corruption and take a new verified backup immediately', 'Change the backup schedule to weekly to reduce corruption risk', 'Replace the backup software without investigating the cause', 'b'),
     correctAnswer: ca('b'),
     explanation: 'A failed verification is urgent — it means the organization has no viable recovery for data created since the last good backup. The priority is diagnosing the corruption cause (media failure, software bug, misconfiguration) and immediately taking and verifying a new backup.',
     difficulty: 3, tags: null, createdAt: NOW },
@@ -1621,8 +1621,8 @@ export const BATCH16_QUESTIONS = [
     difficulty: 2, tags: null, createdAt: NOW },
 
   { id: 'q-c2-4-6-24', topicId: 'topic-c2-4-6', type: 'single_choice' as const,
-    stem: 'The MIT license is considered permissive because it:',
-    choices: ch('Requires attribution and limits commercial use', 'Allows use, modification, and distribution (including commercially) with only attribution required — no copyleft restriction on derivatives', 'Is only valid for open-source projects, not commercial products', 'Requires source code to remain publicly available at all times', 'b'),
+    stem: 'Which statement correctly describes the MIT open-source license?',
+    choices: ch('Requires attribution and limits commercial use', 'Allows use, modification, and distribution including commercial use, with only attribution required', 'Is only valid for open-source projects, not commercial products', 'Requires source code to remain publicly available at all times', 'b'),
     correctAnswer: ca('b'),
     explanation: 'MIT is the most permissive major open-source license. It only requires preserving the copyright notice and license text. Derivatives can be proprietary. This makes MIT-licensed code easy to incorporate into commercial products.',
     difficulty: 2, tags: null, createdAt: NOW },
@@ -2869,7 +2869,7 @@ export const BATCH16_QUESTIONS = [
 
   { id: 'q-c2-4-10-33', topicId: 'topic-c2-4-10', type: 'single_choice' as const,
     stem: 'How does AI-assisted log analysis improve on traditional rule-based log analysis?',
-    choices: ch('AI log analysis is faster because it reads logs line by line in parallel', 'AI can identify novel attack patterns and correlate subtle signals across millions of events without requiring pre-written rules for each specific scenario', 'AI log analysis only works on Windows Event Logs; rule-based works on all log formats', 'AI log analysis does not require any log normalization', 'b'),
+    choices: ch('AI log analysis is faster because it reads logs line by line in parallel', 'AI can identify novel attack patterns and correlate subtle signals that fall below rule-based detection thresholds', 'AI log analysis only works on Windows Event Logs; rule-based works on all log formats', 'AI log analysis does not require any log normalization', 'b'),
     correctAnswer: ca('b'),
     explanation: 'Rule-based SIEM systems can only detect patterns they have explicit rules for. AI/ML-based systems learn baseline behavior and can flag unknown-unknown threats — novel attack patterns not previously seen or explicitly defined. They also correlate weak signals across large event volumes that would overwhelm human analysts.',
     difficulty: 2, tags: null, createdAt: NOW },
@@ -2897,7 +2897,7 @@ export const BATCH16_QUESTIONS = [
 
   { id: 'q-c2-4-10-37', topicId: 'topic-c2-4-10', type: 'single_choice' as const,
     stem: 'What distinguishes GPT, Claude, and Gemini from older chatbot systems?',
-    choices: ch('They only retrieve pre-written answers from a database, like older search engines', 'They are large language models that generate novel text by predicting likely token sequences, enabling open-ended conversation and generalization across tasks', 'They are rule-based systems with deterministic outputs', 'They can only perform tasks they were explicitly programmed for during development', 'b'),
+    choices: ch('They only retrieve pre-written answers from a database, like older search engines', 'They are large language models trained to generate novel text by predicting token sequences', 'They are rule-based systems with deterministic outputs', 'They can only perform tasks they were explicitly programmed for during development', 'b'),
     correctAnswer: ca('b'),
     explanation: 'GPT, Claude, and Gemini are LLMs that generate text through probabilistic prediction rather than template retrieval. This gives them flexible, open-ended capability across diverse tasks but also means outputs can be incorrect or fabricated — they are not knowledge retrieval systems.',
     difficulty: 2, tags: null, createdAt: NOW },
