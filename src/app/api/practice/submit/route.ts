@@ -3,11 +3,13 @@ import { db } from '@/db'
 import {
   examAttempts, questionAttempts, questions as questionsTable,
   topics, domains, topicMastery, questionDistractors, passProbability,
+  masterySnapshots,
 } from '@/db/schema'
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
 import { getUserCode } from '@/lib/auth'
 import { computePassProbability } from '@/lib/pass-probability'
+import { computeMasteryUpdate, type MasteryState } from '@/lib/mastery'
 
 function scoreAnswer(userAnswer: string | string[] | null | undefined, correctAnswerJson: string): boolean {
   if (userAnswer === null || userAnswer === undefined) return false
@@ -17,13 +19,6 @@ function scoreAnswer(userAnswer: string | string[] | null | undefined, correctAn
   if (correctArr.length !== userArr.length) return false
   return correctArr.every((id) => userArr.includes(id))
 }
-
-function blendMastery(seen: number, correct: number, ewma: number, streak: number): number {
-  const streakFactor = streak > 0 ? Math.min(streak / 5, 1) : 0
-  return Math.round((ewma * 0.5 + (correct / seen) * 0.35 + streakFactor * 0.15) * 100)
-}
-
-const EWMA_ALPHA = 0.3
 
 export async function POST(req: NextRequest) {
   const userId = await getUserCode()
@@ -125,48 +120,55 @@ export async function POST(req: NextRequest) {
 
     for (const [topicId, attempts] of topicGroups) {
       const ex = masteryByTopic[topicId]
-      let seen = ex?.questionsSeen ?? 0
-      let correct = ex?.questionsCorrect ?? 0
-      let ewma = ex?.ewmaAccuracy ?? 0
-      let streak = ex?.currentStreak ?? 0
-      let totalTime = ex?.totalTimeSeconds ?? 0
+
+      // Thread each attempt through the shared mastery model in sequence
+      let state: MasteryState | null = null
+      let prev = ex
+        ? {
+            questionsSeen: ex.questionsSeen,
+            questionsCorrect: ex.questionsCorrect,
+            ewmaAccuracy: ex.ewmaAccuracy,
+            currentStreak: ex.currentStreak,
+            totalTimeSeconds: ex.totalTimeSeconds,
+          }
+        : null
 
       for (const a of attempts) {
-        seen++
-        if (a.isCorrect) correct++
-        const obs = a.isCorrect ? 1 : 0
-        ewma = seen === 1 ? obs : EWMA_ALPHA * obs + (1 - EWMA_ALPHA) * ewma
-        streak = a.isCorrect
-          ? (streak >= 0 ? streak + 1 : 1)
-          : (streak <= 0 ? streak - 1 : -1)
-        totalTime += a.timeSecs ?? 0
+        state = computeMasteryUpdate({ existing: prev, isCorrect: a.isCorrect, timeSpentSeconds: a.timeSecs, now })
+        prev = state
       }
+      if (!state) continue
+
+      // Preserve lastCorrectAt across the batch (state.lastCorrectAt only reflects the final attempt)
+      const gotCorrectThisBatch = state.questionsCorrect > (ex?.questionsCorrect ?? 0)
+      const lastCorrectAt = gotCorrectThisBatch ? now : ex?.lastCorrectAt ?? null
 
       await db.insert(topicMastery).values({
         id: ex?.id ?? randomUUID(),
         userId,
         topicId,
-        questionsSeen: seen,
-        questionsCorrect: correct,
-        ewmaAccuracy: ewma,
-        currentStreak: streak,
-        totalTimeSeconds: totalTime,
-        avgTimeSeconds: totalTime / seen,
-        masteryScore: blendMastery(seen, correct, ewma, streak),
+        questionsSeen: state.questionsSeen,
+        questionsCorrect: state.questionsCorrect,
+        ewmaAccuracy: state.ewmaAccuracy,
+        currentStreak: state.currentStreak,
+        totalTimeSeconds: state.totalTimeSeconds,
+        avgTimeSeconds: state.avgTimeSeconds,
+        masteryScore: state.masteryScore,
         lastSeenAt: now,
-        lastCorrectAt: correct > (ex?.questionsCorrect ?? 0) ? now : ex?.lastCorrectAt ?? null,
+        lastCorrectAt,
         updatedAt: now,
       }).onConflictDoUpdate({
         target: [topicMastery.userId, topicMastery.topicId],
         set: {
-          questionsSeen: seen,
-          questionsCorrect: correct,
-          ewmaAccuracy: ewma,
-          currentStreak: streak,
-          totalTimeSeconds: totalTime,
-          avgTimeSeconds: totalTime / seen,
-          masteryScore: blendMastery(seen, correct, ewma, streak),
+          questionsSeen: state.questionsSeen,
+          questionsCorrect: state.questionsCorrect,
+          ewmaAccuracy: state.ewmaAccuracy,
+          currentStreak: state.currentStreak,
+          totalTimeSeconds: state.totalTimeSeconds,
+          avgTimeSeconds: state.avgTimeSeconds,
+          masteryScore: state.masteryScore,
           lastSeenAt: now,
+          lastCorrectAt,
           updatedAt: now,
         },
       })
@@ -195,6 +197,7 @@ export async function POST(req: NextRequest) {
         weightPercent: domains.weightPercent,
         seen: sql<number>`sum(${topicMastery.questionsSeen})`,
         correct: sql<number>`sum(${topicMastery.questionsCorrect})`,
+        mastery: sql<number>`avg(${topicMastery.masteryScore})`,
       })
       .from(topicMastery)
       .innerJoin(topics, eq(topicMastery.topicId, topics.id))
@@ -217,6 +220,38 @@ export async function POST(req: NextRequest) {
         domainBreakdown: JSON.stringify(prob.domainBreakdown),
         sampleSize: prob.sampleSize,
         computedAt: now,
+      })
+
+      // ── Daily per-domain snapshot for velocity / progress-over-time charts ───
+      // Upsert keyed on (user, exam, domain, date): repeated submits the same day
+      // overwrite, leaving one cumulative point-in-time row per domain per day.
+      const snapshotDate = now.slice(0, 10)
+      await db.insert(masterySnapshots).values(
+        domainMastery.map((d) => {
+          const seen = Number(d.seen)
+          return {
+            id: randomUUID(),
+            userId,
+            examId,
+            domainId: d.domainId,
+            snapshotDate,
+            masteryScore: Number(d.mastery ?? 0),
+            questionsSeen: seen,
+            accuracy: seen > 0 ? Number(d.correct) / seen : 0,
+          }
+        })
+      ).onConflictDoUpdate({
+        target: [
+          masterySnapshots.userId,
+          masterySnapshots.examId,
+          masterySnapshots.domainId,
+          masterySnapshots.snapshotDate,
+        ],
+        set: {
+          masteryScore: sql`excluded.mastery_score`,
+          questionsSeen: sql`excluded.questions_seen`,
+          accuracy: sql`excluded.accuracy`,
+        },
       })
     }
 
