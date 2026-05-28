@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/db'
-import { questionAttempts, questions, topics, domains, exams } from '@/db/schema'
-import { eq, sql, count } from 'drizzle-orm'
+import { topicMastery, topics, domains, exams } from '@/db/schema'
+import { and, eq, sql } from 'drizzle-orm'
+import { getUserCode } from '@/lib/auth'
 
 export async function GET() {
+  const userId = await getUserCode()
+  if (!userId) return NextResponse.json([], { status: 401 })
+
   try {
     const rows = await db
       .select({
@@ -12,31 +16,29 @@ export async function GET() {
         topicSlug: topics.slug,
         domainSlug: domains.slug,
         examId: exams.id,
-        correct: sql<number>`sum(case when ${questionAttempts.isCorrect} = 1 then 1 else 0 end)`,
-        total: count(),
+        masteryScore: topicMastery.masteryScore,
+        questionsSeen: topicMastery.questionsSeen,
+        questionsCorrect: topicMastery.questionsCorrect,
       })
-      .from(questionAttempts)
-      .innerJoin(questions, eq(questionAttempts.questionId, questions.id))
-      .innerJoin(topics, eq(questions.topicId, topics.id))
+      .from(topicMastery)
+      .innerJoin(topics, eq(topicMastery.topicId, topics.id))
       .innerJoin(domains, eq(topics.domainId, domains.id))
       .innerJoin(exams, eq(domains.examId, exams.id))
-      .groupBy(topics.id)
-      .having(sql`count(*) >= 3`)
-      .orderBy(sql`CAST(sum(case when ${questionAttempts.isCorrect} = 1 then 1 else 0 end) AS REAL) / count(*) ASC`)
+      .where(and(eq(topicMastery.userId, userId), sql`${topicMastery.questionsSeen} >= 3`))
+      .orderBy(topicMastery.masteryScore)
       .limit(20)
 
-    const result = rows.map((r) => ({
+    return NextResponse.json(rows.map((r: { topicId: string; topicTitle: string; topicSlug: string; domainSlug: string; examId: string; masteryScore: number; questionsSeen: number; questionsCorrect: number }) => ({
       topicId: r.topicId,
       topicTitle: r.topicTitle,
       topicSlug: r.topicSlug,
       domainSlug: r.domainSlug,
       examId: r.examId,
-      correct: Number(r.correct),
-      total: Number(r.total),
-      pct: Math.round((Number(r.correct) / Number(r.total)) * 100),
-    }))
-
-    return NextResponse.json(result)
+      correct: r.questionsCorrect,
+      total: r.questionsSeen,
+      pct: Math.round((r.questionsCorrect / r.questionsSeen) * 100),
+      masteryScore: r.masteryScore,
+    })))
   } catch (err) {
     console.error('[/api/weak-spots]', err)
     return NextResponse.json([])

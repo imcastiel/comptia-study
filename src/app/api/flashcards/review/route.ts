@@ -1,21 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
-import { flashcardReviews } from '@/db/schema'
-import { eq } from 'drizzle-orm'
+import { flashcardReviews, flashcardReviewLog } from '@/db/schema'
+import { and, eq } from 'drizzle-orm'
 import { calculateSM2 } from '@/lib/sm2'
 import { randomUUID } from 'crypto'
+import { getUserCode } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
+  const userId = await getUserCode()
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   try {
     const { flashcardId, quality } = await req.json() as { flashcardId: string; quality: 0 | 1 | 2 | 3 | 4 | 5 }
-
     if (!flashcardId || quality === undefined) {
       return NextResponse.json({ error: 'Missing flashcardId or quality' }, { status: 400 })
     }
 
-    // Get existing review state
     const [existing] = await db.select().from(flashcardReviews)
-      .where(eq(flashcardReviews.flashcardId, flashcardId))
+      .where(and(eq(flashcardReviews.userId, userId), eq(flashcardReviews.flashcardId, flashcardId)))
 
     const sm2Result = calculateSM2({
       quality,
@@ -34,10 +36,11 @@ export async function POST(req: NextRequest) {
         quality,
         nextReviewAt: sm2Result.nextReviewAt,
         reviewedAt: now,
-      }).where(eq(flashcardReviews.id, existing.id))
+      }).where(and(eq(flashcardReviews.userId, userId), eq(flashcardReviews.flashcardId, flashcardId)))
     } else {
       await db.insert(flashcardReviews).values({
         id: randomUUID(),
+        userId,
         flashcardId,
         easeFactor: sm2Result.easeFactor,
         intervalDays: sm2Result.intervalDays,
@@ -48,8 +51,18 @@ export async function POST(req: NextRequest) {
       })
     }
 
+    await db.insert(flashcardReviewLog).values({
+      id: randomUUID(),
+      userId,
+      flashcardId,
+      quality,
+      easeFactor: sm2Result.easeFactor,
+      intervalDays: sm2Result.intervalDays,
+      reviewedAt: now,
+    })
+
     return NextResponse.json({ success: true, nextReviewAt: sm2Result.nextReviewAt, intervalDays: sm2Result.intervalDays })
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Failed to save review' }, { status: 500 })
   }
 }

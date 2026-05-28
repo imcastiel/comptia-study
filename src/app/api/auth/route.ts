@@ -1,20 +1,36 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/db'
+import { users } from '@/db/schema'
+import { eq } from 'drizzle-orm'
+import { signCode } from '@/lib/hmac'
 
 export async function POST(request: NextRequest) {
-  const { password } = await request.json() as { password: string }
+  const { code } = await request.json() as { code?: string }
 
-  if (password !== process.env.AUTH_SECRET) {
-    return NextResponse.json({ error: 'Invalid password' }, { status: 401 })
+  const normalized = (code ?? '').replace(/\s/g, '')
+  if (!/^\d{16}$/.test(normalized)) {
+    return NextResponse.json({ error: 'Invalid code format' }, { status: 400 })
   }
 
+  const [user] = await db.select({ code: users.code }).from(users).where(eq(users.code, normalized))
+  if (!user) {
+    return NextResponse.json({ error: 'Account not found' }, { status: 401 })
+  }
+
+  const hmac = await signCode(normalized)
   const response = NextResponse.json({ ok: true })
-  response.cookies.set('auth', process.env.AUTH_SECRET!, {
+  response.cookies.set('auth', `${normalized}.${hmac}`, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 30, // 30 days
+    maxAge: 60 * 60 * 24 * 365,
     path: '/',
   })
+  return response
+}
+
+export async function DELETE() {
+  const response = NextResponse.json({ ok: true })
+  response.cookies.delete('auth')
   return response
 }

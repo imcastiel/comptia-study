@@ -1,19 +1,22 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { verifyCode } from '@/lib/hmac'
 
 const PUBLIC_PATHS = ['/login', '/api/auth']
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Allow login page and auth API through
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
     return NextResponse.next()
   }
 
-  const auth = request.cookies.get('auth')?.value
-  if (auth === process.env.AUTH_SECRET) {
-    return NextResponse.next()
+  const cookie = request.cookies.get('auth')?.value
+  if (cookie) {
+    const [code, hmac] = cookie.split('.')
+    if (code && hmac && code.length === 16 && await verifyCode(code, hmac)) {
+      return NextResponse.next()
+    }
   }
 
   const loginUrl = new URL('/login', request.url)
