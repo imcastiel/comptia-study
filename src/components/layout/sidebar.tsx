@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { ChevronRight, BookOpen, Wifi, Cpu, Cloud, Wrench, Monitor, Shield, Bug, ClipboardList, Layers, Trophy, Terminal, X, BookMarked } from 'lucide-react'
+import { ChevronRight, BookOpen, Wifi, Cpu, Cloud, Wrench, Monitor, Shield, Bug, ClipboardList, Layers, Trophy, Terminal, X, BookMarked, LineChart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useSidebar } from '@/contexts/sidebar-context'
 
@@ -248,6 +248,7 @@ function SidebarContent() {
   }, [pathname])
 
   const NAV_LINKS = [
+    { href: '/progress', icon: LineChart, label: 'Progress', color: 'var(--apple-teal)' },
     { href: '/study', icon: BookOpen, label: 'Study', color: 'var(--apple-blue)' },
     { href: '/flashcards', icon: Layers, label: 'Flashcards', color: 'var(--apple-green)' },
     { href: '/practice', icon: Trophy, label: 'Practice Tests', color: 'var(--apple-orange)' },
