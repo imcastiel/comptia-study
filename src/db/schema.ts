@@ -64,6 +64,9 @@ export const questions = sqliteTable('questions', {
   difficulty: integer('difficulty').notNull(),
   tags: text('tags'),
   createdAt: text('created_at').notNull(),
+  published: integer('published', { mode: 'boolean' }).notNull().default(false),
+  source: text('source').notNull().default('seed'),
+  updatedAt: text('updated_at'),
 }, (t) => [
   index('idx_questions_topic_id').on(t.topicId),
   index('idx_questions_difficulty').on(t.difficulty),
@@ -118,9 +121,23 @@ export const flashcards = sqliteTable('flashcards', {
   tags: text('tags'),
   difficulty: integer('difficulty').notNull().default(2),
   createdAt: text('created_at').notNull(),
+  published: integer('published', { mode: 'boolean' }).notNull().default(false),
+  source: text('source').notNull().default('seed'),
+  updatedAt: text('updated_at'),
 }, (t) => [
   index('idx_flashcards_topic_id').on(t.topicId),
 ])
+
+// ─── generation_profiles — editable master prompts per content type ───────────
+
+export const generationProfiles = sqliteTable('generation_profiles', {
+  contentType: text('content_type').primaryKey(),
+  masterPrompt: text('master_prompt').notNull(),
+  defaultOptions: text('default_options').notNull().default('{}'),
+  updatedAt: text('updated_at').notNull(),
+})
+
+export type GenerationProfile = typeof generationProfiles.$inferSelect
 
 // ─── 8. flashcard_reviews — SM-2 current state (per user per card) ────────────
 
