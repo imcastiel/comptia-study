@@ -24,17 +24,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 
-  const code = generateCode()
-  await db.insert(users).values({ code, createdAt: new Date().toISOString() })
+  try {
+    const code = generateCode()
+    await db.insert(users).values({ code, createdAt: new Date().toISOString() })
 
-  const hmac = await signCode(code)
-  const response = NextResponse.json({ code })
-  response.cookies.set('auth', `${code}.${hmac}`, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 365,
-    path: '/',
-  })
-  return response
+    const hmac = await signCode(code)
+    const response = NextResponse.json({ code })
+    response.cookies.set('auth', `${code}.${hmac}`, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 365,
+      path: '/',
+    })
+    return response
+  } catch (err) {
+    console.error('[/api/auth/generate]', err)
+    return NextResponse.json({ error: 'Could not create account. Try again.' }, { status: 500 })
+  }
 }

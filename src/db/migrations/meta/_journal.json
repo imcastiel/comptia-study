@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1774294638665,
-      "tag": "0000_great_whiplash",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1775272607570,
-      "tag": "0001_typical_gamma_corps",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1779991349794,
-      "tag": "0002_curvy_firedrake",
+      "when": 1780025251757,
+      "tag": "0000_majestic_makkari",
       "breakpoints": true
     }
   ]

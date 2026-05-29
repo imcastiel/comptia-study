@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx src/db/migrate.ts",
-    "db:seed": "tsx src/db/seed/index.ts",
+    "db:migrate": "node --env-file-if-exists=.env.local --import tsx src/db/migrate.ts",
+    "db:seed": "node --env-file-if-exists=.env.local --import tsx src/db/seed/index.ts",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
