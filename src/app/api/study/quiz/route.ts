@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/db'
 import { questions } from '@/db/schema'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -18,7 +18,7 @@ export async function GET(req: Request) {
         difficulty: questions.difficulty,
       })
       .from(questions)
-      .where(eq(questions.topicId, topicId))
+      .where(and(eq(questions.topicId, topicId), eq(questions.published, true)))
       .limit(40)
 
     const parsed = rows

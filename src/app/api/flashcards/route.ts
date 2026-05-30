@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
       const cards = cardIds.length > 0
         ? await Promise.all(cardIds.map((id) =>
             db.select({ id: flashcards.id, front: flashcards.front, back: flashcards.back })
-              .from(flashcards).where(eq(flashcards.id, id)).then((r) => r[0]).then((c) => c || null)
+              .from(flashcards).where(and(eq(flashcards.id, id), eq(flashcards.published, true))).then((r) => r[0]).then((c) => c || null)
           )).then((r) => r.filter(Boolean))
         : []
 
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
       const cards = await Promise.all(
         topicIds.map((tid) =>
           db.select({ id: flashcards.id, front: flashcards.front, back: flashcards.back })
-            .from(flashcards).where(eq(flashcards.topicId, tid))
+            .from(flashcards).where(and(eq(flashcards.topicId, tid), eq(flashcards.published, true)))
         )
       ).then((r) => r.flat())
 
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
 
     // All cards
     const cards = await db.select({ id: flashcards.id, front: flashcards.front, back: flashcards.back })
-      .from(flashcards)
+      .from(flashcards).where(eq(flashcards.published, true))
     return NextResponse.json({ cards })
   } catch (err) {
     return NextResponse.json({ error: 'Failed to load flashcards' }, { status: 500 })

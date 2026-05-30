@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { questions, topics, domains, exams } from '@/db/schema'
-import { eq, sql, inArray } from 'drizzle-orm'
+import { and, eq, sql, inArray } from 'drizzle-orm'
 
 const EXAM_CODE: Record<string, string> = { core1: '220-1201', core2: '220-1202' }
 
@@ -31,10 +31,10 @@ export async function GET(req: NextRequest) {
 
     const rows = await (
       retryIds.length > 0
-        ? baseQuery.where(inArray(questions.id, retryIds))
+        ? baseQuery.where(and(inArray(questions.id, retryIds), eq(questions.published, true)))
         : examCode
-        ? baseQuery.where(eq(exams.code, examCode)).orderBy(sql`RANDOM()`).limit(count)
-        : baseQuery.orderBy(sql`RANDOM()`).limit(count)
+        ? baseQuery.where(and(eq(exams.code, examCode), eq(questions.published, true))).orderBy(sql`RANDOM()`).limit(count)
+        : baseQuery.where(eq(questions.published, true)).orderBy(sql`RANDOM()`).limit(count)
     )
 
     const result = rows.map((q) => {

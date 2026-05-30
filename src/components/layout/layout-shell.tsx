@@ -8,7 +8,7 @@ import { PomodoroProvider } from '@/contexts/pomodoro-context'
 import { SidebarProvider } from '@/contexts/sidebar-context'
 
 // Routes that render full-screen without the authenticated app chrome.
-const BARE_ROUTES = ['/login']
+const BARE_ROUTES = ['/login', '/admin']
 
 export function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
