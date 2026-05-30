@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Sparkles, FolderOpen, Download, ArrowLeft } from 'lucide-react'
+import { LayoutDashboard, Sparkles, FolderOpen, Layers, Download, ArrowLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV = [
   { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/admin/generate', icon: Sparkles, label: 'Generate' },
-  { href: '/admin/content/questions', icon: FolderOpen, label: 'Content' },
+  { href: '/admin/content/questions', icon: FolderOpen, label: 'Questions' },
+  { href: '/admin/content/flashcards', icon: Layers, label: 'Flashcards' },
   { href: '/admin/export', icon: Download, label: 'Export' },
 ]
 
