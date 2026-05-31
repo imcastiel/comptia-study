@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Shield, Search, Sun, Moon, Menu, RotateCcw } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { CommandPalette } from '@/components/search/command-palette'
+import { AccountMenu } from '@/components/layout/account-menu'
 import { usePomodoroContext } from '@/contexts/pomodoro-context'
 import { useSidebar } from '@/contexts/sidebar-context'
 
@@ -153,6 +154,7 @@ export function TopNav() {
             >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
+            <AccountMenu />
           </div>
         </div>
       </header>

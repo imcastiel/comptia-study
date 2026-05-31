@@ -3,6 +3,13 @@ import { db } from '@/db'
 import { users } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import { signCode } from '@/lib/hmac'
+import { getUserCode } from '@/lib/auth'
+
+// Returns the logged-in account's own code (from its signed cookie), or null.
+export async function GET() {
+  const code = await getUserCode()
+  return NextResponse.json({ code })
+}
 
 export async function POST(request: NextRequest) {
   const { code } = await request.json() as { code?: string }
