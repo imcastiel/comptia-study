@@ -15,6 +15,13 @@
       "when": 1780094008802,
       "tag": "0001_confused_sunset_bain",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1780274443446,
+      "tag": "0002_flippant_rocket_raccoon",
+      "breakpoints": true
     }
   ]
 }
