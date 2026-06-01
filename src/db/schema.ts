@@ -139,6 +139,35 @@ export const generationProfiles = sqliteTable('generation_profiles', {
 
 export type GenerationProfile = typeof generationProfiles.$inferSelect
 
+// ─── cheat_sheets + pbq_scenarios — static content migrated to DB (JSON blobs) ─
+
+export const cheatSheets = sqliteTable('cheat_sheets', {
+  id: text('id').primaryKey(),            // = topicSlug
+  title: text('title').notNull(),
+  exam: text('exam').notNull(),           // 'core1' | 'core2'
+  domainSlug: text('domain_slug').notNull(),
+  data: text('data').notNull(),           // JSON of the full CheatSheet object
+  published: integer('published', { mode: 'boolean' }).notNull().default(false),
+  source: text('source').notNull().default('seed'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at'),
+})
+
+export const pbqScenarios = sqliteTable('pbq_scenarios', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  category: text('category').notNull(),
+  examCode: text('exam_code').notNull(),
+  data: text('data').notNull(),           // JSON of the full PBQScenario object
+  published: integer('published', { mode: 'boolean' }).notNull().default(false),
+  source: text('source').notNull().default('seed'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at'),
+})
+
+export type CheatSheetRow = typeof cheatSheets.$inferSelect
+export type PbqScenarioRow = typeof pbqScenarios.$inferSelect
+
 // ─── 8. flashcard_reviews — SM-2 current state (per user per card) ────────────
 
 export const flashcardReviews = sqliteTable('flashcard_reviews', {

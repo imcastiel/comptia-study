@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronRight, BookOpen } from 'lucide-react'
-import { getCheatSheet, CHEAT_SHEETS } from '@/data/cheat-sheets'
+import { getPublishedCheatSheet } from '@/data/cheat-sheets-access'
 import { TermsSection } from '@/components/cheat-sheets/terms-section'
 import { TableSection } from '@/components/cheat-sheets/table-section'
 import { ProcessSection } from '@/components/cheat-sheets/process-section'
@@ -13,13 +13,9 @@ interface Params {
   topicSlug: string
 }
 
-export function generateStaticParams() {
-  return CHEAT_SHEETS.map((s) => ({ topicSlug: s.topicSlug }))
-}
-
 export default async function CheatSheetPage({ params }: { params: Promise<Params> }) {
   const { topicSlug } = await params
-  const sheet = getCheatSheet(topicSlug)
+  const sheet = await getPublishedCheatSheet(topicSlug)
   if (!sheet) notFound()
 
   const examRoute = sheet.exam === 'core1' ? 'core1' : 'core2'

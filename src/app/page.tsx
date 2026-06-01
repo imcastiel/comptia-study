@@ -6,7 +6,7 @@ import { db } from '@/db'
 import { examAttempts, questionAttempts, questions as questionsTable, topics, domains, flashcardReviews, studyProgress } from '@/db/schema'
 import { eq, lte, desc, sql, count } from 'drizzle-orm'
 import { cn } from '@/lib/utils'
-import { CHEAT_SHEETS } from '@/data/cheat-sheets'
+import { getPublishedCheatSheets } from '@/data/cheat-sheets-access'
 import { ActivityHeatmap } from '@/components/home/activity-heatmap'
 import { WeakSpots } from '@/components/home/weak-spots'
 
@@ -181,15 +181,18 @@ const CORE2_DOMAINS = [
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
-  const {
-    dueCount,
-    topicsStudied,
-    totalTopics,
-    testsCompleted,
-    avgScore,
-    recentAttempts,
-    domainPerf,
-  } = await getDashboardData()
+  const [
+    {
+      dueCount,
+      topicsStudied,
+      totalTopics,
+      testsCompleted,
+      avgScore,
+      recentAttempts,
+      domainPerf,
+    },
+    cheatSheets,
+  ] = await Promise.all([getDashboardData(), getPublishedCheatSheets()])
 
   const greeting = getGreeting()
   const today = formatDate()
@@ -282,7 +285,7 @@ export default async function HomePage() {
             {
               icon: BookMarked,
               title: 'Cheat Sheets',
-              description: `${CHEAT_SHEETS.length} quick-reference sheets`,
+              description: `${cheatSheets.length} quick-reference sheets`,
               href: '/cheat-sheets',
               color: 'var(--apple-indigo)',
             },

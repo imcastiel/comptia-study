@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
-import { questions, flashcards } from '@/db/schema'
+import { questions, flashcards, cheatSheets, pbqScenarios } from '@/db/schema'
 import { and, eq, like, or, desc, sql, type SQL } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
 import { requireAdmin } from '@/lib/auth'
-import { isContentType, validateQuestion, validateFlashcard } from '@/lib/admin/content-types'
+import { isContentType, isBlobType, validateQuestion, validateFlashcard, validateBlob } from '@/lib/admin/content-types'
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ type: string }> }) {
   const guard = await requireAdmin(); if (guard) return guard
@@ -16,6 +16,40 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ type
   const topicId = sp.get('topic')
   const source = sp.get('source')
   const q = sp.get('q')?.trim()
+
+  if (isBlobType(type)) {
+    if (type === 'cheat_sheets') {
+      const conds: SQL[] = []
+      if (status === 'published') conds.push(eq(cheatSheets.published, true))
+      if (status === 'draft') conds.push(eq(cheatSheets.published, false))
+      if (source) conds.push(eq(cheatSheets.source, source))
+      if (q) conds.push(like(cheatSheets.title, `%${q}%`))
+      const items = await db.select({
+        id: cheatSheets.id, title: cheatSheets.title,
+        published: cheatSheets.published, source: cheatSheets.source,
+        updatedAt: cheatSheets.updatedAt,
+      }).from(cheatSheets)
+        .where(conds.length ? and(...conds) : undefined)
+        .orderBy(desc(sql`coalesce(${cheatSheets.updatedAt}, ${cheatSheets.createdAt})`))
+        .limit(200)
+      return NextResponse.json({ items })
+    }
+    // pbq_scenarios
+    const conds: SQL[] = []
+    if (status === 'published') conds.push(eq(pbqScenarios.published, true))
+    if (status === 'draft') conds.push(eq(pbqScenarios.published, false))
+    if (source) conds.push(eq(pbqScenarios.source, source))
+    if (q) conds.push(like(pbqScenarios.title, `%${q}%`))
+    const items = await db.select({
+      id: pbqScenarios.id, title: pbqScenarios.title,
+      published: pbqScenarios.published, source: pbqScenarios.source,
+      updatedAt: pbqScenarios.updatedAt,
+    }).from(pbqScenarios)
+      .where(conds.length ? and(...conds) : undefined)
+      .orderBy(desc(sql`coalesce(${pbqScenarios.updatedAt}, ${pbqScenarios.createdAt})`))
+      .limit(200)
+    return NextResponse.json({ items })
+  }
 
   if (type === 'questions') {
     const conds: SQL[] = []
@@ -52,6 +86,29 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ typ
   const body = await req.json()
   const now = new Date().toISOString()
   const id = randomUUID()
+
+  if (isBlobType(type)) {
+    const v = validateBlob(body)
+    if (!v.ok) return NextResponse.json({ error: v.error }, { status: 400 })
+    let parsed: Record<string, unknown> = {}
+    try { parsed = JSON.parse(body.data) } catch { /* already validated */ }
+    if (type === 'cheat_sheets') {
+      await db.insert(cheatSheets).values({
+        id, title: body.title, data: body.data,
+        exam: (parsed.exam as string) ?? '',
+        domainSlug: (parsed.domainSlug as string) ?? '',
+        published: false, source: 'manual', createdAt: now, updatedAt: now,
+      })
+    } else {
+      await db.insert(pbqScenarios).values({
+        id, title: body.title, data: body.data,
+        category: (parsed.category as string) ?? '',
+        examCode: (parsed.examCode as string) ?? '',
+        published: false, source: 'manual', createdAt: now, updatedAt: now,
+      })
+    }
+    return NextResponse.json({ id })
+  }
 
   if (type === 'questions') {
     const v = validateQuestion(body)
