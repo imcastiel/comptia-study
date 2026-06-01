@@ -1,13 +1,23 @@
-import { questions, flashcards } from '@/db/schema'
+import { questions, flashcards, cheatSheets, pbqScenarios } from '@/db/schema'
 
-export const CONTENT_TYPES = ['questions', 'flashcards'] as const
+export const CONTENT_TYPES = ['questions', 'flashcards', 'cheat_sheets', 'pbq_scenarios'] as const
 export type ContentType = (typeof CONTENT_TYPES)[number]
 
 export function isContentType(t: string): t is ContentType {
   return (CONTENT_TYPES as readonly string[]).includes(t)
 }
 
-export const TABLES = { questions, flashcards } as const
+export const TABLES = { questions, flashcards, cheat_sheets: cheatSheets, pbq_scenarios: pbqScenarios } as const
+
+export const BLOB_TYPES = ['cheat_sheets', 'pbq_scenarios'] as const
+export function isBlobType(t: string): boolean { return (BLOB_TYPES as readonly string[]).includes(t) }
+
+export function validateBlob(body: { title?: string; data?: string }): ValidationResult {
+  if (!body.title?.trim()) return { ok: false, error: 'title is required' }
+  if (!body.data?.trim()) return { ok: false, error: 'data (JSON) is required' }
+  try { JSON.parse(body.data) } catch { return { ok: false, error: 'data must be valid JSON' } }
+  return { ok: true }
+}
 
 export type ValidationResult = { ok: true } | { ok: false; error: string }
 

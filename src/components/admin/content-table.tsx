@@ -4,7 +4,7 @@ import type { ContentType } from '@/lib/admin/content-types'
 import type { ContentItem } from './content-library'
 
 function summary(item: ContentItem): string {
-  return item.stem ?? item.front ?? '(untitled)'
+  return item.title ?? item.stem ?? item.front ?? '(untitled)'
 }
 
 export function ContentTable({
