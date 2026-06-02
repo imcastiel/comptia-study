@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Shield, Search, Sun, Moon, Menu, RotateCcw } from 'lucide-react'
+import { Shield, Search, Sun, Moon, Menu, RotateCcw, Timer } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { CommandPalette } from '@/components/search/command-palette'
 import { AccountMenu } from '@/components/layout/account-menu'
@@ -35,7 +35,7 @@ function PomodoroTimerPill() {
         className="flex items-center gap-[5px] bg-transparent border-none cursor-pointer px-2 py-1 rounded-[6px] hover:bg-[var(--apple-fill)] transition-colors"
         aria-label="Start pomodoro timer"
       >
-        <span className="text-[11px] text-[var(--apple-label-tertiary)]">▶</span>
+        <Timer className="w-3.5 h-3.5 text-[var(--apple-label-tertiary)]" />
         <span className="text-[12px] text-[var(--apple-label-tertiary)] tracking-[0.5px]" style={{ fontVariantNumeric: 'tabular-nums' }}>{time}</span>
       </button>
     )
@@ -50,6 +50,7 @@ function PomodoroTimerPill() {
           style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)' }}
           aria-label={pomodoroActive ? 'Pause pomodoro timer' : 'Resume pomodoro timer'}
         >
+          <Timer className="w-3.5 h-3.5 text-[#6366f1]" />
           {pomodoroActive
             ? <span className="w-[6px] h-[6px] bg-[#6366f1] rounded-full inline-block animate-pulse" />
             : <span className="text-[10px] text-[#6366f1]">⏸</span>
@@ -70,6 +71,7 @@ function PomodoroTimerPill() {
         style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)' }}
         aria-label="Skip break"
       >
+        <Timer className="w-3.5 h-3.5 text-[#6ee7b7]" />
         <span className="text-[12px] font-medium tracking-[0.5px] text-[#6ee7b7]" style={{ fontVariantNumeric: 'tabular-nums' }}>{time}</span>
         <span className="text-[10px] text-[#6ee7b7]">break</span>
       </button>

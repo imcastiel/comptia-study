@@ -107,17 +107,10 @@ export function usePomodoroContext(): PomodoroContextValue {
 
 export function PomodoroProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(timerReducer, initialState)
-  const permissionAskedRef = useRef(false)
-
-  const start = useCallback(() => {
-    if (!permissionAskedRef.current && typeof Notification !== 'undefined') {
-      permissionAskedRef.current = true
-      if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-        Notification.requestPermission()
-      }
-    }
-    dispatch({ type: 'START' })
-  }, [])
+  // Note: we never call Notification.requestPermission() — no browser permission
+  // popup. The completion notification below only fires if the user has already
+  // granted notifications via their browser settings.
+  const start = useCallback(() => dispatch({ type: 'START' }), [])
 
   const pause = useCallback(() => dispatch({ type: 'PAUSE' }), [])
   const reset = useCallback(() => dispatch({ type: 'RESET' }), [])
