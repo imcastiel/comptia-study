@@ -1,12 +1,13 @@
 export const dynamic = 'force-dynamic'
 
 import Link from 'next/link'
-import { BookOpen, Layers, Trophy, ChevronRight, Target, Clock, CheckCircle2, TrendingUp, Terminal, BookMarked } from 'lucide-react'
+import { BookOpen, Layers, Trophy, ChevronRight, Target, TrendingUp, Terminal, BookMarked, LineChart } from 'lucide-react'
 import { db } from '@/db'
-import { examAttempts, questionAttempts, questions as questionsTable, topics, domains, flashcardReviews, studyProgress } from '@/db/schema'
+import { examAttempts, questionAttempts, questions as questionsTable, topics, domains, flashcardReviews, studyProgress, exams } from '@/db/schema'
 import { eq, lte, desc, sql, count } from 'drizzle-orm'
 import { cn } from '@/lib/utils'
 import { getPublishedCheatSheets } from '@/data/cheat-sheets-access'
+import { getPublishedScenarios } from '@/data/pbq-scenarios-access'
 import { ActivityHeatmap } from '@/components/home/activity-heatmap'
 import { WeakSpots } from '@/components/home/weak-spots'
 
@@ -47,7 +48,7 @@ async function getDashboardData() {
       .from(examAttempts)
       .where(eq(examAttempts.isCompleted, true)),
 
-    // Last 5 completed attempts
+    // Last 5 completed attempts (with each exam's real passing score)
     db.select({
       id: examAttempts.id,
       scorePercent: examAttempts.scorePercent,
@@ -55,8 +56,10 @@ async function getDashboardData() {
       totalQuestions: examAttempts.totalQuestions,
       startedAt: examAttempts.startedAt,
       timeSpentSeconds: examAttempts.timeSpentSeconds,
+      passingScore: exams.passingScore,
     })
       .from(examAttempts)
+      .innerJoin(exams, eq(examAttempts.examId, exams.id))
       .where(eq(examAttempts.isCompleted, true))
       .orderBy(desc(examAttempts.startedAt))
       .limit(5),
@@ -81,7 +84,7 @@ async function getDashboardData() {
     topicsStudied,
     totalTopics,
     testsCompleted,
-    avgScore: avgScore ?? null,
+    avgScore,
     recentAttempts,
     domainPerf,
   }
@@ -192,12 +195,21 @@ export default async function HomePage() {
       domainPerf,
     },
     cheatSheets,
-  ] = await Promise.all([getDashboardData(), getPublishedCheatSheets()])
+    scenarios,
+  ] = await Promise.all([getDashboardData(), getPublishedCheatSheets(), getPublishedScenarios()])
 
   const greeting = getGreeting()
   const today = formatDate()
   const avgScoreDisplay = avgScore !== null ? `${Math.round(avgScore)}%` : '--'
   const hasActivity = testsCompleted > 0 || topicsStudied > 0
+
+  const quickStart = [
+    { icon: BookOpen, title: 'Study Content', description: `${totalTopics} topics across 2 exams`, href: '/study', color: 'var(--apple-blue)' },
+    { icon: Layers, title: 'Flashcards', description: dueCount > 0 ? `${dueCount} card${dueCount !== 1 ? 's' : ''} due for review` : 'All cards reviewed', href: '/flashcards', color: dueCount > 0 ? 'var(--apple-orange)' : 'var(--apple-green)' },
+    { icon: Terminal, title: 'PBQ Labs', description: `${scenarios.length} hands-on simulations`, href: '/labs', color: 'var(--apple-purple)' },
+    { icon: Trophy, title: 'Practice Exam', description: 'Timed simulation · 90 min', href: '/practice', color: 'var(--apple-orange)' },
+    { icon: BookMarked, title: 'Cheat Sheets', description: `${cheatSheets.length} quick-reference sheets`, href: '/cheat-sheets', color: 'var(--apple-indigo)' },
+  ]
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
@@ -252,44 +264,8 @@ export default async function HomePage() {
         <h2 className="text-[12px] font-semibold text-[var(--apple-label-secondary)] uppercase tracking-wider mb-3">
           Quick Start
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-          {[
-            {
-              icon: BookOpen,
-              title: 'Study Content',
-              description: `${totalTopics} topics across 2 exams`,
-              href: '/study',
-              color: 'var(--apple-blue)',
-            },
-            {
-              icon: Layers,
-              title: 'Flashcards',
-              description: dueCount > 0 ? `${dueCount} card${dueCount !== 1 ? 's' : ''} due for review` : 'All cards reviewed',
-              href: '/flashcards',
-              color: dueCount > 0 ? 'var(--apple-orange)' : 'var(--apple-green)',
-            },
-            {
-              icon: Terminal,
-              title: 'PBQ Labs',
-              description: '13 hands-on simulations',
-              href: '/labs',
-              color: 'var(--apple-purple)',
-            },
-            {
-              icon: Trophy,
-              title: 'Practice Exam',
-              description: 'Timed simulation · 90 min',
-              href: '/practice',
-              color: 'var(--apple-orange)',
-            },
-            {
-              icon: BookMarked,
-              title: 'Cheat Sheets',
-              description: `${cheatSheets.length} quick-reference sheets`,
-              href: '/cheat-sheets',
-              color: 'var(--apple-indigo)',
-            },
-          ].map((item) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          {quickStart.map((item) => (
             <Link
               key={item.title}
               href={item.href}
@@ -299,7 +275,7 @@ export default async function HomePage() {
                 className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0"
                 style={{ backgroundColor: `${item.color}18` }}
               >
-                <item.icon className="w-4.5 h-4.5" style={{ color: item.color, width: '18px', height: '18px' }} />
+                <item.icon style={{ color: item.color, width: '18px', height: '18px' }} />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-semibold text-foreground">{item.title}</p>
@@ -355,8 +331,8 @@ export default async function HomePage() {
             ) : (
               recentAttempts.map((attempt, i) => {
                 const score = attempt.scorePercent ?? 0
-                const passed = score >= 75
                 const scaledScore = Math.round((score / 100) * 900)
+                const passed = scaledScore >= attempt.passingScore
                 return (
                   <Link
                     key={attempt.id}
@@ -366,13 +342,10 @@ export default async function HomePage() {
                       i < recentAttempts.length - 1 && 'border-b border-[var(--apple-separator)]'
                     )}
                   >
-                    {/* Score ring */}
+                    {/* Score badge */}
                     <div
                       className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-[12px] font-bold"
                       style={{
-                        background: passed
-                          ? 'var(--apple-green)/12'
-                          : 'var(--apple-red)/12',
                         color: passed ? 'var(--apple-green)' : 'var(--apple-red)',
                         backgroundColor: passed ? 'rgba(52,199,89,0.12)' : 'rgba(255,59,48,0.12)',
                       }}
@@ -408,15 +381,15 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Focus Areas — weak spot tracking from quiz results */}
-        <WeakSpots />
-
         {/* Domain Performance */}
         <section className="animate-fade-up" style={{ animationDelay: '200ms' }}>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-[12px] font-semibold text-[var(--apple-label-secondary)] uppercase tracking-wider">
               Domain Performance
             </h2>
+            <Link href="/progress" className="flex items-center gap-1 text-[12px] text-[var(--apple-blue)] font-medium">
+              <LineChart className="w-3.5 h-3.5" /> Full progress
+            </Link>
           </div>
 
           <div className="bg-card rounded-[16px] border border-[var(--apple-separator)] shadow-sm overflow-hidden">
@@ -466,6 +439,9 @@ export default async function HomePage() {
           </div>
         </section>
       </div>
+
+      {/* ── Focus Areas (weak topics from quiz results) ── */}
+      <WeakSpots />
 
       {/* ── Exam Cards ── */}
       <section className="animate-fade-up" style={{ animationDelay: '250ms' }}>
