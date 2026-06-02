@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Sparkles, FolderOpen, Layers, Download, ArrowLeft } from 'lucide-react'
+import { LayoutDashboard, Sparkles, FolderOpen, Layers, Download, ArrowLeft, BookMarked, Terminal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV = [
@@ -10,6 +10,8 @@ const NAV = [
   { href: '/admin/generate', icon: Sparkles, label: 'Generate' },
   { href: '/admin/content/questions', icon: FolderOpen, label: 'Questions' },
   { href: '/admin/content/flashcards', icon: Layers, label: 'Flashcards' },
+  { href: '/admin/content/cheat_sheets', icon: BookMarked, label: 'Cheat sheets' },
+  { href: '/admin/content/pbq_scenarios', icon: Terminal, label: 'PBQ Labs' },
   { href: '/admin/export', icon: Download, label: 'Export' },
 ]
 

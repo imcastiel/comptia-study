@@ -8,8 +8,8 @@ import { EditDrawer } from './edit-drawer'
 
 export interface ContentItem {
   id: string
-  topicId: string
-  difficulty: number
+  topicId?: string
+  difficulty?: number
   published: boolean
   source: string
   updatedAt: string | null
@@ -21,6 +21,8 @@ export interface ContentItem {
   front?: string
   back?: string
   tags?: string | null
+  title?: string
+  data?: string
 }
 
 export function ContentLibrary({ type }: { type: ContentType }) {

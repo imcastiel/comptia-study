@@ -16,6 +16,8 @@ export interface AssembleInput {
 const SHAPE: Record<ContentType, string> = {
   flashcards: `Each item: { "front": string, "back": string }`,
   questions: `Each item: { "stem": string, "choices": [{ "id": "a"|"b"|"c"|"d", "text": string, "isCorrect": boolean }], "correctAnswer": "a"|"b"|"c"|"d", "explanation": string, "difficulty": 1|2|3 }`,
+  cheat_sheets: `Each item: { "title": string, "data": object }`,
+  pbq_scenarios: `Each item: { "title": string, "data": object }`,
 }
 
 export function assemblePrompt(input: AssembleInput): string {

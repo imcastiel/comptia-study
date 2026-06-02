@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
-import { questions, flashcards } from '@/db/schema'
+import { questions, flashcards, cheatSheets, pbqScenarios } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import { requireAdmin } from '@/lib/auth'
-import { isContentType, validateQuestion, validateFlashcard } from '@/lib/admin/content-types'
+import { isContentType, isBlobType, validateQuestion, validateFlashcard, validateBlob } from '@/lib/admin/content-types'
 import { isReferenced } from '@/lib/admin/content-refs'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ type: string; id: string }> }) {
@@ -13,6 +13,25 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ ty
 
   const body = await req.json() as Record<string, unknown>
   const now = new Date().toISOString()
+
+  if (isBlobType(type)) {
+    const set: Record<string, unknown> = { updatedAt: now }
+    if (typeof body.published === 'boolean') set.published = body.published
+    if (body.data !== undefined) {
+      const v = validateBlob({ title: body.title as string | undefined, data: body.data as string | undefined })
+      if (!v.ok) return NextResponse.json({ error: v.error }, { status: 400 })
+      set.title = body.title
+      set.data = body.data
+    } else if (body.title !== undefined) {
+      set.title = body.title
+    }
+    if (type === 'cheat_sheets') {
+      await db.update(cheatSheets).set(set).where(eq(cheatSheets.id, id))
+    } else {
+      await db.update(pbqScenarios).set(set).where(eq(pbqScenarios.id, id))
+    }
+    return NextResponse.json({ ok: true })
+  }
 
   if (type === 'questions') {
     const set: Record<string, unknown> = { updatedAt: now }
@@ -45,6 +64,13 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   const guard = await requireAdmin(); if (guard) return guard
   const { type, id } = await params
   if (!isContentType(type)) return NextResponse.json({ error: 'Unknown content type' }, { status: 404 })
+
+  // Blob tables have no FK references — delete directly without isReferenced check
+  if (isBlobType(type)) {
+    if (type === 'cheat_sheets') await db.delete(cheatSheets).where(eq(cheatSheets.id, id))
+    else await db.delete(pbqScenarios).where(eq(pbqScenarios.id, id))
+    return NextResponse.json({ ok: true })
+  }
 
   if (await isReferenced(type, id)) {
     return NextResponse.json(
