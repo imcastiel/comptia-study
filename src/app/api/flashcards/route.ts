@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       const dueReviews = await db.select().from(flashcardReviews)
         .where(lte(flashcardReviews.nextReviewAt, now))
 
-      const cardIds = dueReviews.map((r) => r.flashcardId)
+      const cardIds = dueReviews.map((r) => r.flashcardId).filter((id): id is string => id !== null)
       const cards = cardIds.length > 0
         ? await Promise.all(cardIds.map((id) =>
             db.select({ id: flashcards.id, front: flashcards.front, back: flashcards.back })

@@ -1,4 +1,5 @@
-import { sqliteTable, text, integer, real, index, unique, primaryKey } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer, real, index, unique, uniqueIndex, primaryKey } from 'drizzle-orm/sqlite-core'
+import { sql } from 'drizzle-orm'
 
 // ─── 0. users ────────────────────────────────────────────────────────────────
 
@@ -128,6 +129,48 @@ export const flashcards = sqliteTable('flashcards', {
   index('idx_flashcards_topic_id').on(t.topicId),
 ])
 
+// ─── drill_sets — themed rote-memorization sets (ports, RAID, …) ──────────────
+
+export const drillSets = sqliteTable('drill_sets', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  slug: text('slug').notNull(),
+  icon: text('icon').notNull().default('🧠'),
+  examCode: text('exam_code').notNull(),
+  description: text('description'),
+  orderIndex: integer('order_index').notNull().default(0),
+  published: integer('published', { mode: 'boolean' }).notNull().default(false),
+  source: text('source').notNull().default('seed'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at'),
+}, (t) => [
+  uniqueIndex('uq_drill_sets_slug').on(t.slug),
+])
+
+export const drillFacts = sqliteTable('drill_facts', {
+  id: text('id').primaryKey(),
+  drillSetId: text('drill_set_id').notNull().references(() => drillSets.id),
+  term: text('term').notNull(),
+  value: text('value').notNull(),
+  hint: text('hint'),
+  aliases: text('aliases'),
+  orderIndex: integer('order_index').notNull().default(0),
+}, (t) => [
+  index('idx_drill_facts_set').on(t.drillSetId),
+])
+
+export type DrillSetRow = typeof drillSets.$inferSelect
+export type DrillFactRow = typeof drillFacts.$inferSelect
+
+// ─── flashcard_settings — per-user daily goal + new-card cap ───────────────────
+
+export const flashcardSettings = sqliteTable('flashcard_settings', {
+  userId: text('user_id').primaryKey().references(() => users.code),
+  dailyGoal: integer('daily_goal').notNull().default(20),
+  newCardCap: integer('new_card_cap').notNull().default(10),
+  updatedAt: text('updated_at').notNull(),
+})
+
 // ─── generation_profiles — editable master prompts per content type ───────────
 
 export const generationProfiles = sqliteTable('generation_profiles', {
@@ -173,7 +216,9 @@ export type PbqScenarioRow = typeof pbqScenarios.$inferSelect
 export const flashcardReviews = sqliteTable('flashcard_reviews', {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.code),
-  flashcardId: text('flashcard_id').notNull().references(() => flashcards.id),
+  cardType: text('card_type').notNull().default('flashcard'),
+  flashcardId: text('flashcard_id').references(() => flashcards.id),
+  drillFactId: text('drill_fact_id').references(() => drillFacts.id),
   easeFactor: real('ease_factor').notNull().default(2.5),
   intervalDays: integer('interval_days').notNull().default(0),
   repetitions: integer('repetitions').notNull().default(0),
@@ -181,7 +226,8 @@ export const flashcardReviews = sqliteTable('flashcard_reviews', {
   nextReviewAt: text('next_review_at').notNull(),
   reviewedAt: text('reviewed_at').notNull(),
 }, (t) => [
-  unique('uq_flashcard_reviews_user_card').on(t.userId, t.flashcardId),
+  uniqueIndex('uq_fr_user_flashcard').on(t.userId, t.flashcardId).where(sql`${t.cardType} = 'flashcard'`),
+  uniqueIndex('uq_fr_user_drill').on(t.userId, t.drillFactId).where(sql`${t.cardType} = 'drill'`),
   index('idx_fr_user_next').on(t.userId, t.nextReviewAt),
 ])
 
@@ -190,13 +236,17 @@ export const flashcardReviews = sqliteTable('flashcard_reviews', {
 export const flashcardReviewLog = sqliteTable('flashcard_review_log', {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.code),
-  flashcardId: text('flashcard_id').notNull().references(() => flashcards.id),
+  cardType: text('card_type').notNull().default('flashcard'),
+  flashcardId: text('flashcard_id').references(() => flashcards.id),
+  drillFactId: text('drill_fact_id').references(() => drillFacts.id),
   quality: integer('quality').notNull(),
   easeFactor: real('ease_factor').notNull(),
   intervalDays: integer('interval_days').notNull(),
   reviewedAt: text('reviewed_at').notNull(),
 }, (t) => [
   index('idx_frl_user_card').on(t.userId, t.flashcardId),
+  index('idx_frl_user_drill').on(t.userId, t.drillFactId),
+  index('idx_frl_user_date').on(t.userId, t.reviewedAt),
 ])
 
 // ─── 10. study_progress ────────────────────────────────────────────────────────
