@@ -29,7 +29,7 @@ export function calculateSM2(input: SM2Input): SM2Result {
     if (repetitions === 0) {
       newInterval = 1
     } else if (repetitions === 1) {
-      newInterval = 6
+      newInterval = 3
     } else {
       newInterval = Math.round(intervalDays * easeFactor)
     }
