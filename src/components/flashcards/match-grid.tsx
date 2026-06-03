@@ -16,8 +16,10 @@ export function MatchGrid({ facts, onComplete }: { facts: DrillFactLite[]; onCom
   const [wrong, setWrong] = useState<string | null>(null)
   const [mistakes, setMistakes] = useState(0)
   const startRef = useRef<number>(0)
+  const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => { startRef.current = Date.now() }, [])
+  useEffect(() => () => { if (wrongTimer.current) clearTimeout(wrongTimer.current) }, [])
 
   const total = round.terms.length
 
@@ -42,7 +44,8 @@ export function MatchGrid({ facts, onComplete }: { facts: DrillFactLite[]; onCom
     } else {
       setMistakes((n) => n + 1)
       setWrong(key)
-      setTimeout(() => setWrong(null), 350)
+      if (wrongTimer.current) clearTimeout(wrongTimer.current)
+      wrongTimer.current = setTimeout(() => setWrong(null), 350)
       setSelected(null)
     }
   }

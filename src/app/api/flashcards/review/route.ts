@@ -22,6 +22,9 @@ export async function POST(req: NextRequest) {
     if (quality === undefined || (!flashcardId && !drillFactId)) {
       return NextResponse.json({ error: 'Missing card id or quality' }, { status: 400 })
     }
+    if (typeof quality !== 'number' || !Number.isInteger(quality) || quality < 0 || quality > 5) {
+      return NextResponse.json({ error: 'Invalid quality (must be 0-5)' }, { status: 400 })
+    }
     const cardType: CardType = drillFactId ? 'drill' : 'flashcard'
     const idCol = cardType === 'drill' ? flashcardReviews.drillFactId : flashcardReviews.flashcardId
     const idVal = cardType === 'drill' ? drillFactId! : flashcardId!
