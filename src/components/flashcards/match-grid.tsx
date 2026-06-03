@@ -15,7 +15,9 @@ export function MatchGrid({ facts, onComplete }: { facts: DrillFactLite[]; onCom
   const [matched, setMatched] = useState<Set<string>>(new Set())
   const [wrong, setWrong] = useState<string | null>(null)
   const [mistakes, setMistakes] = useState(0)
-  const startRef = useRef(Date.now())
+  const startRef = useRef<number>(0)
+
+  useEffect(() => { startRef.current = Date.now() }, [])
 
   const total = round.terms.length
 
