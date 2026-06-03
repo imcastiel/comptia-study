@@ -22,14 +22,13 @@ export function calculateSM2(input: SM2Input): SM2Result {
 
   let newInterval: number
   let newRepetitions: number
-  let newEaseFactor: number
 
   if (quality >= 3) {
     // Correct response
     if (repetitions === 0) {
       newInterval = 1
     } else if (repetitions === 1) {
-      newInterval = 6
+      newInterval = 3
     } else {
       newInterval = Math.round(intervalDays * easeFactor)
     }
@@ -41,7 +40,7 @@ export function calculateSM2(input: SM2Input): SM2Result {
   }
 
   // Update ease factor (only on correct responses, min 1.3)
-  newEaseFactor = Math.max(
+  const newEaseFactor = Math.max(
     1.3,
     easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
   )
