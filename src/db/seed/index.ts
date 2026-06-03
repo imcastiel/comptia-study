@@ -18,6 +18,16 @@ async function batchInsert<T extends Record<string, unknown>>(
 }
 
 async function seed() {
+  // Guard: db:seed DELETEs all content. Never let it run against a remote
+  // (Turso/libsql/http) database by accident — that's a production wipe.
+  const url = process.env.DATABASE_URL ?? ''
+  if (/^(libsql|wss?|https?):/i.test(url) && process.env.ALLOW_REMOTE_SEED !== '1') {
+    console.error(`✋ Refusing to seed a remote database (${url.split(':')[0]}://…).`)
+    console.error('   db:seed wipes ALL content. Run it only against a local file DB.')
+    console.error('   Override intentionally with ALLOW_REMOTE_SEED=1 if you truly mean it.')
+    process.exit(1)
+  }
+
   console.log('🌱 Seeding database...')
 
   // Clear existing data in FK-safe order (children before parents)
@@ -50,12 +60,13 @@ async function seed() {
   await db.insert(topics).values(SEED_TOPICS)
   console.log(`  ✓ ${SEED_TOPICS.length} topics`)
 
-  // Insert questions (batch to stay under SQLite variable limit)
-  await batchInsert(questions, SEED_QUESTIONS)
+  // Insert questions (batch to stay under SQLite variable limit).
+  // Seed content is published so a fresh DB has visible content immediately.
+  await batchInsert(questions, SEED_QUESTIONS.map((q) => ({ ...q, published: true })))
   console.log(`  ✓ ${SEED_QUESTIONS.length} questions`)
 
-  // Insert flashcards (batch to stay under SQLite variable limit)
-  await batchInsert(flashcards, SEED_FLASHCARDS)
+  // Insert flashcards (batch to stay under SQLite variable limit).
+  await batchInsert(flashcards, SEED_FLASHCARDS.map((f) => ({ ...f, published: true })))
   console.log(`  ✓ ${SEED_FLASHCARDS.length} flashcards`)
 
   // Insert drill sets
