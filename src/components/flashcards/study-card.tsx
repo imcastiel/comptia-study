@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw, Lightbulb } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ReviewOutcome } from '@/lib/srs'
+
+const TIPS_STORAGE_KEY = 'flashcard-show-tips'
 
 interface StudyCardProps {
   front: string
@@ -16,6 +18,21 @@ interface StudyCardProps {
 
 export function StudyCard({ front, back, hint, onOutcome, className }: StudyCardProps) {
   const [flipped, setFlipped] = useState(false)
+  // Tips are off by default; remember the user's choice across cards/sessions.
+  // StudyCard only mounts client-side (behind the session loading state), so
+  // reading localStorage in the initializer is safe (no SSR/hydration pass).
+  const [showTips, setShowTips] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false
+    try { return localStorage.getItem(TIPS_STORAGE_KEY) === '1' } catch { return false }
+  })
+
+  const toggleTips = useCallback(() => {
+    setShowTips((v) => {
+      const next = !v
+      try { localStorage.setItem(TIPS_STORAGE_KEY, next ? '1' : '0') } catch { /* ignore */ }
+      return next
+    })
+  }, [])
 
   const flip = useCallback(() => setFlipped(true), [])
   const rate = useCallback((o: ReviewOutcome) => { setFlipped(false); onOutcome(o) }, [onOutcome])
@@ -62,10 +79,21 @@ export function StudyCard({ front, back, hint, onOutcome, className }: StudyCard
             {flipped ? back : front}
           </p>
           {!flipped && hint && <p className="text-[12px] text-[var(--apple-label-tertiary)] mt-3">Hint: {hint}</p>}
-          {!flipped && <p className="text-[12px] text-[var(--apple-label-tertiary)] mt-6">Tap or press Space to reveal</p>}
-          {flipped && <p className="text-[12px] text-[var(--apple-label-tertiary)] mt-6">Tap, Space, or → if you got it</p>}
+          {showTips && !flipped && <p className="text-[12px] text-[var(--apple-label-tertiary)] mt-6">Tap or press Space to reveal</p>}
+          {showTips && flipped && <p className="text-[12px] text-[var(--apple-label-tertiary)] mt-6">Tap, Space, or → if you got it</p>}
         </motion.button>
       </div>
+
+      {/* Tips toggle — off by default; instructions only show when enabled */}
+      <button
+        type="button"
+        onClick={toggleTips}
+        aria-pressed={showTips}
+        className="flex items-center gap-1.5 text-[12px] text-[var(--apple-label-tertiary)] hover:text-foreground transition-colors"
+      >
+        <Lightbulb className="w-3.5 h-3.5" />
+        {showTips ? 'Hide tips' : 'Show tips'}
+      </button>
 
       {/* Miss affordance — only when flipped */}
       <motion.button
