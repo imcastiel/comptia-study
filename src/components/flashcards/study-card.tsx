@@ -55,32 +55,42 @@ export function StudyCard({ front, back, hint, onOutcome, className }: StudyCard
     return () => document.removeEventListener('keydown', onKey)
   }, [flipped, flip, rate])
 
+  const faceText = flipped ? back : front
+  // Scale type down as content grows so long answers stay readable and on-card.
+  const textSize =
+    faceText.length > 320 ? 'text-[14px] leading-relaxed'
+    : faceText.length > 180 ? 'text-[16px] leading-relaxed'
+    : 'text-[19px] leading-snug'
+
   return (
     <div className={cn('flex flex-col items-center gap-5', className)}>
-      <div className="relative w-full max-w-lg" style={{ height: '280px' }}>
-        {/* depth stack */}
+      <div className="relative w-full max-w-lg">
+        {/* depth stack (sits behind, matches the card's height) */}
         <div className="absolute inset-0 bg-card rounded-[20px] border border-[var(--apple-separator)] shadow-sm" style={{ transform: 'translateY(10px) scale(0.96)', opacity: 0.5 }} />
         <div className="absolute inset-0 bg-card rounded-[20px] border border-[var(--apple-separator)] shadow-sm" style={{ transform: 'translateY(5px) scale(0.98)', opacity: 0.7 }} />
 
         <motion.button
           type="button"
           onClick={onCardClick}
-          className="absolute inset-0 w-full rounded-[20px] shadow-lg p-8 flex flex-col items-center justify-center text-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--apple-blue)]"
+          className="relative w-full min-h-[280px] max-h-[70vh] overflow-y-auto rounded-[20px] shadow-lg p-8 flex flex-col cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--apple-blue)]"
           aria-label={flipped ? 'Answer shown — tap if you got it' : 'Tap to reveal the answer'}
           animate={{
             backgroundColor: flipped ? 'var(--apple-blue-bg, rgba(10,132,255,0.06))' : 'var(--card)',
           }}
           transition={{ duration: 0.2 }}
         >
-          <p className={cn('text-[11px] font-semibold uppercase tracking-wide mb-4', flipped ? 'text-[var(--apple-blue)]' : 'text-[var(--apple-label-tertiary)]')}>
-            {flipped ? 'Answer' : 'Question'}
-          </p>
-          <p className={cn('font-semibold text-foreground leading-snug', flipped ? 'text-[20px]' : 'text-[18px]')}>
-            {flipped ? back : front}
-          </p>
-          {!flipped && hint && <p className="text-[12px] text-[var(--apple-label-tertiary)] mt-3">Hint: {hint}</p>}
-          {showTips && !flipped && <p className="text-[12px] text-[var(--apple-label-tertiary)] mt-6">Tap or press Space to reveal</p>}
-          {showTips && flipped && <p className="text-[12px] text-[var(--apple-label-tertiary)] mt-6">Tap, Space, or → if you got it</p>}
+          {/* m-auto centers content when there's room, and scrolls cleanly when not */}
+          <div className="m-auto w-full text-center">
+            <p className={cn('text-[11px] font-semibold uppercase tracking-wide mb-4', flipped ? 'text-[var(--apple-blue)]' : 'text-[var(--apple-label-tertiary)]')}>
+              {flipped ? 'Answer' : 'Question'}
+            </p>
+            <p className={cn('font-semibold text-foreground break-words whitespace-pre-line', textSize)}>
+              {faceText}
+            </p>
+            {!flipped && hint && <p className="text-[12px] text-[var(--apple-label-tertiary)] mt-3 break-words">Hint: {hint}</p>}
+            {showTips && !flipped && <p className="text-[12px] text-[var(--apple-label-tertiary)] mt-6">Tap or press Space to reveal</p>}
+            {showTips && flipped && <p className="text-[12px] text-[var(--apple-label-tertiary)] mt-6">Tap, Space, or → if you got it</p>}
+          </div>
         </motion.button>
       </div>
 
