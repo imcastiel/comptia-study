@@ -32,9 +32,21 @@ export function ContentLibrary({ type }: { type: ContentType }) {
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(0)
   const [loadingMore, setLoadingMore] = useState(false)
-  const [filters, setFilters] = useState<Filters>({ status: '', topic: '', source: '', q: '' })
+  // Honor a ?topic= deep link (e.g. from the Coverage view). Read once on mount;
+  // ContentLibrary only renders client-side, so window is available.
+  const [topicName, setTopicName] = useState('')
+  const [filters, setFilters] = useState<Filters>(() => {
+    if (typeof window === 'undefined') return { status: '', topic: '', source: '', q: '' }
+    const p = new URLSearchParams(window.location.search)
+    return { status: '', topic: p.get('topic') ?? '', source: '', q: '' }
+  })
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [editing, setEditing] = useState<ContentItem | 'new' | null>(null)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    setTopicName(new URLSearchParams(window.location.search).get('topicName') ?? '')
+  }, [])
 
   const fetchPage = useCallback(async (pageNum: number) => {
     const sp = new URLSearchParams()
@@ -80,6 +92,12 @@ export function ContentLibrary({ type }: { type: ContentType }) {
   return (
     <div className="flex flex-col gap-4">
       <ContentFilters type={type} filters={filters} onChange={setFilters} onNew={() => setEditing('new')} />
+      {filters.topic && (
+        <div className="flex items-center gap-2 self-start rounded-full bg-[var(--apple-blue)]/10 px-3 py-1 text-[12px] font-medium text-[var(--apple-blue)]">
+          <span>Topic: {topicName || filters.topic}</span>
+          <button onClick={() => { setTopicName(''); setFilters((f) => ({ ...f, topic: '' })) }} aria-label="Clear topic filter" className="hover:opacity-70">✕</button>
+        </div>
+      )}
       <ContentTable
         type={type}
         items={items}
