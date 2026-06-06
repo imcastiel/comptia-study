@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { questions, flashcards, cheatSheets, pbqScenarios } from '@/db/schema'
-import { and, eq, like, or, desc, sql, type SQL } from 'drizzle-orm'
+import { and, eq, like, or, desc, sql, count, type SQL } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
 import { requireAdmin } from '@/lib/auth'
 import { isContentType, isBlobType, validateQuestion, validateFlashcard, validateBlob } from '@/lib/admin/content-types'
@@ -17,6 +17,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ type
   const source = sp.get('source')
   const q = sp.get('q')?.trim()
 
+  // Pagination: page (0-based) + pageSize (capped). Total is returned so the
+  // UI can show "X of Y" and offer Load more — the list is no longer truncated.
+  const pageSize = Math.min(Math.max(Number(sp.get('pageSize')) || 200, 1), 500)
+  const page = Math.max(Number(sp.get('page')) || 0, 0)
+  const offset = page * pageSize
+
   if (isBlobType(type)) {
     if (type === 'cheat_sheets') {
       const conds: SQL[] = []
@@ -24,15 +30,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ type
       if (status === 'draft') conds.push(eq(cheatSheets.published, false))
       if (source) conds.push(eq(cheatSheets.source, source))
       if (q) conds.push(like(cheatSheets.title, `%${q}%`))
+      const where = conds.length ? and(...conds) : undefined
+      const [{ total }] = await db.select({ total: count() }).from(cheatSheets).where(where)
       const items = await db.select({
         id: cheatSheets.id, title: cheatSheets.title,
         published: cheatSheets.published, source: cheatSheets.source,
         updatedAt: cheatSheets.updatedAt,
       }).from(cheatSheets)
-        .where(conds.length ? and(...conds) : undefined)
+        .where(where)
         .orderBy(desc(sql`coalesce(${cheatSheets.updatedAt}, ${cheatSheets.createdAt})`))
-        .limit(200)
-      return NextResponse.json({ items })
+        .limit(pageSize).offset(offset)
+      return NextResponse.json({ items, total: Number(total) })
     }
     // pbq_scenarios
     const conds: SQL[] = []
@@ -40,15 +48,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ type
     if (status === 'draft') conds.push(eq(pbqScenarios.published, false))
     if (source) conds.push(eq(pbqScenarios.source, source))
     if (q) conds.push(like(pbqScenarios.title, `%${q}%`))
+    const where = conds.length ? and(...conds) : undefined
+    const [{ total }] = await db.select({ total: count() }).from(pbqScenarios).where(where)
     const items = await db.select({
       id: pbqScenarios.id, title: pbqScenarios.title,
       published: pbqScenarios.published, source: pbqScenarios.source,
       updatedAt: pbqScenarios.updatedAt,
     }).from(pbqScenarios)
-      .where(conds.length ? and(...conds) : undefined)
+      .where(where)
       .orderBy(desc(sql`coalesce(${pbqScenarios.updatedAt}, ${pbqScenarios.createdAt})`))
-      .limit(200)
-    return NextResponse.json({ items })
+      .limit(pageSize).offset(offset)
+    return NextResponse.json({ items, total: Number(total) })
   }
 
   if (type === 'questions') {
@@ -58,11 +68,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ type
     if (topicId) conds.push(eq(questions.topicId, topicId))
     if (source) conds.push(eq(questions.source, source))
     if (q) conds.push(or(like(questions.stem, `%${q}%`), like(questions.explanation, `%${q}%`))!)
+    const where = conds.length ? and(...conds) : undefined
+    const [{ total }] = await db.select({ total: count() }).from(questions).where(where)
     const items = await db.select().from(questions)
-      .where(conds.length ? and(...conds) : undefined)
+      .where(where)
       .orderBy(desc(sql`coalesce(${questions.updatedAt}, ${questions.createdAt})`))
-      .limit(200)
-    return NextResponse.json({ items })
+      .limit(pageSize).offset(offset)
+    return NextResponse.json({ items, total: Number(total) })
   }
 
   const conds: SQL[] = []
@@ -71,11 +83,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ type
   if (topicId) conds.push(eq(flashcards.topicId, topicId))
   if (source) conds.push(eq(flashcards.source, source))
   if (q) conds.push(or(like(flashcards.front, `%${q}%`), like(flashcards.back, `%${q}%`))!)
+  const where = conds.length ? and(...conds) : undefined
+  const [{ total }] = await db.select({ total: count() }).from(flashcards).where(where)
   const items = await db.select().from(flashcards)
-    .where(conds.length ? and(...conds) : undefined)
+    .where(where)
     .orderBy(desc(sql`coalesce(${flashcards.updatedAt}, ${flashcards.createdAt})`))
-    .limit(200)
-  return NextResponse.json({ items })
+    .limit(pageSize).offset(offset)
+  return NextResponse.json({ items, total: Number(total) })
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ type: string }> }) {
