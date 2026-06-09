@@ -39,11 +39,13 @@ export function calculateSM2(input: SM2Input): SM2Result {
     newRepetitions = 0
   }
 
-  // Update ease factor (only on correct responses, min 1.3)
-  const newEaseFactor = Math.max(
-    1.3,
-    easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
-  )
+  // Update ease factor only on correct responses (canonical SM-2), min 1.3.
+  // Failed reviews reset interval/repetitions above but must not erode ease,
+  // otherwise a couple of early misses pin a card at the 1.3 floor for good.
+  const newEaseFactor =
+    quality >= 3
+      ? Math.max(1.3, easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)))
+      : easeFactor
 
   const nextReviewAt = new Date()
   nextReviewAt.setDate(nextReviewAt.getDate() + newInterval)

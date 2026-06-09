@@ -48,8 +48,9 @@ function SessionInner() {
     fetch('/api/flashcards/review', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).catch(() => {})
 
     if (outcome === 'miss') {
+      // Requeue the missed card at the end; the session only completes once
+      // every card has been recalled, so a miss never ends it early.
       setCards((prev) => { const next = [...prev]; next.splice(index, 1); next.push(card); return next })
-      if (cards.length === 1) setDone(true)
     } else if (index + 1 >= cards.length) {
       setDone(true)
     } else {
