@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { RotateCcw, Lightbulb } from 'lucide-react'
+import { RotateCcw, Lightbulb, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ReviewOutcome } from '@/lib/srs'
 
@@ -105,19 +105,32 @@ export function StudyCard({ front, back, hint, onOutcome, className }: StudyCard
         {showTips ? 'Hide tips' : 'Show tips'}
       </button>
 
-      {/* Miss affordance — only when flipped */}
-      <motion.button
-        type="button"
-        onClick={() => rate('miss')}
-        className="flex items-center gap-1.5 text-[13px] font-medium text-[var(--apple-red)] px-4 py-2 rounded-full bg-[var(--apple-red)]/10 hover:bg-[var(--apple-red)]/20 transition-colors"
+      {/* Rating affordances — only when flipped. Tapping the card also counts
+          as "Got it", but the buttons make both outcomes visible. */}
+      <motion.div
+        className="flex items-center gap-3"
         initial={false}
         animate={{ opacity: flipped ? 1 : 0, y: flipped ? 0 : 8 }}
         transition={{ duration: 0.2 }}
         style={{ pointerEvents: flipped ? 'auto' : 'none' }}
       >
-        <RotateCcw className="w-3.5 h-3.5" />
-        I missed this
-      </motion.button>
+        <button
+          type="button"
+          onClick={() => rate('miss')}
+          className="flex items-center gap-1.5 text-[13px] font-medium text-[var(--apple-red)] px-4 py-2 rounded-full bg-[var(--apple-red)]/10 hover:bg-[var(--apple-red)]/20 transition-colors"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+          I missed this
+        </button>
+        <button
+          type="button"
+          onClick={() => rate('got_it')}
+          className="flex items-center gap-1.5 text-[13px] font-semibold text-white px-5 py-2 rounded-full bg-[var(--apple-green)] hover:brightness-105 transition-all"
+        >
+          <Check className="w-3.5 h-3.5" />
+          Got it
+        </button>
+      </motion.div>
     </div>
   )
 }

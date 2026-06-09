@@ -3,7 +3,7 @@ import { db } from '@/db'
 import {
   examAttempts, questionAttempts, questions as questionsTable,
   topics, domains, topicMastery, questionDistractors, passProbability,
-  masterySnapshots,
+  masterySnapshots, exams,
 } from '@/db/schema'
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
@@ -206,12 +206,13 @@ export async function POST(req: NextRequest) {
       .groupBy(domains.id)
 
     if (domainMastery.length > 0) {
+      const [exam] = await db.select({ passingScore: exams.passingScore }).from(exams).where(eq(exams.id, examId))
       const prob = computePassProbability(domainMastery.map((d: { domainId: string; weightPercent: number; seen: number; correct: number }) => ({
         domainId: d.domainId,
         weightPercent: d.weightPercent,
         questionsSeen: Number(d.seen),
         questionsCorrect: Number(d.correct),
-      })))
+      })), exam.passingScore)
       await db.insert(passProbability).values({
         id: randomUUID(), userId, examId,
         probability: prob.probability,

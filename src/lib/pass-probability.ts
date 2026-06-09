@@ -1,4 +1,3 @@
-const PASSING_SCORE = 720
 const MAX_SCORE = 900
 const PRIOR_WEIGHT = 10
 const LOGISTIC_SPREAD = 60
@@ -27,7 +26,12 @@ export interface PassProbabilityResult {
   sampleSize: number
 }
 
-export function computePassProbability(domains: DomainInput[]): PassProbabilityResult {
+/**
+ * @param passingScore the exam's real cut score on the 100–900 scale
+ *   (e.g. 675 for 220-1201, 700 for 220-1202) — read from the exams table,
+ *   never hardcoded, so additional exams work without touching this model.
+ */
+export function computePassProbability(domains: DomainInput[], passingScore: number): PassProbabilityResult {
   if (domains.length === 0) {
     return { probability: 0, predictedScore: 0, confidence: 0, domainBreakdown: [], sampleSize: 0 }
   }
@@ -42,7 +46,7 @@ export function computePassProbability(domains: DomainInput[]): PassProbabilityR
   })
 
   const predictedScore = breakdown.reduce((s, b) => s + b.contribution, 0)
-  const probability = 1 / (1 + Math.exp(-(predictedScore - PASSING_SCORE) / LOGISTIC_SPREAD))
+  const probability = 1 / (1 + Math.exp(-(predictedScore - passingScore) / LOGISTIC_SPREAD))
 
   const domainsWithData = domains.filter((d) => d.questionsSeen >= 3).length
   const domainCoverage = domainsWithData / domains.length
