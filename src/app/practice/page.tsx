@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Layers, Trophy, Zap } from 'lucide-react'
+import { Crosshair, Layers, Trophy, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const EXAM_MODES = [
@@ -26,6 +26,13 @@ const EXAM_MODES = [
     description: 'Untimed · Instant feedback after each answer',
     icon: Layers,
     color: 'var(--apple-green)',
+  },
+  {
+    id: 'weak',
+    title: 'Weak Spot Drill',
+    description: '20 questions targeting your lowest-mastery topics',
+    icon: Crosshair,
+    color: 'var(--apple-red)',
   },
 ]
 

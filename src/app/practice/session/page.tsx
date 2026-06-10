@@ -37,6 +37,7 @@ const MODE_CONFIG = {
   simulation: { count: 90, timeMinutes: 90, label: 'Exam Simulation' },
   quick: { count: 20, timeMinutes: 20, label: 'Quick Drill' },
   study: { count: 20, timeMinutes: 0, label: 'Study Mode' },
+  weak: { count: 20, timeMinutes: 0, label: 'Weak Spot Drill' },
 }
 
 function ExamSessionInner() {
@@ -55,7 +56,7 @@ function ExamSessionInner() {
   const showFeedback = mode !== 'simulation'
 
   useEffect(() => {
-    const url = `/api/practice/questions?count=${config.count}${showFeedback ? '&study=true' : ''}${exam ? `&exam=${exam}` : ''}${retryIds ? `&retryIds=${retryIds}` : ''}`
+    const url = `/api/practice/questions?count=${config.count}${showFeedback ? '&study=true' : ''}${exam ? `&exam=${exam}` : ''}${retryIds ? `&retryIds=${retryIds}` : ''}${mode === 'weak' ? '&focus=weak' : ''}`
     fetch(url)
       .then((r) => r.json())
       .then((data) => {
@@ -71,7 +72,7 @@ function ExamSessionInner() {
         setLoading(false)
       })
       .catch(() => setLoading(false))
-  }, [config.count, showFeedback, exam, retryIds])
+  }, [config.count, showFeedback, exam, retryIds, mode])
 
   const handleAnswer = useCallback((questionId: string, value: string | string[], isCorrect?: boolean) => {
     setSession((s) => s ? { ...s, answers: { ...s.answers, [questionId]: value } } : s)
