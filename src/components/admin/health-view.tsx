@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { AlertTriangle, CircleAlert, CheckCircle2, Copy } from 'lucide-react'
-import type { ContentHealthResponse, FlaggedItem } from '@/app/api/admin/content-health/route'
+import { AlertTriangle, CircleAlert, CheckCircle2, Copy, Bot, SearchX } from 'lucide-react'
+import type { ContentHealthResponse, FlaggedItem, ReviewFlag, TopicGap } from '@/app/api/admin/content-health/route'
 
 function SeverityBadge({ severity }: { severity: 'error' | 'warning' }) {
   return severity === 'error' ? (
@@ -67,6 +67,80 @@ function DuplicateGroups({ title, groups }: { title: string; groups: string[][] 
   )
 }
 
+function ReviewQueue({ flags, onAction }: { flags: ReviewFlag[]; onAction: (id: string, status: 'resolved' | 'dismissed') => void }) {
+  if (flags.length === 0) return null
+  return (
+    <section className="mb-8">
+      <h2 className="flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-wide text-[var(--apple-label-secondary)] mb-3">
+        <Bot className="w-4 h-4" /> Review queue · {flags.length}
+      </h2>
+      <div className="space-y-2">
+        {flags.map((f) => (
+          <div key={f.id} className="bg-card rounded-[14px] border border-[var(--apple-separator)] p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[14px] font-medium leading-snug">{f.excerpt}…</p>
+                <p className="text-[11px] text-[var(--apple-label-tertiary)] mt-1 font-mono">{f.itemType} · {f.itemId}</p>
+                <p className="flex items-center gap-2 text-[12px] text-[var(--apple-label-secondary)] mt-2">
+                  <SeverityBadge severity={f.severity === 'error' ? 'error' : 'warning'} />
+                  <span className="font-mono">{f.code}</span> — {f.detail}
+                </p>
+              </div>
+              <div className="flex shrink-0 gap-2">
+                <button
+                  onClick={() => onAction(f.id, 'resolved')}
+                  className="text-[12px] font-semibold text-white bg-[var(--apple-green)] px-3 py-1.5 rounded-full hover:brightness-105"
+                >
+                  Resolved
+                </button>
+                <button
+                  onClick={() => onAction(f.id, 'dismissed')}
+                  className="text-[12px] font-medium text-[var(--apple-label-secondary)] bg-[var(--apple-fill)] px-3 py-1.5 rounded-full hover:text-foreground"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function ObjectiveGaps({ gaps }: { gaps: TopicGap[] }) {
+  if (gaps.length === 0) return null
+  return (
+    <section className="mb-8">
+      <h2 className="flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-wide text-[var(--apple-label-secondary)] mb-3">
+        <SearchX className="w-4 h-4" /> Objective gaps · {gaps.length} topic{gaps.length === 1 ? '' : 's'}
+      </h2>
+      <div className="space-y-2">
+        {gaps.map((g) => (
+          <div key={g.topicId} className="bg-card rounded-[14px] border border-[var(--apple-separator)] p-4">
+            <div className="flex items-start justify-between gap-4">
+              <p className="text-[14px] font-medium">{g.topicTitle}</p>
+              <Link
+                href={`/admin/generate?topicId=${encodeURIComponent(g.topicId)}`}
+                className="shrink-0 text-[12px] text-[var(--apple-blue)] font-medium hover:underline"
+              >
+                Generate for topic →
+              </Link>
+            </div>
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {g.missing.map((kw) => (
+                <span key={kw} className="text-[12px] bg-[var(--apple-fill)] text-[var(--apple-label-secondary)] px-2 py-0.5 rounded-full">
+                  {kw}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 export function HealthView() {
   const [data, setData] = useState<ContentHealthResponse | null>(null)
   const [failed, setFailed] = useState(false)
@@ -78,11 +152,24 @@ export function HealthView() {
       .catch(() => setFailed(true))
   }, [])
 
+  const handleFlagAction = (id: string, status: 'resolved' | 'dismissed') => {
+    // Optimistic removal; restore on failure.
+    const prev = data
+    setData((d) => d ? { ...d, reviewQueue: d.reviewQueue.filter((f) => f.id !== id) } : d)
+    fetch(`/api/admin/flags/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    }).then((r) => { if (!r.ok) throw new Error(String(r.status)) })
+      .catch(() => setData(prev))
+  }
+
   if (failed) return <p className="text-[14px] text-[var(--apple-red)]">Could not load the health report.</p>
   if (!data) return <p className="text-[14px] text-[var(--apple-label-secondary)]">Scanning content…</p>
 
   const clean = data.errorCount === 0 && data.warningCount === 0
     && data.duplicateQuestionGroups.length === 0 && data.duplicateFlashcardGroups.length === 0
+    && data.reviewQueue.length === 0 && data.gaps.length === 0
 
   return (
     <div>
@@ -107,6 +194,8 @@ export function HealthView() {
         </p>
       )}
 
+      <ReviewQueue flags={data.reviewQueue} onAction={handleFlagAction} />
+      <ObjectiveGaps gaps={data.gaps} />
       <FlaggedList title="Questions" items={data.questions} libraryHref="/admin/content/questions" />
       <FlaggedList title="Flashcards" items={data.flashcards} libraryHref="/admin/content/flashcards" />
       <DuplicateGroups title="Duplicate question stems" groups={data.duplicateQuestionGroups} />

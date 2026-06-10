@@ -17,7 +17,8 @@
     "db:bootstrap-static": "node --env-file-if-exists=.env.local --import tsx src/db/bootstrap-static-content.ts",
     "db:studio": "drizzle-kit studio",
     "lint:content": "node --env-file-if-exists=.env.local --import tsx scripts/content-lint.ts",
-    "audit:render": "node --env-file-if-exists=.env.local --import tsx scripts/audit-render.ts"
+    "audit:render": "node --env-file-if-exists=.env.local --import tsx scripts/audit-render.ts",
+    "review:accuracy": "node --env-file-if-exists=.env.local --import tsx scripts/review-accuracy.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",

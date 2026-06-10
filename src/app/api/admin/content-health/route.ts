@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { eq } from 'drizzle-orm'
 import { db } from '@/db'
-import { questions, flashcards } from '@/db/schema'
+import { questions, flashcards, topics, contentFlags } from '@/db/schema'
 import { requireAdmin } from '@/lib/auth'
 import { lintQuestion, lintFlashcard, findDuplicates, type LintIssue } from '@/lib/content-lint'
+import { extractKeywords, findUncovered } from '@/lib/objective-keywords'
 
 export interface FlaggedItem {
   id: string
@@ -10,6 +12,23 @@ export interface FlaggedItem {
   published: boolean
   excerpt: string
   issues: LintIssue[]
+}
+
+export interface ReviewFlag {
+  id: string
+  itemType: string
+  itemId: string
+  severity: string
+  code: string
+  detail: string
+  createdAt: string
+  excerpt: string
+}
+
+export interface TopicGap {
+  topicId: string
+  topicTitle: string
+  missing: string[]
 }
 
 export interface ContentHealthResponse {
@@ -20,6 +39,8 @@ export interface ContentHealthResponse {
   flashcards: FlaggedItem[]
   duplicateQuestionGroups: string[][]
   duplicateFlashcardGroups: string[][]
+  reviewQueue: ReviewFlag[]
+  gaps: TopicGap[]
 }
 
 export async function GET(req: NextRequest) {
@@ -52,6 +73,43 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Pending review-queue flags (from the AI accuracy sweep et al.), with the
+  // flagged item's text so the admin can judge without leaving the page.
+  const pending = await db.select().from(contentFlags).where(eq(contentFlags.status, 'pending'))
+  const qById = new Map(qRows.map((q) => [q.id, q.stem]))
+  const fById = new Map(fRows.map((f) => [f.id, f.front]))
+  const reviewQueue: ReviewFlag[] = pending.map((p) => ({
+    id: p.id,
+    itemType: p.itemType,
+    itemId: p.itemId,
+    severity: p.severity,
+    code: p.code,
+    detail: p.detail,
+    createdAt: p.createdAt,
+    excerpt: (p.itemType === 'question' ? qById.get(p.itemId) : fById.get(p.itemId))?.slice(0, 120) ?? '(item not found)',
+  }))
+
+  // Objective coverage gaps: topic descriptions carry the official objective
+  // bullet keywords — find ones no published item exercises.
+  const topicRows = await db.select({ id: topics.id, title: topics.title, description: topics.description }).from(topics)
+  const textsByTopic = new Map<string, string[]>()
+  for (const q of qScan) {
+    const texts = textsByTopic.get(q.topicId) ?? []
+    texts.push(`${q.stem} ${q.choices} ${q.explanation}`)
+    textsByTopic.set(q.topicId, texts)
+  }
+  for (const f of fScan) {
+    const texts = textsByTopic.get(f.topicId) ?? []
+    texts.push(`${f.front} ${f.back}`)
+    textsByTopic.set(f.topicId, texts)
+  }
+  const gaps: TopicGap[] = []
+  for (const t of topicRows) {
+    if (!t.description) continue
+    const missing = findUncovered(extractKeywords(t.description), textsByTopic.get(t.id) ?? [])
+    if (missing.length) gaps.push({ topicId: t.id, topicTitle: t.title, missing })
+  }
+
   const all = [...flaggedQuestions, ...flaggedFlashcards]
   const body: ContentHealthResponse = {
     scanned: { questions: qScan.length, flashcards: fScan.length },
@@ -61,6 +119,8 @@ export async function GET(req: NextRequest) {
     flashcards: flaggedFlashcards,
     duplicateQuestionGroups: findDuplicates(qScan.map((q) => ({ id: q.id, text: q.stem }))),
     duplicateFlashcardGroups: findDuplicates(fScan.map((f) => ({ id: f.id, text: f.front }))),
+    reviewQueue,
+    gaps,
   }
   return NextResponse.json(body)
 }
