@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { WeakSpots } from '@/components/home/weak-spots'
 import { PassProbabilityCard } from './pass-probability-card'
+import { PacingCard } from './pacing-card'
 import { ProbabilityTrendChart } from './probability-trend-chart'
 import { DomainBreakdown } from './domain-breakdown'
 import { VelocityChart } from './velocity-chart'
@@ -96,6 +97,10 @@ export function AnalyticsDashboard() {
 
       <div className="animate-fade-up">
         <PassProbabilityCard latest={latest} previous={previous} passingScore={selected.passingScore} />
+      </div>
+
+      <div className="animate-fade-up">
+        <PacingCard history={history} passingScore={selected.passingScore} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2 animate-fade-up">
