@@ -1,10 +1,11 @@
-type ColorKey = 'blue' | 'orange' | 'green' | 'purple'
+type ColorKey = 'blue' | 'orange' | 'green' | 'purple' | 'red'
 
 const COLORS: Record<ColorKey, { bg: string; line: string }> = {
   blue:   { bg: '#007AFF', line: 'rgba(0,122,255,0.22)'   },
   orange: { bg: '#FF9F0A', line: 'rgba(255,159,10,0.22)'  },
   green:  { bg: '#34C759', line: 'rgba(52,199,89,0.22)'   },
   purple: { bg: '#AF52DE', line: 'rgba(175,82,222,0.22)'  },
+  red:    { bg: '#FF3B30', line: 'rgba(255,59,48,0.22)'   },
 }
 
 interface Step {
@@ -19,7 +20,8 @@ interface ProcessStepsProps {
 }
 
 export function ProcessSteps({ steps, color = 'blue', title }: ProcessStepsProps) {
-  const c = COLORS[color]
+  // MDX content is authored by hand — an unknown color must degrade, not 500.
+  const c = COLORS[color] ?? COLORS.blue
 
   return (
     <div className="my-6">
