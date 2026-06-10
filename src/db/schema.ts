@@ -351,6 +351,27 @@ export const passProbability = sqliteTable('pass_probability', {
   index('idx_pp_user_exam_date').on(t.userId, t.examId, t.computedAt),
 ])
 
+// ─── content_flags — review queue for suspect content ─────────────────────────
+// Populated by the AI accuracy sweep (scripts/review-accuracy.ts) and any other
+// checker that finds an item needing human judgment. Admins work the queue in
+// /admin/health: fix the item then resolve, or dismiss a false positive.
+
+export const contentFlags = sqliteTable('content_flags', {
+  id: text('id').primaryKey(),
+  itemType: text('item_type').notNull(), // 'question' | 'flashcard'
+  itemId: text('item_id').notNull(),
+  source: text('source').notNull(), // 'accuracy_review' | 'lint' | 'manual'
+  severity: text('severity').notNull(), // 'error' | 'warning'
+  code: text('code').notNull(), // e.g. 'wrong_answer_key', 'outdated_fact'
+  detail: text('detail').notNull(),
+  status: text('status').notNull().default('pending'), // 'pending' | 'resolved' | 'dismissed'
+  createdAt: text('created_at').notNull(),
+  resolvedAt: text('resolved_at'),
+}, (t) => [
+  index('idx_content_flags_status').on(t.status),
+  index('idx_content_flags_item').on(t.itemType, t.itemId),
+])
+
 // ─── TypeScript types ─────────────────────────────────────────────────────────
 
 export type User = typeof users.$inferSelect
@@ -379,3 +400,5 @@ export type NewFlashcardReview = typeof flashcardReviews.$inferInsert
 export type NewStudyProgress = typeof studyProgress.$inferInsert
 export type StudyActivityLog = typeof studyActivityLog.$inferSelect
 export type StudyTopicVisit = typeof studyTopicVisits.$inferSelect
+export type ContentFlag = typeof contentFlags.$inferSelect
+export type NewContentFlag = typeof contentFlags.$inferInsert
