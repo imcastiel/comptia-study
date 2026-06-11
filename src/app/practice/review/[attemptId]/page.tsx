@@ -6,6 +6,7 @@ import { db } from '@/db'
 import { examAttempts, questionAttempts, questions, topics, domains, exams, questionDistractors } from '@/db/schema'
 import { and, eq, inArray } from 'drizzle-orm'
 import { cn } from '@/lib/utils'
+import { getUserCode } from '@/lib/auth'
 import { CheckCircle2, XCircle, Clock, Trophy, ChevronRight, Flag } from 'lucide-react'
 
 interface Params {
@@ -27,6 +28,11 @@ export default async function ReviewPage({ params }: { params: Promise<Params> }
     .where(eq(examAttempts.id, attemptId))
 
   if (!attempt) notFound()
+
+  // Ownership gate: attempt ids are guessable route params — only the
+  // account that took the attempt may view its review.
+  const userCode = await getUserCode()
+  if (!userCode || userCode !== attempt.userId) notFound()
 
   const [exam] = await db.select({ passingScore: exams.passingScore, code: exams.code })
     .from(exams).where(eq(exams.id, attempt.examId))
@@ -61,7 +67,7 @@ export default async function ReviewPage({ params }: { params: Promise<Params> }
     ? await db
         .select({ questionId: questionDistractors.questionId, choiceId: questionDistractors.choiceId, timesChosen: questionDistractors.timesChosen })
         .from(questionDistractors)
-        .where(and(eq(questionDistractors.userId, attempt.userId), inArray(questionDistractors.questionId, questionIds)))
+        .where(and(eq(questionDistractors.userId, userCode), inArray(questionDistractors.questionId, questionIds)))
     : []
   const timesPicked = new Map(distractorRows.map((d) => [`${d.questionId}:${d.choiceId}`, d.timesChosen]))
 
