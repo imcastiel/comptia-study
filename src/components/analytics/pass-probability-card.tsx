@@ -1,14 +1,17 @@
 'use client'
 
+import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, AlertTriangle } from 'lucide-react'
 import type { AnalyticsProbabilityPoint } from '@/app/api/analytics/route'
+import type { DomainBreakdownEntry } from '@/lib/pass-probability'
 
 interface PassProbabilityCardProps {
   latest: AnalyticsProbabilityPoint | null
   previous: AnalyticsProbabilityPoint | null
   passingScore: number
   maxScore?: number
+  domainBreakdown?: DomainBreakdownEntry[]
 }
 
 function bandColor(probability: number): string {
@@ -28,6 +31,7 @@ export function PassProbabilityCard({
   previous,
   passingScore,
   maxScore = 900,
+  domainBreakdown,
 }: PassProbabilityCardProps) {
   if (!latest) {
     return (
@@ -35,9 +39,12 @@ export function PassProbabilityCard({
         <h2 className="text-[13px] font-semibold text-[var(--apple-label-secondary)] uppercase tracking-wider mb-2">
           Pass Probability
         </h2>
-        <p className="text-[14px] text-[var(--apple-label-secondary)]">
+        <p className="text-[14px] text-[var(--apple-label-secondary)] mb-3">
           Complete a practice test to unlock your projected pass probability and score.
         </p>
+        <Link href="/practice" className="text-[13px] font-semibold text-[var(--apple-blue)] hover:underline">
+          Start a quick drill →
+        </Link>
       </div>
     )
   }
@@ -46,6 +53,12 @@ export function PassProbabilityCard({
   const color = bandColor(latest.probability)
   const predicted = latest.predictedScore ?? 0
   const delta = previous ? pct - Math.round(previous.probability * 100) : null
+
+  // Honesty about coverage: how many domains actually have enough answers
+  // to inform this number. Thin data gets an explicit caveat, not a hedge.
+  const breakdown = domainBreakdown ?? []
+  const domainsWithData = breakdown.filter((b) => b.questionsSeen >= 3).length
+  const lowConfidence = latest.confidence < 0.3
 
   // SVG ring geometry
   const size = 132
@@ -154,8 +167,16 @@ export function PassProbabilityCard({
             </div>
             <span className="text-[11px] text-[var(--apple-label-tertiary)] shrink-0">
               {Math.round(latest.confidence * 100)}% confidence · {latest.sampleSize} answered
+              {breakdown.length > 0 && ` · ${domainsWithData}/${breakdown.length} domains`}
             </span>
           </div>
+
+          {lowConfidence && (
+            <p className="mt-2 flex items-start gap-1.5 text-[11px] text-[var(--apple-orange)]">
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-px" />
+              Early estimate — answer more questions across more domains before trusting this number.
+            </p>
+          )}
         </div>
       </div>
     </div>
