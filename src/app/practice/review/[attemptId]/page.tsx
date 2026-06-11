@@ -3,8 +3,8 @@ export const dynamic = 'force-dynamic'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { db } from '@/db'
-import { examAttempts, questionAttempts, questions, topics, domains, exams } from '@/db/schema'
-import { eq } from 'drizzle-orm'
+import { examAttempts, questionAttempts, questions, topics, domains, exams, questionDistractors } from '@/db/schema'
+import { and, eq, inArray } from 'drizzle-orm'
 import { cn } from '@/lib/utils'
 import { CheckCircle2, XCircle, Clock, Trophy, ChevronRight, Flag } from 'lucide-react'
 
@@ -53,6 +53,17 @@ export default async function ReviewPage({ params }: { params: Promise<Params> }
     .innerJoin(topics, eq(questions.topicId, topics.id))
     .innerJoin(domains, eq(topics.domainId, domains.id))
     .where(eq(questionAttempts.examAttemptId, attemptId))
+
+  // Repeat-distractor history: how often this user has picked each wrong
+  // choice across ALL attempts, so the review can call out habitual traps.
+  const questionIds = reviewRows.map((r) => r.q_id)
+  const distractorRows = questionIds.length
+    ? await db
+        .select({ questionId: questionDistractors.questionId, choiceId: questionDistractors.choiceId, timesChosen: questionDistractors.timesChosen })
+        .from(questionDistractors)
+        .where(and(eq(questionDistractors.userId, attempt.userId), inArray(questionDistractors.questionId, questionIds)))
+    : []
+  const timesPicked = new Map(distractorRows.map((d) => [`${d.questionId}:${d.choiceId}`, d.timesChosen]))
 
   // Domain breakdown
   const domainMap = new Map<string, { name: string; correct: number; total: number }>()
@@ -265,6 +276,11 @@ export default async function ReviewPage({ params }: { params: Promise<Params> }
                           {isCorrect && !isSelected && (
                             <span className="ml-auto text-[10px] font-semibold text-[var(--apple-green)]">
                               Correct answer
+                            </span>
+                          )}
+                          {isSelected && !isCorrect && (timesPicked.get(`${row.q_id}:${c.id}`) ?? 0) >= 2 && (
+                            <span className="ml-auto shrink-0 text-[10px] font-semibold text-[var(--apple-orange)] bg-[var(--apple-orange)]/10 px-2 py-0.5 rounded-full">
+                              Picked {timesPicked.get(`${row.q_id}:${c.id}`)}× — your usual trap
                             </span>
                           )}
                         </div>

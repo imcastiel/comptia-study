@@ -32,8 +32,9 @@ export function ProbabilityTrendChart({ history }: ProbabilityTrendChartProps) {
       </h2>
 
       {data.length < 2 ? (
-        <p className="text-[13px] text-[var(--apple-label-tertiary)] py-8 text-center">
-          Take more practice tests to chart your trend.
+        <p className="text-[13px] text-[var(--apple-label-tertiary)] py-6 text-center">
+          Take more practice tests to chart your trend.{' '}
+          <a href="/practice" className="text-[var(--apple-blue)] font-medium hover:underline">Practice now →</a>
         </p>
       ) : (
         <div className="h-[200px]">

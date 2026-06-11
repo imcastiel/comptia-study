@@ -39,8 +39,9 @@ export function VelocityChart({ domains, snapshots }: VelocityChartProps) {
       </h2>
 
       {dates.length < 2 ? (
-        <p className="text-[13px] text-[var(--apple-label-tertiary)] py-8 text-center">
-          Study across multiple days to see how each domain trends.
+        <p className="text-[13px] text-[var(--apple-label-tertiary)] py-6 text-center">
+          Study across multiple days to see how each domain trends.{' '}
+          <a href="/flashcards" className="text-[var(--apple-blue)] font-medium hover:underline">Review cards →</a>
         </p>
       ) : (
         <div className="h-[260px]">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { WeakSpots } from '@/components/home/weak-spots'
+import { ConfusionsCard } from './confusions-card'
 import { PassProbabilityCard } from './pass-probability-card'
 import { ProbabilityTrendChart } from './probability-trend-chart'
 import { DomainBreakdown } from './domain-breakdown'
@@ -95,7 +96,12 @@ export function AnalyticsDashboard() {
       )}
 
       <div className="animate-fade-up">
-        <PassProbabilityCard latest={latest} previous={previous} passingScore={selected.passingScore} />
+        <PassProbabilityCard
+          latest={latest}
+          previous={previous}
+          passingScore={selected.passingScore}
+          domainBreakdown={selected.latest?.domainBreakdown ?? []}
+        />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2 animate-fade-up">
@@ -108,6 +114,10 @@ export function AnalyticsDashboard() {
       </div>
 
       <WeakSpots />
+
+      <div className="animate-fade-up">
+        <ConfusionsCard />
+      </div>
     </div>
   )
 }
