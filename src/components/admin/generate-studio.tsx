@@ -5,10 +5,23 @@ import { DraftList, type Draft } from './draft-list'
 
 type Type = 'questions' | 'flashcards'
 
+interface TopicRow {
+  id: string
+  title: string
+  objectiveId: string
+  domainName: string
+  examCode: string
+}
+
 export function GenerateStudio() {
   const [type, setType] = useState<Type>('flashcards')
   const [brief, setBrief] = useState('')
-  const [topicId, setTopicId] = useState('')
+  // Honor ?topicId= deep links (e.g. "Generate for topic" from coverage/health).
+  const [topicId, setTopicId] = useState(() => {
+    if (typeof window === 'undefined') return ''
+    return new URLSearchParams(window.location.search).get('topicId') ?? ''
+  })
+  const [topics, setTopics] = useState<TopicRow[]>([])
   const [count, setCount] = useState(10)
   const [options, setOptions] = useState<Record<string, boolean>>({ mnemonics: true, memoryMethods: true })
   const [masterPrompt, setMasterPrompt] = useState('')
@@ -22,6 +35,12 @@ export function GenerateStudio() {
       .then((d: { profile?: { masterPrompt: string } | null }) => setMasterPrompt(d.profile?.masterPrompt ?? ''))
       .catch(() => setMasterPrompt(''))
   }, [type])
+
+  useEffect(() => {
+    fetch('/api/admin/topics').then((r) => r.json())
+      .then((d: { topics?: TopicRow[] }) => setTopics(Array.isArray(d.topics) ? d.topics : []))
+      .catch(() => {})
+  }, [])
 
   async function saveProfile() {
     await fetch(`/api/admin/generation-profiles/${type}`, {
@@ -56,7 +75,22 @@ export function GenerateStudio() {
           ))}
         </div>
         <textarea className={inputCls} rows={4} placeholder="Brief — describe exactly what to generate (e.g. common TCP/UDP ports with mnemonics and memory methods)" value={brief} onChange={(e) => setBrief(e.target.value)} />
-        <input className={inputCls} placeholder="Target topic ID (optional)" value={topicId} onChange={(e) => setTopicId(e.target.value)} />
+        <select className={inputCls} value={topicId} onChange={(e) => setTopicId(e.target.value)}>
+          <option value="">Target topic (optional — drafts attach to this topic)</option>
+          {(['220-1201', '220-1202'] as const).map((examCode) => {
+            const examTopics = topics.filter((t) => t.examCode === examCode)
+            if (examTopics.length === 0) return null
+            const byDomain = new Map<string, TopicRow[]>()
+            for (const t of examTopics) byDomain.set(t.domainName, [...(byDomain.get(t.domainName) ?? []), t])
+            return [...byDomain.entries()].map(([domainName, list]) => (
+              <optgroup key={`${examCode}-${domainName}`} label={`${examCode} · ${domainName}`}>
+                {list.map((t) => (
+                  <option key={t.id} value={t.id}>{t.objectiveId} {t.title}</option>
+                ))}
+              </optgroup>
+            ))
+          })}
+        </select>
         <div className="flex flex-wrap items-center gap-2">
           {chip('mnemonics', 'Mnemonics')}
           {chip('memoryMethods', 'Memory methods')}

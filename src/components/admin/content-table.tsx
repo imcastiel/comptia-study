@@ -45,6 +45,7 @@ export function ContentTable({
         <span className="w-4" />
         <span className="flex-1">Item</span>
         <span className="w-28 hidden sm:block">Topic</span>
+        {type === 'questions' && <span className="w-20 hidden md:block text-right">Missed</span>}
         <span className="w-14">Status</span>
         <span className="w-16 text-right">Actions</span>
       </div>
@@ -62,6 +63,20 @@ export function ContentTable({
                 <span className="w-28 hidden sm:block text-[12px] text-[var(--apple-label-tertiary)] truncate" title={topicMap[item.topicId ?? ''] ?? item.topicId}>
                   {topicMap[item.topicId ?? ''] ?? item.topicId ?? '—'}
                 </span>
+                {type === 'questions' && (
+                  <span
+                    className="w-20 hidden md:block text-right text-[12px] tabular-nums"
+                    title={item.attempts ? `${item.misses ?? 0} missed of ${item.attempts} attempts` : 'No attempts yet'}
+                    style={{
+                      color:
+                        (item.attempts ?? 0) >= 3 && (item.misses ?? 0) / (item.attempts || 1) >= 0.5
+                          ? 'var(--apple-red)'
+                          : 'var(--apple-label-tertiary)',
+                    }}
+                  >
+                    {item.attempts ? `${Math.round(((item.misses ?? 0) / item.attempts) * 100)}% of ${item.attempts}` : '—'}
+                  </span>
+                )}
                 <span className="w-14 text-[12px]" style={{ color: item.published ? 'var(--apple-green)' : 'var(--apple-orange)' }}>
                   {item.published ? '● live' : '○ draft'}
                 </span>
