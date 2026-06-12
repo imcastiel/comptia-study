@@ -1,11 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useCallback } from 'react'
-import { Terminal, Wifi, Shield, Monitor, Cpu, Smartphone, Clock, ChevronRight, FlaskConical, Sparkles, Loader2, Play } from 'lucide-react'
+import { useState } from 'react'
+import { Terminal, Wifi, Shield, Monitor, Cpu, Smartphone, Clock, ChevronRight, FlaskConical } from 'lucide-react'
 import type { PBQCategory, PBQScenario } from '@/data/pbq-scenarios'
 import { getStepType } from '@/data/pbq-scenarios'
-import { ScenarioPlayer } from '@/components/labs/scenario-player'
 import { cn } from '@/lib/utils'
 
 const CATEGORIES: { id: PBQCategory | 'all'; label: string; icon: React.ElementType; color: string }[] = [
@@ -48,55 +47,6 @@ function DifficultyDots({ level }: { level: 1 | 2 | 3 }) {
 
 export function LabsClient({ scenarios }: { scenarios: PBQScenario[] }) {
   const [activeFilter, setActiveFilter] = useState<PBQCategory | 'all'>('all')
-  const [generatingCategory, setGeneratingCategory] = useState<PBQCategory>('networking')
-  const [generatingDifficulty, setGeneratingDifficulty] = useState<1 | 2 | 3>(2)
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [generatedScenario, setGeneratedScenario] = useState<PBQScenario | null>(null)
-  const [generateError, setGenerateError] = useState<string | null>(null)
-  const [showGeneratePanel, setShowGeneratePanel] = useState(false)
-
-  const handleGenerate = useCallback(async () => {
-    setIsGenerating(true)
-    setGenerateError(null)
-    setGeneratedScenario(null)
-    try {
-      const res = await fetch('/api/ai/generate-scenario', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category: generatingCategory, difficulty: generatingDifficulty }),
-      })
-      const data = await res.json()
-      if (data.error) throw new Error(data.error)
-      setGeneratedScenario(data.scenario)
-    } catch (e) {
-      setGenerateError(e instanceof Error ? e.message : 'Generation failed')
-    } finally {
-      setIsGenerating(false)
-    }
-  }, [generatingCategory, generatingDifficulty])
-
-  // If a generated scenario is ready to play, show the player
-  if (generatedScenario && !isGenerating) {
-    return (
-      <div>
-        <div className="max-w-xl mx-auto px-6 pt-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-[var(--apple-purple)]/10 text-[var(--apple-purple)]">
-              <Sparkles className="w-3 h-3" />
-              AI-Generated Scenario
-            </div>
-            <button
-              onClick={() => setGeneratedScenario(null)}
-              className="text-[12px] text-[var(--apple-label-secondary)] hover:text-foreground"
-            >
-              ← Back to Labs
-            </button>
-          </div>
-        </div>
-        <ScenarioPlayer scenario={generatedScenario} />
-      </div>
-    )
-  }
 
   const filtered = activeFilter === 'all'
     ? scenarios
@@ -126,107 +76,6 @@ export function LabsClient({ scenarios }: { scenarios: PBQScenario[] }) {
           PBQs appear <strong>first</strong> in the real CompTIA exam and test practical skills — not just memorization.
           Each lab walks you through a real troubleshooting scenario with tool outputs, multiple choices, and detailed feedback explaining <em>why</em> each answer is right or wrong.
         </p>
-      </div>
-
-      {/* AI Generate panel */}
-      <div className="mb-6">
-        <button
-          onClick={() => setShowGeneratePanel((v) => !v)}
-          className="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-[var(--apple-purple)]/10 to-[var(--apple-blue)]/10 border border-[var(--apple-purple)]/20 rounded-[14px] hover:from-[var(--apple-purple)]/15 hover:to-[var(--apple-blue)]/15 transition-colors"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-[8px] bg-[var(--apple-purple)]/15 flex items-center justify-center">
-              <Sparkles className="w-3.5 h-3.5 text-[var(--apple-purple)]" />
-            </div>
-            <div className="text-left">
-              <p className="text-[13px] font-semibold text-foreground">Generate a New Scenario</p>
-              <p className="text-[11px] text-[var(--apple-label-secondary)]">AI creates a unique PBQ scenario on any topic</p>
-            </div>
-          </div>
-          <ChevronRight className={cn('w-4 h-4 text-[var(--apple-label-tertiary)] transition-transform', showGeneratePanel && 'rotate-90')} />
-        </button>
-
-        {showGeneratePanel && (
-          <div className="mt-2 p-4 bg-card border border-[var(--apple-separator)] rounded-[14px]">
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div>
-                <p className="text-[11px] font-semibold text-[var(--apple-label-secondary)] uppercase tracking-wide mb-2">Category</p>
-                <div className="flex flex-col gap-1">
-                  {(['networking', 'security', 'os', 'hardware', 'mobile'] as PBQCategory[]).map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => setGeneratingCategory(cat)}
-                      className={cn(
-                        'text-left px-2.5 py-1.5 rounded-[8px] text-[12px] font-medium capitalize transition-colors',
-                        generatingCategory === cat
-                          ? 'bg-[var(--apple-purple)]/15 text-[var(--apple-purple)]'
-                          : 'text-[var(--apple-label-secondary)] hover:bg-[var(--apple-fill)]'
-                      )}
-                    >
-                      {cat === 'os' ? 'OS' : cat.charAt(0).toUpperCase() + cat.slice(1)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold text-[var(--apple-label-secondary)] uppercase tracking-wide mb-2">Difficulty</p>
-                <div className="flex flex-col gap-1">
-                  {([1, 2, 3] as const).map((d) => {
-                    const labels = { 1: 'Beginner', 2: 'Intermediate', 3: 'Advanced' }
-                    const colors = { 1: 'var(--apple-green)', 2: 'var(--apple-orange)', 3: 'var(--apple-red)' }
-                    return (
-                      <button
-                        key={d}
-                        onClick={() => setGeneratingDifficulty(d)}
-                        className={cn(
-                          'text-left px-2.5 py-1.5 rounded-[8px] text-[12px] font-medium transition-colors',
-                          generatingDifficulty === d
-                            ? 'bg-[var(--apple-fill)]'
-                            : 'text-[var(--apple-label-secondary)] hover:bg-[var(--apple-fill)]'
-                        )}
-                        style={generatingDifficulty === d ? { color: colors[d] } : undefined}
-                      >
-                        {labels[d]}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {generateError && (
-              <p className="text-[12px] text-[var(--apple-red)] mb-3">{generateError}</p>
-            )}
-
-            <button
-              onClick={handleGenerate}
-              disabled={isGenerating}
-              className={cn(
-                'w-full flex items-center justify-center gap-2 py-2.5 rounded-[10px] text-[13px] font-semibold transition-all',
-                isGenerating
-                  ? 'bg-[var(--apple-fill)] text-[var(--apple-label-secondary)] cursor-wait'
-                  : 'bg-[var(--apple-purple)] text-white hover:opacity-90'
-              )}
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  Generating scenario…
-                </>
-              ) : (
-                <>
-                  <Play className="w-3.5 h-3.5" />
-                  Generate &amp; Start
-                </>
-              )}
-            </button>
-            {isGenerating && (
-              <p className="text-[10px] text-center text-[var(--apple-label-tertiary)] mt-2">
-                Claude is writing your scenario — usually takes 15-30 seconds
-              </p>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Category filter */}
