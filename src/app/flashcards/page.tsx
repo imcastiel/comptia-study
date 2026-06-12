@@ -5,7 +5,6 @@ import { flashcards, topics, domains, exams, flashcardReviews, drillSets, drillF
 import { eq, count, and, gte } from 'drizzle-orm'
 import { getUserCode } from '@/lib/auth'
 import { masteryPercent, MATURE_INTERVAL_DAYS } from '@/lib/flashcard-stats'
-import { GenerateFlashcardsButton } from '@/components/ai/generate-flashcards-button'
 import { TodayPlanCard } from '@/components/flashcards/today-plan-card'
 import { DrillSetChip } from '@/components/flashcards/drill-set-chip'
 import { DeckRow } from '@/components/flashcards/deck-row'
@@ -63,12 +62,11 @@ export default async function FlashcardsPage() {
 
       <div className="mb-6"><TodayPlanCard /></div>
 
-      <GenerateFlashcardsButton />
-
       {drillData.length > 0 && (
         <section className="mb-7">
           <h2 className="text-[12px] font-bold uppercase tracking-wide text-[var(--apple-label-secondary)] mb-3">Drill sets · memorize</h2>
-          <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
+          {/* Right-edge fade signals there are more chips to scroll to */}
+          <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 [mask-image:linear-gradient(to_right,black_92%,transparent)]">
             {drillData.map((d) => <DrillSetChip key={d.id} {...d} />)}
           </div>
         </section>

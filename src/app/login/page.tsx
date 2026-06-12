@@ -85,8 +85,13 @@ function LoginContent() {
           className="group relative w-full rounded-[18px] border border-[var(--apple-separator)] bg-[var(--apple-fill)] px-5 py-5 text-center transition-all hover:border-[var(--apple-blue)] active:scale-[0.99]"
           aria-label="Copy account number"
         >
-          <span className="block text-[clamp(1.25rem,6vw,1.6rem)] font-mono font-semibold tracking-[0.18em] text-foreground tabular-nums">
-            {formatCode(generatedCode)}
+          {/* Deterministic 2×2 layout — a single line wraps into an orphaned
+              fourth group on narrow screens, which looks accidental on the
+              most important screen of a no-recovery auth flow. */}
+          <span className="mx-auto grid w-fit grid-cols-2 gap-x-8 gap-y-1 text-[clamp(1.25rem,6vw,1.6rem)] font-mono font-semibold tracking-[0.18em] text-foreground tabular-nums">
+            {(generatedCode.match(/.{1,4}/g) ?? []).map((group, i) => (
+              <span key={i} className="text-center">{group}</span>
+            ))}
           </span>
           <span className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--apple-blue)]">
             {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}

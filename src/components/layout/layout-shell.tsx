@@ -3,7 +3,6 @@
 import { usePathname } from 'next/navigation'
 import { TopNav } from '@/components/layout/top-nav'
 import { Sidebar } from '@/components/layout/sidebar'
-import { AiTutor } from '@/components/ai/ai-tutor'
 import { PomodoroProvider } from '@/contexts/pomodoro-context'
 import { SidebarProvider } from '@/contexts/sidebar-context'
 
@@ -27,7 +26,6 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
             {children}
           </main>
         </div>
-        <AiTutor />
       </SidebarProvider>
     </PomodoroProvider>
   )

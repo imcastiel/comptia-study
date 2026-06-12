@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface ActivityDay {
   date: string
@@ -8,12 +8,23 @@ interface ActivityDay {
   topicsVisited: number
 }
 
+// Theme-aware ramp: the empty cell uses the shared fill token so the grid
+// reads correctly in BOTH light and dark mode (the old hardcoded GitHub-dark
+// palette rendered as a solid black wall on light backgrounds).
+const LEVELS: React.CSSProperties[] = [
+  { background: 'var(--apple-fill)' },
+  { background: 'rgba(52, 199, 89, 0.30)' },
+  { background: 'rgba(52, 199, 89, 0.55)' },
+  { background: 'rgba(52, 199, 89, 0.78)' },
+  { background: '#34C759' },
+]
+
 function getCellStyle(minutes: number): React.CSSProperties {
-  if (minutes === 0) return { background: '#161b22', border: '1px solid rgba(255,255,255,0.06)' }
-  if (minutes <= 15) return { background: '#0e4429' }
-  if (minutes <= 30) return { background: '#006d32' }
-  if (minutes <= 59) return { background: '#26a641' }
-  return { background: '#39d353' }
+  if (minutes === 0) return LEVELS[0]
+  if (minutes <= 15) return LEVELS[1]
+  if (minutes <= 30) return LEVELS[2]
+  if (minutes <= 59) return LEVELS[3]
+  return LEVELS[4]
 }
 
 function formatTooltip(date: string, minutes: number, topics: number): string {
@@ -25,6 +36,7 @@ function formatTooltip(date: string, minutes: number, topics: number): string {
 export function ActivityHeatmap() {
   const [data, setData] = useState<ActivityDay[]>([])
   const [loading, setLoading] = useState(true)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch('/api/activity/history')
@@ -32,6 +44,13 @@ export function ActivityHeatmap() {
       .then((rows: unknown) => { setData(Array.isArray(rows) ? rows : []); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])
+
+  // On narrow screens the grid overflows; the recent weeks matter most,
+  // so start scrolled to the right edge instead of showing last year's start.
+  useEffect(() => {
+    const el = scrollRef.current
+    if (el) el.scrollLeft = el.scrollWidth
+  }, [loading])
 
   // Build 52×7 grid aligned to Monday
   const today = new Date()
@@ -67,8 +86,10 @@ export function ActivityHeatmap() {
     if (weeks.length >= 53) break
   }
 
-  // Take last 52 weeks
-  const grid = weeks.slice(-52)
+  // Take last 52 weeks — or a half-year for accounts with no activity yet,
+  // so new users see a compact grid instead of twelve months of nothing.
+  const hasActivity = data.some((d) => d.minutesActive > 0)
+  const grid = weeks.slice(hasActivity ? -52 : -26)
 
   // Month labels: emit a label in the week where the month first appears
   const monthLabels: (string | null)[] = grid.map((week, wi) => {
@@ -85,11 +106,11 @@ export function ActivityHeatmap() {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: '2px', overflowX: 'auto' }}>
+      <div ref={scrollRef} style={{ display: 'flex', gap: '2px', overflowX: 'auto' }}>
         {/* Day labels */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingTop: '16px', marginRight: '4px' }}>
           {['Mon', '', 'Wed', '', 'Fri', '', ''].map((label, i) => (
-            <div key={i} style={{ height: '10px', lineHeight: '10px', fontSize: '8px', color: '#444', textAlign: 'right', width: '20px' }}>
+            <div key={i} style={{ height: '10px', lineHeight: '10px', fontSize: '8px', color: 'var(--apple-label-tertiary)', textAlign: 'right', width: '20px' }}>
               {label}
             </div>
           ))}
@@ -99,7 +120,7 @@ export function ActivityHeatmap() {
           {/* Month labels row */}
           <div style={{ display: 'flex', gap: '2px', marginBottom: '4px', height: '12px' }}>
             {grid.map((_, wi) => (
-              <div key={wi} style={{ width: '10px', fontSize: '9px', color: '#444', whiteSpace: 'nowrap', overflow: 'visible' }}>
+              <div key={wi} style={{ width: '10px', fontSize: '9px', color: 'var(--apple-label-tertiary)', whiteSpace: 'nowrap', overflow: 'visible' }}>
                 {monthLabels[wi] ?? ''}
               </div>
             ))}
@@ -111,7 +132,7 @@ export function ActivityHeatmap() {
               <div key={wi} style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 {week.map((cell) => {
                   const inRange = cell.date <= endDate.toISOString().slice(0, 10)
-                  const style = inRange && !loading ? getCellStyle(cell.minutes) : { background: '#161b22', border: '1px solid rgba(255,255,255,0.06)' }
+                  const style = inRange && !loading ? getCellStyle(cell.minutes) : LEVELS[0]
                   return (
                     <div
                       key={cell.date}
@@ -128,17 +149,11 @@ export function ActivityHeatmap() {
 
       {/* Legend */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '8px', justifyContent: 'flex-end' }}>
-        <span style={{ fontSize: '9px', color: '#444' }}>Less</span>
-        {[
-          { background: '#161b22', border: '1px solid rgba(255,255,255,0.06)' },
-          { background: '#0e4429' },
-          { background: '#006d32' },
-          { background: '#26a641' },
-          { background: '#39d353' },
-        ].map((s, i) => (
+        <span style={{ fontSize: '9px', color: 'var(--apple-label-tertiary)' }}>Less</span>
+        {LEVELS.map((s, i) => (
           <div key={i} style={{ width: '9px', height: '9px', borderRadius: '2px', ...s }} />
         ))}
-        <span style={{ fontSize: '9px', color: '#444' }}>More</span>
+        <span style={{ fontSize: '9px', color: 'var(--apple-label-tertiary)' }}>More</span>
       </div>
     </div>
   )

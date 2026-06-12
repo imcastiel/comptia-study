@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Layers, Trophy, Zap } from 'lucide-react'
+import { Layers, Trophy, Zap, Target, FileQuestion, Timer } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const EXAM_MODES = [
@@ -101,17 +101,20 @@ export default function PracticePage() {
         <p className="text-[12px] font-semibold text-[var(--apple-label-secondary)] mb-3 uppercase tracking-wide">Exam Details</p>
         <div className="grid grid-cols-2 gap-3">
           {[
-            { label: 'Core 1 (220-1201)', value: 'Pass: 675/900', icon: '🎯' },
-            { label: 'Core 2 (220-1202)', value: 'Pass: 700/900', icon: '🎯' },
-            { label: 'Question Types', value: 'MCQ + PBQs', icon: '📝' },
-            { label: 'Time per Question', value: '~1 minute', icon: '⏱️' },
-          ].map((item) => (
-            <div key={item.label} className="bg-card rounded-[12px] p-3 border border-[var(--apple-separator)]">
-              <p className="text-[18px] mb-0.5">{item.icon}</p>
-              <p className="text-[13px] font-semibold text-foreground">{item.value}</p>
-              <p className="text-[11px] text-[var(--apple-label-secondary)]">{item.label}</p>
-            </div>
-          ))}
+            { label: 'Core 1 (220-1201)', value: 'Pass: 675/900', icon: Target, color: 'var(--apple-orange)' },
+            { label: 'Core 2 (220-1202)', value: 'Pass: 700/900', icon: Target, color: 'var(--apple-blue)' },
+            { label: 'Question Types', value: 'MCQ + PBQs', icon: FileQuestion, color: 'var(--apple-purple)' },
+            { label: 'Time per Question', value: '~1 minute', icon: Timer, color: 'var(--apple-green)' },
+          ].map((item) => {
+            const Icon = item.icon
+            return (
+              <div key={item.label} className="bg-card rounded-[12px] p-3 border border-[var(--apple-separator)]">
+                <Icon className="w-[18px] h-[18px] mb-1.5" style={{ color: item.color }} />
+                <p className="text-[13px] font-semibold text-foreground">{item.value}</p>
+                <p className="text-[11px] text-[var(--apple-label-secondary)]">{item.label}</p>
+              </div>
+            )
+          })}
         </div>
       </div>
 

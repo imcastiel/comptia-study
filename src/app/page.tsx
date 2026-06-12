@@ -473,21 +473,24 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              <div className="space-y-2.5 mb-5">
-                {exam.examDomains.map((d) => (
-                  <div key={d.name} className="flex items-center gap-3">
-                    <div className="flex-1 bg-[var(--apple-fill)] rounded-full h-[5px] overflow-hidden">
-                      <div
-                        className="h-full rounded-full"
-                        style={{ width: `${d.weight}%`, backgroundColor: d.color }}
-                      />
+              {/* Exam composition: one stacked bar (segments = official domain
+                  weights) — per-domain fill bars read as personal progress,
+                  which these numbers are not. */}
+              <div className="mb-5">
+                <div className="flex h-[8px] rounded-full overflow-hidden mb-3">
+                  {exam.examDomains.map((d) => (
+                    <div key={d.name} style={{ width: `${d.weight}%`, backgroundColor: d.color }} />
+                  ))}
+                </div>
+                <div className="space-y-1.5">
+                  {exam.examDomains.map((d) => (
+                    <div key={d.name} className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
+                      <span className="text-[11px] text-[var(--apple-label-secondary)] truncate flex-1">{d.name}</span>
+                      <span className="text-[11px] font-semibold tabular-nums shrink-0" style={{ color: d.color }}>{d.weight}% of exam</span>
                     </div>
-                    <div className="flex items-center justify-between gap-2 w-[190px] shrink-0">
-                      <span className="text-[11px] text-[var(--apple-label-secondary)] truncate">{d.name}</span>
-                      <span className="text-[11px] font-semibold shrink-0" style={{ color: d.color }}>{d.weight}%</span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
 
               <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--apple-blue)] group-hover:gap-3 transition-all duration-200">
