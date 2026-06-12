@@ -90,6 +90,23 @@ export interface PBQStepTerminal {
   hint?: string
 }
 
+// ── Step type: hotspot ──────────────────────────────────────────────────────
+// Click the right component on a schematic diagram (motherboard, ports, …) —
+// the "here's a picture, identify the part" PBQ from the real exam. Diagrams
+// are SVG components registered in components/labs/diagrams; steps reference
+// a diagram by key and a target region by id.
+
+export interface PBQStepHotspot {
+  type: 'hotspot'
+  id: string
+  prompt: string
+  toolOutput?: ToolOutput
+  diagram: 'motherboard'
+  targetRegionId: string
+  feedback: { correct: string; incorrect: string }
+  hint?: string
+}
+
 // ── Union ───────────────────────────────────────────────────────────────────
 
 export type PBQStep =
@@ -97,8 +114,9 @@ export type PBQStep =
   | PBQStepDragMatch
   | PBQStepDragOrder
   | PBQStepTerminal
+  | PBQStepHotspot
 
-export function getStepType(step: PBQStep): 'multiple_choice' | 'drag_match' | 'drag_order' | 'terminal' {
+export function getStepType(step: PBQStep): 'multiple_choice' | 'drag_match' | 'drag_order' | 'terminal' | 'hotspot' {
   return step.type ?? 'multiple_choice'
 }
 
@@ -1396,5 +1414,116 @@ Open a Command Prompt running as Administrator to begin.`,
         hint: 'net user jsmith <newpassword>  — no /add needed, just username and new password',
       } as PBQStepTerminal,
     ],
+  },
+
+  // ─── Motherboard component identification (hotspot diagram) ────────────────
+  {
+    id: 'pbq-hw-motherboard-id',
+    title: 'Motherboard Component Identification',
+    category: 'hardware',
+    difficulty: 1,
+    estimatedMinutes: 6,
+    objectives: ['3.4'],
+    examCode: '220-1201',
+    summary: 'Identify components on a motherboard diagram — the classic "click the part" exam question.',
+    context: 'You are a bench technician at a repair shop. A customer brought in a desktop for several upgrades and repairs. Before touching anything, your supervisor wants to confirm you can locate every component you will be working with on the motherboard.',
+    steps: [
+      {
+        type: 'hotspot',
+        id: 'mb-1',
+        prompt: 'The customer wants a faster processor. Click the component you would remove and replace.',
+        diagram: 'motherboard',
+        targetRegionId: 'cpu-socket',
+        feedback: {
+          correct: 'The CPU socket holds the processor under a retention bracket. Always release the lever, align the gold triangle, and never force a chip into the socket.',
+          incorrect: 'The processor sits in the CPU socket — the large square socket with a retention bracket, usually in the upper-center of the board with mounting holes for a cooler around it.',
+        },
+        hint: 'Look for the large square socket with a load lever, surrounded by cooler mounting holes.',
+      },
+      {
+        type: 'hotspot',
+        id: 'mb-2',
+        prompt: 'You are adding 16 GB of memory. Click where the new modules are installed.',
+        diagram: 'motherboard',
+        targetRegionId: 'ram-slots',
+        feedback: {
+          correct: 'DIMM slots take the system memory. For dual-channel operation, install pairs in matching slots (usually same-colored, often slots 2 and 4).',
+          incorrect: 'Memory installs in the DIMM slots — the long, thin parallel slots with locking tabs at each end, normally to the right of the CPU socket.',
+        },
+        hint: 'Long parallel slots with clips on the ends, right next to the CPU.',
+      },
+      {
+        type: 'hotspot',
+        id: 'mb-3',
+        prompt: 'The customer bought an NVMe SSD for faster boot times. Click the slot where it mounts flat against the board.',
+        diagram: 'motherboard',
+        targetRegionId: 'm2-slot',
+        feedback: {
+          correct: 'The M.2 slot accepts NVMe (and some SATA) SSDs that lie flat against the board, secured by a single screw at the standoff.',
+          incorrect: 'NVMe SSDs mount in the M.2 slot — the short horizontal slot with a screw standoff at one end, with the drive lying flat against the board.',
+        },
+        hint: 'It has a small screw standoff at one end and the drive lies parallel to the board.',
+      },
+      {
+        type: 'hotspot',
+        id: 'mb-4',
+        prompt: 'They also want a dedicated graphics card. Click the slot it belongs in.',
+        diagram: 'motherboard',
+        targetRegionId: 'pcie-x16',
+        feedback: {
+          correct: 'Graphics cards go in the PCIe x16 slot — the longest expansion slot, with the most bandwidth, closest to the CPU.',
+          incorrect: 'A GPU needs the PCIe x16 slot — the longest expansion slot on the board. The shorter PCIe x1 slots are for low-bandwidth cards like sound or capture cards.',
+        },
+        hint: 'The longest expansion slot, usually the one nearest the CPU.',
+      },
+      {
+        type: 'hotspot',
+        id: 'mb-5',
+        prompt: 'The system loses its BIOS date and time settings every time it is unplugged. Click the component you would replace.',
+        diagram: 'motherboard',
+        targetRegionId: 'cmos-battery',
+        feedback: {
+          correct: 'A dead CMOS battery (CR2032 coin cell) is the classic cause of lost date/time and BIOS settings. Pop it out and replace it — this is a heavily tested symptom.',
+          incorrect: 'Losing BIOS settings when power is removed points to the CMOS battery — the silver coin cell (CR2032). This symptom-to-component link appears on the exam constantly.',
+        },
+        hint: 'A coin-shaped silver battery. Think: what keeps settings alive with the power cord unplugged?',
+      },
+      {
+        type: 'hotspot',
+        id: 'mb-6',
+        prompt: 'You are connecting two SATA hard drives. Click where their data cables attach.',
+        diagram: 'motherboard',
+        targetRegionId: 'sata-ports',
+        feedback: {
+          correct: 'SATA data cables plug into the L-shaped SATA ports, usually clustered at the board edge. Each drive also needs a separate SATA power connector from the PSU.',
+          incorrect: 'SATA drives connect to the small L-shaped SATA ports, typically grouped near the board edge. The L-shaped key prevents plugging them in backwards.',
+        },
+        hint: 'Small L-shaped connectors grouped together near the edge of the board.',
+      },
+      {
+        type: 'hotspot',
+        id: 'mb-7',
+        prompt: 'The new build will not power on at all. You suspect the main power feed from the PSU is not seated. Click the connector that delivers main power to the board.',
+        diagram: 'motherboard',
+        targetRegionId: 'atx-24pin',
+        feedback: {
+          correct: 'The 24-pin ATX connector is the main power feed. An unseated 24-pin (or missing 8-pin EPS CPU power) is a top cause of a completely dead build.',
+          incorrect: 'Main board power arrives through the 24-pin ATX connector — the tall two-column connector on the board edge. The smaller 8-pin near the CPU is supplemental CPU power.',
+        },
+        hint: 'The largest power connector on the board — two columns of 12 pins on the right edge.',
+      },
+      {
+        type: 'hotspot',
+        id: 'mb-8',
+        prompt: 'Finally, the case power button does nothing. Click where the case’s power switch, reset, and LED leads connect.',
+        diagram: 'motherboard',
+        targetRegionId: 'front-panel-header',
+        feedback: {
+          correct: 'The front-panel header takes the case’s power switch, reset switch, and LED leads. A power button that does nothing is often just a misplaced front-panel connector.',
+          incorrect: 'Case switches and LEDs land on the front-panel header — the small cluster of bare pins in the bottom corner. Check the board manual for the exact pin map.',
+        },
+        hint: 'A small cluster of bare pins in the bottom corner of the board.',
+      },
+    ] as PBQStep[],
   },
 ]

@@ -2,12 +2,13 @@
 
 import { useState, useCallback } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, CheckCircle2, XCircle, ChevronRight, Terminal, RotateCcw, ChevronDown, ChevronUp, GripVertical, Keyboard } from 'lucide-react'
-import { type PBQScenario, type PBQChoice, type PBQStepMultipleChoice, getStepType } from '@/data/pbq-scenarios'
+import { ArrowLeft, CheckCircle2, XCircle, ChevronRight, Terminal, RotateCcw, ChevronDown, ChevronUp, GripVertical, Keyboard, MousePointerClick } from 'lucide-react'
+import { type PBQScenario, type PBQChoice, type PBQStepMultipleChoice, type PBQStepHotspot, getStepType } from '@/data/pbq-scenarios'
 import { MultipleChoiceStep } from './multiple-choice-step'
 import { DragMatchStep } from './drag-match-step'
 import { DragOrderStep } from './drag-order-step'
 import { TerminalStep } from './terminal-step'
+import { HotspotStep } from './hotspot-step'
 import { cn } from '@/lib/utils'
 
 interface StepResult {
@@ -23,6 +24,7 @@ const STEP_TYPE_LABELS: Record<string, { label: string; icon: React.ElementType;
   drag_match:      { label: 'Drag & Match',    icon: GripVertical,  color: 'var(--apple-purple)' },
   drag_order:      { label: 'Drag & Order',    icon: GripVertical,  color: 'var(--apple-indigo)' },
   terminal:        { label: 'Terminal',         icon: Keyboard,      color: 'var(--apple-green)' },
+  hotspot:         { label: 'Identify',          icon: MousePointerClick, color: 'var(--apple-teal)' },
 }
 
 export function ScenarioPlayer({ scenario }: { scenario: PBQScenario }) {
@@ -253,6 +255,16 @@ export function ScenarioPlayer({ scenario }: { scenario: PBQScenario }) {
       {stepType === 'terminal' && !stepDone && (
         <TerminalStep
           step={currentStep as Parameters<typeof TerminalStep>[0]['step']}
+          onComplete={handleStepComplete}
+        />
+      )}
+
+      {/* Hotspot stays mounted after answering so the highlight + feedback
+          remain visible; the key remounts it fresh for each step. */}
+      {stepType === 'hotspot' && (
+        <HotspotStep
+          key={currentStep.id}
+          step={currentStep as PBQStepHotspot}
           onComplete={handleStepComplete}
         />
       )}
