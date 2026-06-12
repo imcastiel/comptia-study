@@ -16,7 +16,8 @@ export function GrowthChart({ growth }: { growth: AnalyticsData['growth']; activ
               <defs><linearGradient id="acc" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--apple-blue)" stopOpacity={0.28} /><stop offset="100%" stopColor="var(--apple-blue)" stopOpacity={0.02} /></linearGradient></defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--apple-separator)" vertical={false} />
               <XAxis dataKey="day" tick={{ fontSize: 11, fill: 'var(--apple-label-tertiary)' }} tickLine={false} axisLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: 'var(--apple-label-tertiary)' }} tickLine={false} axisLine={false} width={36} />
+              {/* Counts are integers — decimal ticks (0.75, 1.5, …) clip to garbage in the narrow gutter */}
+              <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: 'var(--apple-label-tertiary)' }} tickLine={false} axisLine={false} width={36} />
               <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid var(--apple-separator)', fontSize: 12 }} />
               <Area type="monotone" dataKey="total" stroke="var(--apple-blue)" strokeWidth={2.5} fill="url(#acc)" />
             </AreaChart>

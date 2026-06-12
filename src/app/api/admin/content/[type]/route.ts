@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
-import { questions, flashcards, cheatSheets, pbqScenarios } from '@/db/schema'
-import { and, eq, like, or, desc, sql, count, type SQL } from 'drizzle-orm'
+import { questions, flashcards, cheatSheets, pbqScenarios, questionAttempts } from '@/db/schema'
+import { and, eq, like, or, desc, sql, count, getTableColumns, type SQL } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
 import { requireAdmin } from '@/lib/auth'
 import { isContentType, isBlobType, validateQuestion, validateFlashcard, validateBlob } from '@/lib/admin/content-types'
@@ -69,10 +69,35 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ type
     if (source) conds.push(eq(questions.source, source))
     if (q) conds.push(or(like(questions.stem, `%${q}%`), like(questions.explanation, `%${q}%`))!)
     const where = conds.length ? and(...conds) : undefined
+    const sort = sp.get('sort')
     const [{ total }] = await db.select({ total: count() }).from(questions).where(where)
-    const items = await db.select().from(questions)
+
+    // Learner telemetry per question: attempts + misses across all users,
+    // so admins can spot questions everyone gets wrong (or nobody sees).
+    const agg = db
+      .select({
+        questionId: questionAttempts.questionId,
+        attempts: count().as('attempts'),
+        misses: sql<number>`sum(case when ${questionAttempts.isCorrect} then 0 else 1 end)`.as('misses'),
+      })
+      .from(questionAttempts)
+      .groupBy(questionAttempts.questionId)
+      .as('agg')
+
+    const items = await db
+      .select({
+        ...getTableColumns(questions),
+        attempts: sql<number>`coalesce(${agg.attempts}, 0)`,
+        misses: sql<number>`coalesce(${agg.misses}, 0)`,
+      })
+      .from(questions)
+      .leftJoin(agg, eq(questions.id, agg.questionId))
       .where(where)
-      .orderBy(desc(sql`coalesce(${questions.updatedAt}, ${questions.createdAt})`))
+      .orderBy(
+        sort === 'missed'
+          ? desc(sql`coalesce(${agg.misses} * 1.0 / nullif(${agg.attempts}, 0), 0)`)
+          : desc(sql`coalesce(${questions.updatedAt}, ${questions.createdAt})`),
+      )
       .limit(pageSize).offset(offset)
     return NextResponse.json({ items, total: Number(total) })
   }

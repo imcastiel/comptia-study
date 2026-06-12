@@ -25,6 +25,8 @@ export interface ContentItem {
   tags?: string | null
   title?: string
   data?: string
+  attempts?: number
+  misses?: number
 }
 
 const PAGE_SIZE = 200
@@ -43,6 +45,7 @@ export function ContentLibrary({ type }: { type: ContentType }) {
     return { status: '', topic: p.get('topic') ?? '', source: '', q: '' }
   })
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [sort, setSort] = useState<'newest' | 'missed'>('newest')
   const [editing, setEditing] = useState<ContentItem | 'new' | null>(null)
   const [topics, setTopics] = useState<TopicOption[]>([])
   const [readerIndex, setReaderIndex] = useState<number | null>(null)
@@ -71,11 +74,12 @@ export function ContentLibrary({ type }: { type: ContentType }) {
     if (filters.topic) sp.set('topic', filters.topic)
     if (filters.source) sp.set('source', filters.source)
     if (filters.q) sp.set('q', filters.q)
+    if (type === 'questions' && sort === 'missed') sp.set('sort', 'missed')
     sp.set('page', String(pageNum))
     sp.set('pageSize', String(PAGE_SIZE))
     const res = await fetch(`/api/admin/content/${type}?${sp}`)
     return await res.json() as { items: ContentItem[]; total: number }
-  }, [type, filters])
+  }, [type, filters, sort])
 
   const load = useCallback(async () => {
     const data = await fetchPage(0)
@@ -119,6 +123,14 @@ export function ContentLibrary({ type }: { type: ContentType }) {
         {items && items.length > 0 && (
           <button onClick={() => setReaderIndex(0)} className="flex items-center gap-1.5 rounded-full bg-[var(--apple-fill)] px-3 py-1 text-[12px] font-medium hover:opacity-80">
             <BookOpen className="w-3.5 h-3.5" /> Read through ({items.length})
+          </button>
+        )}
+        {type === 'questions' && (
+          <button
+            onClick={() => setSort((s) => (s === 'newest' ? 'missed' : 'newest'))}
+            className="ml-auto rounded-full bg-[var(--apple-fill)] px-3 py-1 text-[12px] font-medium hover:opacity-80"
+          >
+            Sort: {sort === 'missed' ? 'Most missed' : 'Newest'}
           </button>
         )}
       </div>
